@@ -1,42 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Alef:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Orayta Spiritual Design System - Warm Torah Learning Aesthetic */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm Parchment & Spiritual Colors */
+    --background: 42 15% 97%;           /* Warm parchment white */
+    --foreground: 210 20% 15%;          /* Deep navy text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 42 20% 98%;                 /* Slightly warmer card */
+    --card-foreground: 210 20% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 42 20% 98%;
+    --popover-foreground: 210 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Sunset Orange Primary */
+    --primary: 18 85% 65%;              /* Warm sunset orange */
+    --primary-foreground: 42 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Soft Secondary */
+    --secondary: 42 25% 92%;            /* Warm light background */
+    --secondary-foreground: 210 20% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 42 20% 94%;                /* Subtle warm background */
+    --muted-foreground: 210 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Gold Accent */
+    --accent: 35 65% 68%;               /* Warm gold accent */
+    --accent-foreground: 210 20% 15%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 42 20% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 42 15% 88%;               /* Warm border */
+    --input: 42 15% 88%;
+    --ring: 18 85% 65%;                 /* Primary orange ring */
 
-    --radius: 0.5rem;
+    /* Spiritual Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(18 85% 65%), hsl(35 65% 68%));
+    --gradient-subtle: linear-gradient(180deg, hsl(42 20% 98%), hsl(42 15% 96%));
+    --gradient-warm: linear-gradient(135deg, hsl(42 25% 92%), hsl(35 40% 88%));
+
+    /* Shadows with warmth */
+    --shadow-warm: 0 10px 30px -10px hsl(18 85% 65% / 0.2);
+    --shadow-soft: 0 4px 20px -8px hsl(210 20% 15% / 0.1);
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +116,67 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    font-feature-settings: "cv11", "ss01";
+    font-variant-numeric: oldstyle-nums;
+  }
+
+  /* Hebrew Typography */
+  .hebrew {
+    @apply font-alef;
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Spiritual UI Components */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+
+  .shadow-warm {
+    box-shadow: var(--shadow-warm);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+}
+
+@layer components {
+  /* Spiritual Button Variants */
+  .btn-spiritual {
+    @apply bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm hover:shadow-lg transition-smooth rounded-lg px-6 py-3 font-medium;
+  }
+
+  .btn-gentle {
+    @apply bg-gradient-subtle border border-border hover:bg-gradient-warm transition-smooth rounded-lg px-4 py-2;
+  }
+
+  /* Torah Learning Cards */
+  .learning-card {
+    @apply bg-card border border-border rounded-xl p-6 shadow-soft hover:shadow-warm transition-smooth;
+  }
+
+  /* Bilingual Text Styles */
+  .text-spiritual {
+    @apply text-lg leading-relaxed text-foreground;
+  }
+
+  .text-hebrew {
+    @apply text-lg leading-relaxed font-alef;
+    direction: rtl;
+    text-align: right;
   }
 }
