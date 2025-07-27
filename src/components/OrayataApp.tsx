@@ -1,20 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
 import { SourceRecommendation } from "./SourceRecommendation";
 import { ReflectionForm } from "./ReflectionForm";
 import { LearningJournal } from "./LearningJournal";
+import { ProfileSettings } from "./ProfileSettings";
 import { Language } from "./LanguageToggle";
+import { DarkModeToggle } from "./DarkModeToggle";
+import { BottomNav } from "./BottomNav";
 
-type AppStep = 'welcome' | 'time' | 'topic' | 'source' | 'reflection' | 'journal';
+type AppStep =
+  | 'welcome'
+  | 'time'
+  | 'topic'
+  | 'source'
+  | 'reflection'
+  | 'journal'
+  | 'profile';
 
 export const OrayataApp = () => {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [language, setLanguage] = useState<Language>('en');
+  const [darkMode, setDarkMode] = useState(false);
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [currentSource, setCurrentSource] = useState<string>("");
+
+  // Load persisted settings on mount
+  useEffect(() => {
+    const storedLang = localStorage.getItem('orayta_lang');
+    const storedDark = localStorage.getItem('orayta_dark');
+    if (storedLang === 'he' || storedLang === 'en') {
+      setLanguage(storedLang);
+    }
+    if (storedDark === 'true') {
+      setDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('orayta_dark', String(darkMode));
+  }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('orayta_lang', language);
+  }, [language]);
 
   const handleStartLearning = () => {
     setCurrentStep('time');
@@ -59,6 +96,9 @@ export const OrayataApp = () => {
       case 'journal':
         setCurrentStep('welcome');
         break;
+      case 'profile':
+        setCurrentStep('welcome');
+        break;
     }
   };
 
@@ -69,6 +109,14 @@ export const OrayataApp = () => {
 
   const handleJournal = () => {
     setCurrentStep('journal');
+  };
+
+  const handleOpenProfile = () => {
+    setCurrentStep('profile');
+  };
+
+  const handleToggleDark = (value: boolean) => {
+    setDarkMode(value);
   };
 
   const handleSaveReflection = (reflection: string, tags: string[]) => {
@@ -88,6 +136,9 @@ export const OrayataApp = () => {
           onLanguageChange={setLanguage}
           onStartLearning={handleStartLearning}
           onJournal={handleJournal}
+          onProfile={handleOpenProfile}
+          darkMode={darkMode}
+          onToggleDark={handleToggleDark}
         />
       )}
 
@@ -136,6 +187,21 @@ export const OrayataApp = () => {
           onBack={() => setCurrentStep('welcome')}
         />
       )}
+
+      {currentStep === 'profile' && (
+        <ProfileSettings
+          language={language}
+          darkMode={darkMode}
+          onLanguageChange={setLanguage}
+          onToggleDark={handleToggleDark}
+          onBack={goToPrevStep}
+        />
+      )}
+      <BottomNav
+        onHome={() => setCurrentStep('welcome')}
+        onJournal={handleJournal}
+        onProfile={handleOpenProfile}
+      />
     </div>
   );
 };
