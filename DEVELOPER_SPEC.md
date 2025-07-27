@@ -49,3 +49,8 @@ reflections(id, user_id, session_id, note, tags[], created_at)
 - **APIs & Automation:** Sefaria API, Make (Integromat), Google Calendar/Gmail
 
 This file summarizes the functional and technical requirements for the MVP of the Orayta app.
+
+## UI Design Notes
+- Pages use warm gradient backgrounds with frosted glass cards for a spiritual feel.
+- Primary buttons include a subtle glow animation to draw attention.
+- The mobile bottom navigation bar has a blurred backdrop for a modern aesthetic.

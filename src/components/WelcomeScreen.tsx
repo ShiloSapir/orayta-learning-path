@@ -53,8 +53,8 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
   const isHebrew = language === 'he';
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
+    <div className={`min-h-screen bg-gradient-warm flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-warm">
         {/* Header with Language Toggle */}
         <div className="flex justify-between items-center">
           <div className="w-20"></div> {/* Spacer */}
