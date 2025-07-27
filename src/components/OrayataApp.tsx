@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -6,181 +6,152 @@ import { SourceRecommendation } from "./SourceRecommendation";
 import { ReflectionForm } from "./ReflectionForm";
 import { LearningJournal } from "./LearningJournal";
 import { ProfileSettings } from "./ProfileSettings";
-import { Language } from "./LanguageToggle";
-import { DarkModeToggle } from "./DarkModeToggle";
+import { NavigationHeader } from "./NavigationHeader";
+import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
-
-type AppStep =
-  | 'welcome'
-  | 'time'
-  | 'topic'
-  | 'source'
-  | 'reflection'
-  | 'journal'
-  | 'profile';
+import { useAppContext } from "@/context/AppContext";
 
 export const OrayataApp = () => {
-  const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
-  const [language, setLanguage] = useState<Language>('en');
-  
-  const [selectedTime, setSelectedTime] = useState<number | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [currentSource, setCurrentSource] = useState<string>("");
+  const { state, actions } = useAppContext();
+  const { currentStep, language, selectedTime, selectedTopic, currentSource } = state;
 
   // Load persisted settings on mount
   useEffect(() => {
     const storedLang = localStorage.getItem('orayta_lang');
     if (storedLang === 'he' || storedLang === 'en') {
-      setLanguage(storedLang);
+      actions.setLanguage(storedLang);
     }
-  }, []);
+  }, [actions]);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', language);
   }, [language]);
 
   const handleStartLearning = () => {
-    setCurrentStep('time');
+    actions.setStep('time');
   };
 
   const handleTimeSelect = (minutes: number) => {
-    setSelectedTime(minutes);
+    actions.setTime(minutes);
   };
 
   const handleTopicSelect = (topic: string) => {
-    setSelectedTopic(topic);
-  };
-
-  const goToNextStep = () => {
-    switch (currentStep) {
-      case 'time':
-        setCurrentStep('topic');
-        break;
-      case 'topic':
-        setCurrentStep('source');
-        break;
-      case 'source':
-        setCurrentStep('reflection');
-        break;
-    }
-  };
-
-  const goToPrevStep = () => {
-    switch (currentStep) {
-      case 'time':
-        setCurrentStep('welcome');
-        break;
-      case 'topic':
-        setCurrentStep('time');
-        break;
-      case 'source':
-        setCurrentStep('topic');
-        break;
-      case 'reflection':
-        setCurrentStep('source');
-        break;
-      case 'journal':
-        setCurrentStep('welcome');
-        break;
-      case 'profile':
-        setCurrentStep('welcome');
-        break;
-    }
+    actions.setTopic(topic);
   };
 
   const handleReflection = (sourceTitle: string) => {
-    setCurrentSource(sourceTitle);
-    setCurrentStep('reflection');
+    actions.setSource(sourceTitle);
+    actions.setStep('reflection');
   };
 
   const handleJournal = () => {
-    setCurrentStep('journal');
+    actions.setStep('journal');
   };
 
   const handleOpenProfile = () => {
-    setCurrentStep('profile');
+    actions.setStep('profile');
   };
 
-
   const handleSaveReflection = (reflection: string, tags: string[]) => {
-    console.log('Saving reflection:', { reflection, tags, source: currentSource });
-    // This would save to database with Supabase
-    setCurrentStep('welcome');
+    // Add session to state
+    actions.addSession({
+      sourceTitle: currentSource,
+      topic: selectedTopic || '',
+      timeSpent: selectedTime || 0,
+      reflection,
+      tags,
+      status: 'reflected'
+    });
+    
+    // Reset session and go to welcome
+    actions.resetSession();
   };
 
   // Apply RTL direction to the entire app when Hebrew is selected
   const appDirection = language === 'he' ? 'rtl' : 'ltr';
 
   return (
-    <div dir={appDirection} className="font-inter">
-      {currentStep === 'welcome' && (
-          <WelcomeScreen
+    <div dir={appDirection} className="font-inter min-h-screen bg-background">
+      {/* Show navigation header for learning flow */}
+      {['time', 'topic', 'source', 'reflection'].includes(currentStep) && (
+        <NavigationHeader />
+      )}
+
+      <main className="flex-1">
+        {currentStep === 'welcome' && (
+            <WelcomeScreen
+              language={language}
+              onLanguageChange={actions.setLanguage}
+              onStartLearning={handleStartLearning}
+              onJournal={handleJournal}
+              onProfile={handleOpenProfile}
+            />
+        )}
+
+        {currentStep === 'time' && (
+          <TimeSelection
             language={language}
-            onLanguageChange={setLanguage}
-            onStartLearning={handleStartLearning}
-            onJournal={handleJournal}
-            onProfile={handleOpenProfile}
+            selectedTime={selectedTime}
+            onTimeSelect={handleTimeSelect}
+            onBack={actions.goToPreviousStep}
+            onNext={actions.goToNextStep}
           />
-      )}
+        )}
 
-      {currentStep === 'time' && (
-        <TimeSelection
-          language={language}
-          selectedTime={selectedTime}
-          onTimeSelect={handleTimeSelect}
-          onBack={goToPrevStep}
-          onNext={goToNextStep}
-        />
-      )}
+        {currentStep === 'topic' && (
+          <TopicSelection
+            language={language}
+            selectedTopic={selectedTopic}
+            onTopicSelect={handleTopicSelect}
+            onBack={actions.goToPreviousStep}
+            onNext={actions.goToNextStep}
+          />
+        )}
 
-      {currentStep === 'topic' && (
-        <TopicSelection
-          language={language}
-          selectedTopic={selectedTopic}
-          onTopicSelect={handleTopicSelect}
-          onBack={goToPrevStep}
-          onNext={goToNextStep}
-        />
-      )}
+        {currentStep === 'source' && selectedTime && selectedTopic && (
+          <SourceRecommendation
+            language={language}
+            timeSelected={selectedTime}
+            topicSelected={selectedTopic}
+            onBack={actions.goToPreviousStep}
+            onReflection={() => handleReflection(`${selectedTopic} Source`)}
+          />
+        )}
 
-      {currentStep === 'source' && selectedTime && selectedTopic && (
-        <SourceRecommendation
-          language={language}
-          timeSelected={selectedTime}
-          topicSelected={selectedTopic}
-          onBack={goToPrevStep}
-          onReflection={() => handleReflection(`${selectedTopic} Source`)}
-        />
-      )}
+        {currentStep === 'reflection' && (
+          <ReflectionForm
+            language={language}
+            sourceTitle={currentSource}
+            onBack={actions.goToPreviousStep}
+            onSave={handleSaveReflection}
+          />
+        )}
 
-      {currentStep === 'reflection' && (
-        <ReflectionForm
-          language={language}
-          sourceTitle={currentSource}
-          onBack={goToPrevStep}
-          onSave={handleSaveReflection}
-        />
-      )}
+        {currentStep === 'journal' && (
+          <LearningJournal
+            language={language}
+            onBack={() => actions.setStep('welcome')}
+          />
+        )}
 
-      {currentStep === 'journal' && (
-        <LearningJournal
-          language={language}
-          onBack={() => setCurrentStep('welcome')}
-        />
-      )}
+        {currentStep === 'profile' && (
+          <ProfileSettings
+            language={language}
+            onLanguageChange={actions.setLanguage}
+            onBack={() => actions.setStep('welcome')}
+          />
+        )}
+      </main>
 
-      {currentStep === 'profile' && (
-        <ProfileSettings
-          language={language}
-          onLanguageChange={setLanguage}
-          onBack={goToPrevStep}
-        />
-      )}
+      {/* Bottom Navigation - always visible */}
       <BottomNav
-        onHome={() => setCurrentStep('welcome')}
+        onHome={() => actions.setStep('welcome')}
         onJournal={handleJournal}
         onProfile={handleOpenProfile}
       />
+
+      {/* Offline Support */}
+      <OfflineIndicator />
     </div>
   );
 };
