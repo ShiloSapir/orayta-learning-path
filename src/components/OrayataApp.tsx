@@ -11,6 +11,7 @@ import { Language } from "./LanguageToggle";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { useAppContext } from "../context/AppContext";
 import { BottomNav } from "./BottomNav";
+import type { SourceEntry } from "../data/sources";
 
 type AppStep =
   | "welcome"
@@ -21,12 +22,32 @@ type AppStep =
   | "journal"
   | "profile";
 
+interface LearningSession {
+  id: string;
+  title: string;
+  topic: string;
+  date: string;
+  duration: number;
+  status: "learned" | "saved" | "reflected";
+  reflection?: string;
+  tags?: string[];
+  sefariaLink: string;
+}
+
 export const OrayataApp = () => {
   const [currentStep, setCurrentStep] = useState<AppStep>("welcome");
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [currentSource, setCurrentSource] = useState<string>("");
+  const [currentSource, setCurrentSource] = useState<SourceEntry | null>(null);
   const [{ language, darkMode }, dispatch] = useAppContext();
+
+  const recordSession = (session: LearningSession) => {
+    const existing = JSON.parse(
+      localStorage.getItem("orayta_sessions") || "[]"
+    ) as LearningSession[];
+    existing.push(session);
+    localStorage.setItem("orayta_sessions", JSON.stringify(existing));
+  };
 
   const handleStartLearning = () => {
     setCurrentStep("time");
@@ -77,8 +98,8 @@ export const OrayataApp = () => {
     }
   };
 
-  const handleReflection = (sourceTitle: string) => {
-    setCurrentSource(sourceTitle);
+  const handleReflection = (source: SourceEntry) => {
+    setCurrentSource(source);
     setCurrentStep("reflection");
   };
 
@@ -95,12 +116,18 @@ export const OrayataApp = () => {
   };
 
   const handleSaveReflection = (reflection: string, tags: string[]) => {
-    console.log("Saving reflection:", {
+    if (!currentSource || !selectedTopic || !selectedTime) return;
+    recordSession({
+      id: crypto.randomUUID(),
+      title: currentSource.title,
+      topic: selectedTopic,
+      date: new Date().toISOString(),
+      duration: selectedTime,
+      status: "reflected",
       reflection,
       tags,
-      source: currentSource,
+      sefariaLink: currentSource.sefariaLink,
     });
-    // This would save to database with Supabase
     setCurrentStep("welcome");
   };
 
@@ -149,14 +176,25 @@ export const OrayataApp = () => {
           timeSelected={selectedTime}
           topicSelected={selectedTopic}
           onBack={goToPrevStep}
-          onReflection={() => handleReflection(`${selectedTopic} Source`)}
+          onReflection={handleReflection}
+          onSessionAction={(status, src) =>
+            recordSession({
+              id: crypto.randomUUID(),
+              title: src.title,
+              topic: selectedTopic,
+              date: new Date().toISOString(),
+              duration: selectedTime,
+              status,
+              sefariaLink: src.sefariaLink,
+            })
+          }
         />
       )}
 
-      {currentStep === "reflection" && (
+      {currentStep === "reflection" && currentSource && (
         <ReflectionForm
           language={language}
-          sourceTitle={currentSource}
+          source={currentSource}
           onBack={goToPrevStep}
           onSave={handleSaveReflection}
         />

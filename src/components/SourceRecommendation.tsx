@@ -18,7 +18,8 @@ interface SourceRecommendationProps {
   timeSelected: number;
   topicSelected: string;
   onBack: () => void;
-  onReflection: () => void;
+  onReflection: (source: SourceEntry) => void;
+  onSessionAction?: (status: "saved" | "learned", source: SourceEntry) => void;
 }
 
 const content = {
@@ -116,10 +117,16 @@ export const SourceRecommendation = ({
         handleCalendar();
         break;
       case 'reflection':
-        onReflection();
+        onReflection(source);
+        break;
+      case 'save':
+        onSessionAction?.('saved', source);
+        break;
+      case 'learned':
+        onSessionAction?.('learned', source);
         break;
       default:
-        console.log(`Action: ${action}`);
+        break;
     }
   };
 
@@ -260,7 +267,7 @@ export const SourceRecommendation = ({
           </Button>
           
           <Button
-            onClick={onReflection}
+            onClick={() => onReflection(source)}
             className="btn-spiritual flex items-center gap-2"
           >
             <BookOpen className="h-4 w-4" />

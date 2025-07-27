@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Language } from "./LanguageToggle";
 import { ArrowLeft, Save, Sparkles } from "lucide-react";
 
+import type { SourceEntry } from "../data/sources";
+
 interface ReflectionFormProps {
   language: Language;
-  sourceTitle: string;
+  source: SourceEntry;
   onBack: () => void;
   onSave: (reflection: string, tags: string[]) => void;
 }
@@ -36,7 +38,7 @@ const content = {
   }
 };
 
-export const ReflectionForm = ({ language, sourceTitle, onBack, onSave }: ReflectionFormProps) => {
+export const ReflectionForm = ({ language, source, onBack, onSave }: ReflectionFormProps) => {
   const [reflection, setReflection] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const t = content[language];
@@ -72,7 +74,7 @@ export const ReflectionForm = ({ language, sourceTitle, onBack, onSave }: Reflec
           <div className="text-center flex-1 mx-4">
             <Sparkles className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-sm text-muted-foreground max-w-md mx-auto truncate">
-              {sourceTitle}
+              {source.title}
             </div>
           </div>
           <div className="w-16" /> {/* Spacer for balance */}

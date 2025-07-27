@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -129,10 +129,20 @@ const mockSessions: LearningSession[] = [
 
 export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
   const [activeTab, setActiveTab] = useState<'learned' | 'saved' | 'reflected'>('learned');
+  const [storedSessions, setStoredSessions] = useState<LearningSession[]>([]);
   const t = content[language];
   const isHebrew = language === 'he';
 
-  const filteredSessions = mockSessions.filter(session => {
+  useEffect(() => {
+    const stored = localStorage.getItem('orayta_sessions');
+    if (stored) {
+      setStoredSessions(JSON.parse(stored));
+    }
+  }, []);
+
+  const allSessions = [...storedSessions, ...mockSessions];
+
+  const filteredSessions = allSessions.filter(session => {
     switch (activeTab) {
       case 'learned':
         return session.status === 'learned' || session.status === 'reflected';
@@ -231,7 +241,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
                         {session.reflection && (
                           <p className="text-foreground/80 mb-3 italic">
-                            "{session.reflection.substring(0, 100)}..."
+                            {session.reflection.substring(0, 100)}...
                           </p>
                         )}
 
@@ -372,7 +382,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
                         {session.reflection && (
                           <p className="text-foreground/80 mb-3 italic">
-                            "{session.reflection}"
+                            {session.reflection}
                           </p>
                         )}
 
