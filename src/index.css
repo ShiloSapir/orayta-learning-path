@@ -161,7 +161,7 @@
   }
 
   .btn-gentle {
-    @apply bg-gradient-subtle border border-border hover:bg-gradient-warm transition-smooth rounded-lg px-4 py-2;
+    @apply bg-secondary border border-border hover:bg-muted transition-smooth rounded-lg px-4 py-2;
   }
 
   /* Torah Learning Cards */
