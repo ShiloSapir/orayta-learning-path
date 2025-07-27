@@ -219,6 +219,7 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
         endRef: "1:1",
         summary: "Rambam begins with the command to know that God exists and is the first cause.",
         text: "The foundation of all foundations and the pillar of wisdom is to know that there is a First Being who brought every existing thing into being.",
+        commentaries: ["Kesef Mishneh"],
         reflectionPrompt: "How do you connect to the idea of a First Cause in your life?",
         sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Foundations_of_the_Torah.1.1"
       },
@@ -356,7 +357,7 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
         endRef: "כג:ד",
         summary: "מזמור של ביטחון בה' המדריך ושומר בעת צרה.",
         text: "ה' רועי לא אחסר... גם כי אלך בגיא צלמות לא אירא רע כי אתה עמדי.",
-        commentaries: ["אבן עזרא", "מלבי"ם"],
+        commentaries: ["אבן עזרא", "מלבי\"ם"],
         reflectionPrompt: "היכן הרגשת לאחרונה השגחה ושמירה עליונה?",
         sefariaLink: "https://www.sefaria.org/Psalms.23.1-23.4?lang=he"
       },
@@ -472,7 +473,7 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
         endRef: "ז א",
         summary: "כל המציל נפש אחת כאילו קיים עולם מלא.",
         text: "לפיכך נברא אדם יחידי... שכל המאבד נפש אחת מישראל כאילו איבד עולם מלא.",
-        commentaries: ["רש\"י", "מהרש"א"],
+        commentaries: ["רש\"י", "מהרש\"א"],
         reflectionPrompt: "כיצד ערך חיי אדם משפיע על מעשיך?",
         sefariaLink: "https://www.sefaria.org/Sanhedrin.37a?lang=he"
       },
@@ -480,7 +481,7 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
         title: "תענית ז א – התורה נמשלה למים",
         startRef: "תענית ז א",
         endRef: "ז א",
-        summary: "חז"ל משווים את דברי התורה למים שמחיים את העולם.",
+        summary: "חז\"ל משווים את דברי התורה למים שמחיים את העולם.",
         text: "מה המים יורדים טיפה טיפה ונעשים נחלים – כך התורה נקנית מעט מעט.",
         commentaries: ["רש\"י"],
         reflectionPrompt: "היכן אתה שואב חיות רוחנית?",

@@ -22,7 +22,7 @@ type AppStep =
 export const OrayataApp = () => {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [language, setLanguage] = useState<Language>('en');
-  const [darkMode, setDarkMode] = useState(false);
+  
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [currentSource, setCurrentSource] = useState<string>("");
@@ -30,24 +30,10 @@ export const OrayataApp = () => {
   // Load persisted settings on mount
   useEffect(() => {
     const storedLang = localStorage.getItem('orayta_lang');
-    const storedDark = localStorage.getItem('orayta_dark');
     if (storedLang === 'he' || storedLang === 'en') {
       setLanguage(storedLang);
     }
-    if (storedDark === 'true') {
-      setDarkMode(true);
-    }
   }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (darkMode) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('orayta_dark', String(darkMode));
-  }, [darkMode]);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', language);
@@ -115,9 +101,6 @@ export const OrayataApp = () => {
     setCurrentStep('profile');
   };
 
-  const handleToggleDark = (value: boolean) => {
-    setDarkMode(value);
-  };
 
   const handleSaveReflection = (reflection: string, tags: string[]) => {
     console.log('Saving reflection:', { reflection, tags, source: currentSource });
@@ -131,15 +114,13 @@ export const OrayataApp = () => {
   return (
     <div dir={appDirection} className="font-inter">
       {currentStep === 'welcome' && (
-        <WelcomeScreen
-          language={language}
-          onLanguageChange={setLanguage}
-          onStartLearning={handleStartLearning}
-          onJournal={handleJournal}
-          onProfile={handleOpenProfile}
-          darkMode={darkMode}
-          onToggleDark={handleToggleDark}
-        />
+          <WelcomeScreen
+            language={language}
+            onLanguageChange={setLanguage}
+            onStartLearning={handleStartLearning}
+            onJournal={handleJournal}
+            onProfile={handleOpenProfile}
+          />
       )}
 
       {currentStep === 'time' && (
@@ -191,9 +172,7 @@ export const OrayataApp = () => {
       {currentStep === 'profile' && (
         <ProfileSettings
           language={language}
-          darkMode={darkMode}
           onLanguageChange={setLanguage}
-          onToggleDark={handleToggleDark}
           onBack={goToPrevStep}
         />
       )}

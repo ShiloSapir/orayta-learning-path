@@ -9,8 +9,6 @@ interface WelcomeScreenProps {
   onStartLearning: () => void;
   onJournal: () => void;
   onProfile: () => void;
-  darkMode: boolean;
-  onToggleDark: (value: boolean) => void;
 }
 
 const content = {
@@ -48,7 +46,7 @@ const content = {
   }
 };
 
-export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, darkMode, onToggleDark }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
@@ -63,7 +61,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
-            <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
+            <DarkModeToggle />
           </div>
         </div>
 

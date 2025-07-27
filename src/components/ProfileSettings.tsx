@@ -5,9 +5,7 @@ import { ArrowLeft, User } from "lucide-react";
 
 interface ProfileSettingsProps {
   language: Language;
-  darkMode: boolean;
   onLanguageChange: (lang: Language) => void;
-  onToggleDark: (value: boolean) => void;
   onBack: () => void;
 }
 
@@ -30,9 +28,7 @@ const content = {
 
 export const ProfileSettings = ({
   language,
-  darkMode,
   onLanguageChange,
-  onToggleDark,
   onBack
 }: ProfileSettingsProps) => {
   const t = content[language];
@@ -66,7 +62,7 @@ export const ProfileSettings = ({
         {/* Dark Mode */}
         <div className="flex items-center justify-between gap-4">
           <span className="font-medium">{t.themeLabel}</span>
-          <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
+          <DarkModeToggle />
         </div>
       </div>
     </div>
