@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
+import { useAppToast } from "@/hooks/useToast";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -614,17 +616,114 @@ export const SourceRecommendation = ({
   onBack, 
   onReflection 
 }: SourceRecommendationProps) => {
+  const [currentSource, setCurrentSource] = useState<SourceEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const t = content[language];
-  const source = getSourceForTopic(topicSelected, language);
   const isHebrew = language === 'he';
+  const toast = useAppToast();
+
+  // Initialize source on component mount or when topic/language changes
+  useEffect(() => {
+    const source = getSourceForTopic(topicSelected, language);
+    setCurrentSource(source);
+    setError(null);
+  }, [topicSelected, language]);
+
+  const generateNewSource = () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Get all sources for the current topic
+      const sources = sourcesByTopic[topicSelected]?.[language];
+      if (!sources || sources.length === 0) {
+        throw new Error('No sources available for this topic');
+      }
+      
+      // Filter out current source to ensure we get a different one
+      const availableSources = sources.filter(source => 
+        currentSource ? source.title !== currentSource.title : true
+      );
+      
+      if (availableSources.length === 0) {
+        // If no different sources available, keep current one
+        setError('No alternative sources available');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Select random source from available ones
+      const randomIndex = Math.floor(Math.random() * availableSources.length);
+      const newSource = availableSources[randomIndex];
+      
+      setCurrentSource(newSource);
+      setIsLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate new source');
+      setIsLoading(false);
+    }
+  };
 
   const handleAction = (action: string) => {
     console.log(`Action: ${action}`);
-    // In real app, these would trigger backend actions
-    if (action === 'reflection') {
-      onReflection();
+    
+    switch (action) {
+      case 'skip':
+        generateNewSource();
+        break;
+      case 'save':
+        // TODO: Implement save functionality with Supabase
+        toast.info('Source saved for later study', {
+          description: 'This feature requires Supabase integration'
+        });
+        break;
+      case 'learned':
+        // TODO: Implement learned functionality with Supabase
+        toast.success('Source marked as learned', {
+          description: 'This feature requires Supabase integration'
+        });
+        break;
+      case 'calendar':
+        // TODO: Implement calendar integration
+        toast.info('Calendar integration coming soon', {
+          description: 'This feature requires backend setup'
+        });
+        break;
+      case 'reflection':
+        onReflection();
+        break;
+      default:
+        console.warn(`Unknown action: ${action}`);
     }
   };
+
+  // Show loading state if source is not yet loaded
+  if (!currentSource && !error) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading source...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if source failed to load
+  if (error && !currentSource) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const source = currentSource!;
 
   return (
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
@@ -648,10 +747,15 @@ export const SourceRecommendation = ({
           <Button
             variant="ghost"
             onClick={() => handleAction('skip')}
+            disabled={isLoading}
             className="flex items-center gap-2"
           >
-            <SkipForward className="h-4 w-4" />
-            {t.skipButton}
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+            ) : (
+              <SkipForward className="h-4 w-4" />
+            )}
+            {isLoading ? 'Loading...' : t.skipButton}
           </Button>
         </div>
 
