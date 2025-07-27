@@ -57,7 +57,7 @@ export const ReflectionForm = ({ language, sourceTitle, onBack, onSave }: Reflec
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle p-4 ${isHebrew ? 'hebrew' : ''}`}>
+    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -89,7 +89,7 @@ export const ReflectionForm = ({ language, sourceTitle, onBack, onSave }: Reflec
         </div>
 
         {/* Reflection Form */}
-        <Card className="learning-card bg-gradient-warm">
+        <Card className="learning-card gradient-warm">
           <div className="space-y-6">
             {/* Textarea */}
             <div>

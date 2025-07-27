@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { LanguageToggle, Language } from "./LanguageToggle";
+import { DarkModeToggle } from "./DarkModeToggle";
 import { BookOpen, Clock, Heart } from "lucide-react";
 
 interface WelcomeScreenProps {
@@ -7,6 +8,9 @@ interface WelcomeScreenProps {
   onLanguageChange: (lang: Language) => void;
   onStartLearning: () => void;
   onJournal: () => void;
+  onProfile: () => void;
+  darkMode: boolean;
+  onToggleDark: (value: boolean) => void;
 }
 
 const content = {
@@ -17,6 +21,7 @@ const content = {
     description: "Discover meaningful Torah sources tailored to your time and interests. Learn, reflect, and grow spiritually.",
     startButton: "Begin Your Journey",
     journalButton: "Learning Journal",
+    profileButton: "Profile",
     loginButton: "Login / Sign Up",
     features: [
       { icon: BookOpen, text: "Personalized Torah Sources" },
@@ -32,6 +37,7 @@ const content = {
     description: "גלה מקורות תורה משמעותיים המותאמים לזמנך ולתחומי העניין שלך. למד, הרהר וצמח רוחנית.",
     startButton: "התחל את המסע שלך", 
     journalButton: "יומן הלימוד",
+    profileButton: "פרופיל",
     loginButton: "התחברות / הרשמה",
     features: [
       { icon: BookOpen, text: "מקורות תורה מותאמים אישית" },
@@ -42,20 +48,23 @@ const content = {
   }
 };
 
-export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, darkMode, onToggleDark }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center p-4 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
+    <div className={`min-h-screen gradient-warm flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-warm">
         {/* Header with Language Toggle */}
         <div className="flex justify-between items-center">
           <div className="w-20"></div> {/* Spacer */}
           <div className="text-sm text-muted-foreground font-medium">
             {t.greeting}
           </div>
-          <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
+          <div className="flex items-center gap-2">
+            <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
+            <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
+          </div>
         </div>
 
         {/* Main Title */}
@@ -78,7 +87,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           {t.features.map((feature, index) => (
             <div 
               key={index}
-              className="learning-card hover:scale-105 transition-smooth bg-gradient-warm"
+              className="learning-card hover:scale-105 transition-smooth gradient-warm"
             >
               <feature.icon className="h-8 w-8 text-primary mx-auto mb-3" />
               <p className="font-medium text-foreground">
@@ -97,7 +106,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           >
             ✨ {t.startButton} ✨
           </Button>
-          
+
           <Button
             onClick={onJournal}
             variant="outline"
@@ -105,6 +114,15 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
             className="btn-gentle text-lg px-8 py-4"
           >
             📚 {t.journalButton}
+          </Button>
+
+          <Button
+            onClick={onProfile}
+            variant="outline"
+            size="lg"
+            className="btn-gentle text-lg px-8 py-4"
+          >
+            ⚙️ {t.profileButton}
           </Button>
         </div>
 

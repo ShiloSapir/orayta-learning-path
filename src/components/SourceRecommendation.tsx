@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
-import { 
-  ArrowLeft, 
-  ExternalLink, 
-  BookOpen, 
-  Heart, 
+import {
+  ArrowLeft,
+  ExternalLink,
+  BookOpen,
+  Heart,
   Calendar,
   SkipForward,
   CheckCircle
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import sourcesByTopic, { SourceEntry } from "../data/sources";
 interface SourceRecommendationProps {
   language: Language;
   timeSelected: number;
@@ -52,103 +54,78 @@ const content = {
   }
 };
 
-// Mock sources organized by category
-const sourcesByTopic = {
-  "Halacha": {
-    en: {
-      title: "Shulchan Aruch Orach Chaim 1:1 – Morning Awakening",
-      startRef: "Shulchan Aruch OC 1:1",
-      endRef: "1:1",
-      summary: "The very first law in the Shulchan Aruch teaches about waking up with strength and determination to serve God.",
-      text: "One should strengthen himself like a lion to get up in the morning to serve his Creator, so that he should wake up the dawn.",
-      commentaries: ["Mishna Berura", "Kaf HaChaim", "Aruch HaShulchan"],
-      reflectionPrompt: "How can you apply this teaching about morning determination to your daily spiritual practice?",
-      sefariaLink: "https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.1.1"
-    },
-    he: {
-      title: "שולחן ערוך אורח חיים א:א – התעוררות הבוקר",
-      startRef: "שולחן ערוך או״ח א:א",
-      endRef: "א:א",
-      summary: "החוק הראשון בשולחן ערוך מלמד על התעוררות בכוח ובנחישות לעבוד את ה'.",
-      text: "יתגבר כארי לעמוד בבוקר לעבודת בוראו, שיהא הוא מעורר השחר.",
-      commentaries: ["משנה ברורה", "כף החיים", "ערוך השולחן"],
-      reflectionPrompt: "איך אתה יכול ליישם את הלימוד הזה על נחישות בוקר בתרגול הרוחני היומי שלך?",
-      sefariaLink: "https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.1.1"
-    }
-  },
-  "Rambam": {
-    en: {
-      title: "Mishneh Torah Hilchot Teshuva 7:3 – The Nature of Return",
-      startRef: "Hilchot Teshuva 7:3",
-      endRef: "7:3",
-      summary: "Rambam explains how repentance transforms a person's very essence and relationship with God.",
-      text: "How great is repentance! Yesterday this person was separated from God... and today he cleaves to the Divine Presence.",
-      commentaries: ["Lechem Mishneh", "Kesef Mishneh", "Radbaz"],
-      reflectionPrompt: "Reflect on a time when you experienced genuine transformation. What does this teach about human potential?",
-      sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Repentance.7.3"
-    },
-    he: {
-      title: "משנה תורה הלכות תשובה ז:ג – טבע התשובה",
-      startRef: "הלכות תשובה ז:ג",
-      endRef: "ז:ג",
-      summary: "הרמב״ם מסביר איך תשובה משנה את מהותו של האדם ויחסו לה'.",
-      text: "גדולה תשובה שאמש היה זה מובדל מה' אלוקי ישראל... והיום הוא דבוק בשכינה.",
-      commentaries: ["לחם משנה", "כסף משנה", "רדב״ז"],
-      reflectionPrompt: "הרהר על זמן שחווית שינוי אמיתי. מה זה מלמד על הפוטנציאל האנושי?",
-      sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Repentance.7.3"
-    }
-  },
-  "Ethics": {
-    en: {
-      title: "Pirkei Avot 2:13 – Who is Wise?",
-      startRef: "Pirkei Avot 2:13",
-      endRef: "2:13",
-      summary: "This Mishnah explores the character traits that define true wisdom, strength, and honor.",
-      text: "Who is wise? One who learns from every person. Who is mighty? One who conquers his inclination.",
-      commentaries: ["Rambam", "Rashi", "Bartenura"],
-      reflectionPrompt: "Think about someone you initially dismissed but later learned from. What does this teach about humility?",
-      sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
-    },
-    he: {
-      title: "פרקי אבות ב:יג – איזהו חכם?",
-      startRef: "פרקי אבות ב:יג",
-      endRef: "ב:יג",
-      summary: "משנה זו חוקרת את תכונות האופי המגדירות חכמה, גבורה וכבוד אמיתיים.",
-      text: "איזהו חכם? הלומד מכל אדם. איזהו גבור? הכובש את יצרו.",
-      commentaries: ["רמב״ם", "רש״י", "ברטנורא"],
-      reflectionPrompt: "חשוב על מישהו שבתחילה התעלמת ממנו אבל אחר כך למדת ממנו. מה זה מלמד על ענווה?",
-      sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
-    }
+
+const getSourceForTopic = (
+  topic: string,
+  language: Language,
+  time: number
+): SourceEntry => {
+  let topicKey = topic as keyof typeof sourcesByTopic;
+  if (topicKey === 'surprise') {
+    const keys = Object.keys(sourcesByTopic) as Array<keyof typeof sourcesByTopic>;
+    topicKey = keys[Math.floor(Math.random() * keys.length)];
   }
+  const options =
+    sourcesByTopic[topicKey]?.[language] || sourcesByTopic.spiritual[language];
+  const filtered = options.filter((s) => s.estimatedTime <= time);
+  const chooseFrom = filtered.length ? filtered : options;
+  return chooseFrom[Math.floor(Math.random() * chooseFrom.length)];
 };
 
-const getSourceForTopic = (topic: string, language: Language) => {
-  const topicKey = topic as keyof typeof sourcesByTopic;
-  return sourcesByTopic[topicKey]?.[language] || sourcesByTopic["Ethics"][language];
-};
-
-export const SourceRecommendation = ({ 
-  language, 
-  timeSelected, 
-  topicSelected, 
-  onBack, 
-  onReflection 
+export const SourceRecommendation = ({
+  language,
+  timeSelected,
+  topicSelected,
+  onBack,
+  onReflection
 }: SourceRecommendationProps) => {
   const t = content[language];
-  const source = getSourceForTopic(topicSelected, language);
+  const [source, setSource] = useState<SourceEntry>(
+    () => getSourceForTopic(topicSelected, language, timeSelected)
+  );
   const isHebrew = language === 'he';
 
+  // refresh source if topic, language or time changes
+  useEffect(() => {
+    setSource(getSourceForTopic(topicSelected, language, timeSelected));
+  }, [topicSelected, language, timeSelected]);
+
+  const handleSkip = () => {
+    setSource(getSourceForTopic(topicSelected, language, timeSelected));
+  };
+
+  const handleCalendar = () => {
+    const start = new Date();
+    const end = new Date(start.getTime() + timeSelected * 60000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
+    const url =
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+        source.title
+      )}` +
+      `&dates=${fmt(start)}/${fmt(end)}` +
+      `&details=${encodeURIComponent(`${source.summary} ${source.sefariaLink}`)}`;
+    window.open(url, "_blank");
+  };
+
   const handleAction = (action: string) => {
-    console.log(`Action: ${action}`);
-    // In real app, these would trigger backend actions
-    if (action === 'reflection') {
-      onReflection();
+    switch (action) {
+      case 'skip':
+        handleSkip();
+        break;
+      case 'calendar':
+        handleCalendar();
+        break;
+      case 'reflection':
+        onReflection();
+        break;
+      default:
+        console.log(`Action: ${action}`);
     }
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle p-4 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="max-w-4xl mx-auto py-8 animate-fade-in">
+    <div className={`min-h-screen gradient-primary flex items-start justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-4xl mx-auto py-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-soft">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Button
@@ -186,7 +163,7 @@ export const SourceRecommendation = ({
         </div>
 
         {/* Source Card */}
-        <Card className="learning-card mb-8 bg-gradient-warm">
+        <Card className="learning-card mb-8 gradient-warm">
           <div className="space-y-6">
             {/* Source Title */}
             <div>
