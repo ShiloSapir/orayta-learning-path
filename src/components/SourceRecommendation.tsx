@@ -52,28 +52,79 @@ const content = {
   }
 };
 
-// Mock data - in real app this would come from Sefaria API
-const mockSource = {
-  en: {
-    title: "Pirkei Avot 2:13 – Who is Wise?",
-    startRef: "Pirkei Avot 2:13",
-    endRef: "2:13",
-    summary: "This Mishnah explores the character traits that define true wisdom, a rich person, and a person of honor. Rabbi Yehoshua teaches that wisdom comes from learning from every person.",
-    text: "Who is wise? One who learns from every person, as it is stated: 'From all my teachers I have grown wise' (Psalms 119:99). Who is mighty? One who conquers his inclination, as it is stated: 'One who is slow to anger is better than a mighty person, and one who rules over his spirit than a conqueror of a city' (Proverbs 16:32).",
-    commentaries: ["Rambam", "Rashi", "Bartenura"],
-    reflectionPrompt: "Think about a recent situation where you could have learned something from someone you initially dismissed. What does this Mishnah teach about intellectual humility?",
-    sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
+// Mock sources organized by category
+const sourcesByTopic = {
+  "Halacha": {
+    en: {
+      title: "Shulchan Aruch Orach Chaim 1:1 – Morning Awakening",
+      startRef: "Shulchan Aruch OC 1:1",
+      endRef: "1:1",
+      summary: "The very first law in the Shulchan Aruch teaches about waking up with strength and determination to serve God.",
+      text: "One should strengthen himself like a lion to get up in the morning to serve his Creator, so that he should wake up the dawn.",
+      commentaries: ["Mishna Berura", "Kaf HaChaim", "Aruch HaShulchan"],
+      reflectionPrompt: "How can you apply this teaching about morning determination to your daily spiritual practice?",
+      sefariaLink: "https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.1.1"
+    },
+    he: {
+      title: "שולחן ערוך אורח חיים א:א – התעוררות הבוקר",
+      startRef: "שולחן ערוך או״ח א:א",
+      endRef: "א:א",
+      summary: "החוק הראשון בשולחן ערוך מלמד על התעוררות בכוח ובנחישות לעבוד את ה'.",
+      text: "יתגבר כארי לעמוד בבוקר לעבודת בוראו, שיהא הוא מעורר השחר.",
+      commentaries: ["משנה ברורה", "כף החיים", "ערוך השולחן"],
+      reflectionPrompt: "איך אתה יכול ליישם את הלימוד הזה על נחישות בוקר בתרגול הרוחני היומי שלך?",
+      sefariaLink: "https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.1.1"
+    }
   },
-  he: {
-    title: "פרקי אבות ב:יג – איזהו חכם?",
-    startRef: "פרקי אבות ב:יג",
-    endRef: "ב:יג",
-    summary: "משנה זו חוקרת את תכונות האופי המגדירות חכמה אמיתית, עושר ואדם מכובד. רבי יהושע מלמד שחכמה באה מלמידה מכל אדם.",
-    text: "איזהו חכם? הלומד מכל אדם, שנאמר 'מכל מלמדי השכלתי' (תהלים קיט:צט). איזהו גבור? הכובש את יצרו, שנאמר 'טוב ארך אפים מגבור ומושל ברוחו מלוכד עיר' (משלי טז:לב).",
-    commentaries: ["רמב״ם", "רש״י", "ברטנורא"],
-    reflectionPrompt: "חשוב על מצב אחרון שבו יכולת ללמוד משהו ממישהו שבתחילה התעלמת ממנו. מה המשנה הזו מלמדת על ענווה אינטלקטואלית?",
-    sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
+  "Rambam": {
+    en: {
+      title: "Mishneh Torah Hilchot Teshuva 7:3 – The Nature of Return",
+      startRef: "Hilchot Teshuva 7:3",
+      endRef: "7:3",
+      summary: "Rambam explains how repentance transforms a person's very essence and relationship with God.",
+      text: "How great is repentance! Yesterday this person was separated from God... and today he cleaves to the Divine Presence.",
+      commentaries: ["Lechem Mishneh", "Kesef Mishneh", "Radbaz"],
+      reflectionPrompt: "Reflect on a time when you experienced genuine transformation. What does this teach about human potential?",
+      sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Repentance.7.3"
+    },
+    he: {
+      title: "משנה תורה הלכות תשובה ז:ג – טבע התשובה",
+      startRef: "הלכות תשובה ז:ג",
+      endRef: "ז:ג",
+      summary: "הרמב״ם מסביר איך תשובה משנה את מהותו של האדם ויחסו לה'.",
+      text: "גדולה תשובה שאמש היה זה מובדל מה' אלוקי ישראל... והיום הוא דבוק בשכינה.",
+      commentaries: ["לחם משנה", "כסף משנה", "רדב״ז"],
+      reflectionPrompt: "הרהר על זמן שחווית שינוי אמיתי. מה זה מלמד על הפוטנציאל האנושי?",
+      sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Repentance.7.3"
+    }
+  },
+  "Ethics": {
+    en: {
+      title: "Pirkei Avot 2:13 – Who is Wise?",
+      startRef: "Pirkei Avot 2:13",
+      endRef: "2:13",
+      summary: "This Mishnah explores the character traits that define true wisdom, strength, and honor.",
+      text: "Who is wise? One who learns from every person. Who is mighty? One who conquers his inclination.",
+      commentaries: ["Rambam", "Rashi", "Bartenura"],
+      reflectionPrompt: "Think about someone you initially dismissed but later learned from. What does this teach about humility?",
+      sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
+    },
+    he: {
+      title: "פרקי אבות ב:יג – איזהו חכם?",
+      startRef: "פרקי אבות ב:יג",
+      endRef: "ב:יג",
+      summary: "משנה זו חוקרת את תכונות האופי המגדירות חכמה, גבורה וכבוד אמיתיים.",
+      text: "איזהו חכם? הלומד מכל אדם. איזהו גבור? הכובש את יצרו.",
+      commentaries: ["רמב״ם", "רש״י", "ברטנורא"],
+      reflectionPrompt: "חשוב על מישהו שבתחילה התעלמת ממנו אבל אחר כך למדת ממנו. מה זה מלמד על ענווה?",
+      sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
+    }
   }
+};
+
+const getSourceForTopic = (topic: string, language: Language) => {
+  const topicKey = topic as keyof typeof sourcesByTopic;
+  return sourcesByTopic[topicKey]?.[language] || sourcesByTopic["Ethics"][language];
 };
 
 export const SourceRecommendation = ({ 
@@ -84,7 +135,7 @@ export const SourceRecommendation = ({
   onReflection 
 }: SourceRecommendationProps) => {
   const t = content[language];
-  const source = mockSource[language];
+  const source = getSourceForTopic(topicSelected, language);
   const isHebrew = language === 'he';
 
   const handleAction = (action: string) => {

@@ -6,6 +6,7 @@ interface WelcomeScreenProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onStartLearning: () => void;
+  onJournal: () => void;
 }
 
 const content = {
@@ -15,27 +16,33 @@ const content = {
     subtitle: "Your Spiritual Torah Learning Companion",
     description: "Discover meaningful Torah sources tailored to your time and interests. Learn, reflect, and grow spiritually.",
     startButton: "Begin Your Journey",
+    journalButton: "Learning Journal",
+    loginButton: "Login / Sign Up",
     features: [
       { icon: BookOpen, text: "Personalized Torah Sources" },
       { icon: Clock, text: "Fits Your Schedule" },
       { icon: Heart, text: "Spiritual Growth" }
-    ]
+    ],
+    quote: "\"In every generation, each person must see themselves as if they personally came out of Egypt\" - Passover Haggadah"
   },
   he: {
     greeting: "שלום עליכם",
     title: "אורייתא",
     subtitle: "המדריך הרוחני שלך ללימוד תורה",
     description: "גלה מקורות תורה משמעותיים המותאמים לזמנך ולתחומי העניין שלך. למד, הרהר וצמח רוחנית.",
-    startButton: "התחל את המסע שלך",
+    startButton: "התחל את המסע שלך", 
+    journalButton: "יומן הלימוד",
+    loginButton: "התחברות / הרשמה",
     features: [
       { icon: BookOpen, text: "מקורות תורה מותאמים אישית" },
       { icon: Clock, text: "מתאים ללוח הזמנים שלך" },
       { icon: Heart, text: "צמיחה רוחנית" }
-    ]
+    ],
+    quote: "\"בכל דור ודור חייב אדם לראות את עצמו כאילו הוא יצא ממצרים\" - הגדה של פסח"
   }
 };
 
-export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
@@ -81,22 +88,40 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning }: W
           ))}
         </div>
 
-        {/* Start Button */}
-        <Button
-          onClick={onStartLearning}
-          size="lg"
-          className="btn-spiritual text-lg px-8 py-4 animate-glow"
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={onStartLearning}
+            size="lg"
+            className="btn-spiritual text-lg px-8 py-4"
+          >
+            ✨ {t.startButton} ✨
+          </Button>
+          
+          <Button
+            onClick={onJournal}
+            variant="outline"
+            size="lg"
+            className="btn-gentle text-lg px-8 py-4"
+          >
+            📚 {t.journalButton}
+          </Button>
+        </div>
+
+        {/* Login Button */}
+        <button 
+          onClick={() => {
+            console.log('Login/Signup clicked - requires Supabase integration');
+          }}
+          className="text-primary hover:text-primary/80 transition-smooth underline underline-offset-4"
         >
-          {t.startButton}
-        </Button>
+          {t.loginButton}
+        </button>
 
         {/* Spiritual Quote */}
         <div className="mt-12 pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground italic">
-            {isHebrew 
-              ? '"אם למדת הרבה תורה אל תחזיק טובה לעצמך כי לכך נוצרת" - אבות ב:ח'
-              : '"If you have learned much Torah, do not claim credit for yourself, because for this purpose you were created" - Avot 2:8'
-            }
+            {t.quote}
           </p>
         </div>
       </div>

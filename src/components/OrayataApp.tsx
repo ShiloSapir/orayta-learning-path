@@ -3,15 +3,18 @@ import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
 import { SourceRecommendation } from "./SourceRecommendation";
+import { ReflectionForm } from "./ReflectionForm";
+import { LearningJournal } from "./LearningJournal";
 import { Language } from "./LanguageToggle";
 
-type AppStep = 'welcome' | 'time' | 'topic' | 'source' | 'reflection';
+type AppStep = 'welcome' | 'time' | 'topic' | 'source' | 'reflection' | 'journal';
 
 export const OrayataApp = () => {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [language, setLanguage] = useState<Language>('en');
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [currentSource, setCurrentSource] = useState<string>("");
 
   const handleStartLearning = () => {
     setCurrentStep('time');
@@ -53,11 +56,25 @@ export const OrayataApp = () => {
       case 'reflection':
         setCurrentStep('source');
         break;
+      case 'journal':
+        setCurrentStep('welcome');
+        break;
     }
   };
 
-  const handleReflection = () => {
+  const handleReflection = (sourceTitle: string) => {
+    setCurrentSource(sourceTitle);
     setCurrentStep('reflection');
+  };
+
+  const handleJournal = () => {
+    setCurrentStep('journal');
+  };
+
+  const handleSaveReflection = (reflection: string, tags: string[]) => {
+    console.log('Saving reflection:', { reflection, tags, source: currentSource });
+    // This would save to database with Supabase
+    setCurrentStep('welcome');
   };
 
   // Apply RTL direction to the entire app when Hebrew is selected
@@ -70,6 +87,7 @@ export const OrayataApp = () => {
           language={language}
           onLanguageChange={setLanguage}
           onStartLearning={handleStartLearning}
+          onJournal={handleJournal}
         />
       )}
 
@@ -99,31 +117,24 @@ export const OrayataApp = () => {
           timeSelected={selectedTime}
           topicSelected={selectedTopic}
           onBack={goToPrevStep}
-          onReflection={handleReflection}
+          onReflection={() => handleReflection(`${selectedTopic} Source`)}
         />
       )}
 
       {currentStep === 'reflection' && (
-        <div className={`min-h-screen bg-gradient-subtle p-4 flex items-center justify-center ${language === 'he' ? 'hebrew' : ''}`}>
-          <div className="text-center space-y-6 animate-fade-in">
-            <div className="text-6xl">📝</div>
-            <h1 className="text-3xl font-bold text-foreground">
-              {language === 'he' ? 'הרהור והתבוננות' : 'Reflection & Contemplation'}
-            </h1>
-            <p className="text-muted-foreground max-w-md">
-              {language === 'he' 
-                ? 'תכונה זו תתווסף בקרוב - מקום לכתיבת הרהורים אישיים על הלימוד שלך'
-                : 'This feature is coming soon - a space for writing personal reflections on your learning'
-              }
-            </p>
-            <button
-              onClick={() => setCurrentStep('welcome')}
-              className="btn-spiritual px-6 py-3 rounded-lg"
-            >
-              {language === 'he' ? 'חזור לבית' : 'Return Home'}
-            </button>
-          </div>
-        </div>
+        <ReflectionForm
+          language={language}
+          sourceTitle={currentSource}
+          onBack={goToPrevStep}
+          onSave={handleSaveReflection}
+        />
+      )}
+
+      {currentStep === 'journal' && (
+        <LearningJournal
+          language={language}
+          onBack={() => setCurrentStep('welcome')}
+        />
       )}
     </div>
   );
