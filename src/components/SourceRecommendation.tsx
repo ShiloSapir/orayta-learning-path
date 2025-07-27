@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 import { useAppToast } from "@/hooks/useToast";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
+import { SocialSharing } from "./SocialSharing";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -623,6 +626,17 @@ export const SourceRecommendation = ({
   const t = content[language];
   const isHebrew = language === 'he';
   const toast = useAppToast();
+  const { announce } = useAccessibilityAnnouncements();
+
+  // Keyboard shortcuts
+  useKeyboardNavigation({
+    shortcuts: [
+      { key: 'Escape', action: onBack, description: 'Go back' },
+      { key: 's', action: () => handleAction('skip'), description: 'Skip source' },
+      { key: 'r', action: onReflection, description: 'Write reflection' },
+      { key: 'c', action: () => handleAction('calendar'), description: 'Add to calendar' }
+    ]
+  });
 
   // Initialize source on component mount or when topic/language changes
   useEffect(() => {
@@ -660,9 +674,11 @@ export const SourceRecommendation = ({
       
       setCurrentSource(newSource);
       setIsLoading(false);
+      announce(`New source loaded: ${newSource.title}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate new source');
       setIsLoading(false);
+      announce('Failed to load new source');
     }
   };
 
@@ -672,6 +688,7 @@ export const SourceRecommendation = ({
     switch (action) {
       case 'skip':
         generateNewSource();
+        announce('Generating new source');
         break;
       case 'save':
         // TODO: Implement save functionality with Supabase
@@ -726,7 +743,12 @@ export const SourceRecommendation = ({
   const source = currentSource!;
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+    <div 
+      className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}
+      id="main-content"
+      role="main"
+      aria-label={`Source recommendation for ${topicSelected}`}
+    >
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -873,6 +895,19 @@ export const SourceRecommendation = ({
             <BookOpen className="h-4 w-4" />
             {t.reflectionButton}
           </Button>
+        </div>
+
+        {/* Social Sharing */}
+        <div className="mt-8">
+          <SocialSharing 
+            language={language}
+            source={{
+              title: source.title,
+              text: source.text,
+              tags: source.commentaries,
+              sefariaLink: source.sefariaLink
+            }}
+          />
         </div>
       </div>
     </div>
