@@ -17,7 +17,15 @@ const SourceSchema = z.object({
   text_excerpt_he: z.string().optional(),
   reflection_prompt: z.string().min(1, "Reflection prompt is required"),
   reflection_prompt_he: z.string().min(1, "Hebrew reflection prompt is required"),
-  published: z.boolean()
+  published: z.boolean(),
+  // New enhanced fields
+  difficulty_level: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  source_type: z.enum(['text_study', 'practical_halacha', 'philosophical', 'historical', 'mystical']).optional(),
+  language_preference: z.enum(['english', 'hebrew', 'both']).optional(),
+  min_time: z.number().min(5).optional(),
+  max_time: z.number().max(60).optional(),
+  learning_objectives: z.array(z.string()).optional(),
+  prerequisites: z.array(z.string()).optional()
 });
 
 const SessionSchema = z.object({
@@ -54,6 +62,14 @@ export interface Source {
   reflection_prompt: string;
   reflection_prompt_he: string;
   published: boolean;
+  // New enhanced fields
+  difficulty_level?: 'beginner' | 'intermediate' | 'advanced';
+  source_type?: 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical';
+  language_preference?: 'english' | 'hebrew' | 'both';
+  min_time?: number;
+  max_time?: number;
+  learning_objectives?: string[];
+  prerequisites?: string[];
 }
 
 export interface LearningSession {
@@ -112,13 +128,37 @@ export const useSupabaseData = () => {
 
       if (error) throw error;
       
-      // Validate data
-      const validatedSources = (data || []).filter(source => {
+      // Validate and transform data
+      const validatedSources = (data || []).map(source => {
+        // Safely cast enum values to proper types
+        const difficulty_level = (['beginner', 'intermediate', 'advanced'] as const).includes(source.difficulty_level as any) 
+          ? source.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
+          : 'beginner';
+        
+        const source_type = (['text_study', 'practical_halacha', 'philosophical', 'historical', 'mystical'] as const).includes(source.source_type as any)
+          ? source.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical'
+          : 'text_study';
+          
+        const language_preference = (['english', 'hebrew', 'both'] as const).includes(source.language_preference as any)
+          ? source.language_preference as 'english' | 'hebrew' | 'both'
+          : 'both';
+
+        return {
+          ...source,
+          difficulty_level,
+          source_type,
+          language_preference,
+          min_time: source.min_time || Math.max(5, source.estimated_time - 5),
+          max_time: source.max_time || Math.min(60, source.estimated_time + 10),
+          learning_objectives: source.learning_objectives || [],
+          prerequisites: source.prerequisites || []
+        } as Source;
+      }).filter(source => {
         try {
-          SourceSchema.parse(source);
-          return true;
-        } catch {
-          console.warn('Invalid source data:', source);
+          // Basic validation - just check required fields exist
+          return source.id && source.title && source.category && source.published;
+        } catch (error) {
+          console.warn('Invalid source data:', source, error);
           return false;
         }
       });

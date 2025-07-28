@@ -94,27 +94,68 @@ export const SourceRecommendationV2 = ({
     ]
   });
 
-  // Get sources filtered by topic and time
+  // Enhanced sources filtering with intelligent time matching
   const getFilteredSources = () => {
-    return sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === topicSelected.toLowerCase() ||
-                          source.subcategory?.toLowerCase() === topicSelected.toLowerCase();
-      const matchesTime = source.estimated_time <= timeSelected;
+    // Primary filter: exact topic match + optimal time range
+    const primaryFilter = sources.filter(source => {
+      const matchesTopic = source.category.toLowerCase() === topicSelected.toLowerCase();
+      const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 5) && 
+                       timeSelected <= (source.max_time || source.estimated_time + 10);
       const notInHistory = !sourceHistory.includes(source.id);
-      
-      return matchesTopic && matchesTime && notInHistory;
+      return matchesTopic && timeMatch && notInHistory && source.published;
     });
+
+    // If we have good primary matches, return them
+    if (primaryFilter.length >= 3) {
+      return primaryFilter;
+    }
+
+    // Secondary filter: expand time range for fewer matches
+    const secondaryFilter = sources.filter(source => {
+      const matchesTopic = source.category.toLowerCase() === topicSelected.toLowerCase();
+      const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 10) && 
+                       timeSelected <= (source.max_time || source.estimated_time + 15);
+      const notInHistory = !sourceHistory.includes(source.id);
+      return matchesTopic && timeMatch && notInHistory && source.published;
+    });
+
+    // Special handling for "surprise" category - include variety from all topics
+    if ((secondaryFilter.length < 3 && topicSelected.toLowerCase() === 'surprise') || topicSelected.toLowerCase() === 'surprise') {
+      const fallbackFilter = sources.filter(source => {
+        const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 10) && 
+                         timeSelected <= (source.max_time || source.estimated_time + 15);
+        const notInHistory = !sourceHistory.includes(source.id);
+        return timeMatch && notInHistory && source.published;
+      });
+      return fallbackFilter.slice(0, 15); // Limit for variety
+    }
+
+    return secondaryFilter.length > 0 ? secondaryFilter : primaryFilter;
   };
 
-  // Get random source from filtered results
+  // Smart source selection with difficulty weighting
   const getRandomSource = () => {
     const filtered = getFilteredSources();
     if (filtered.length === 0) {
-      // If no sources match, show any published source
-      const available = sources.filter(s => !sourceHistory.includes(s.id));
+      // Final fallback: any available published source
+      const available = sources.filter(s => !sourceHistory.includes(s.id) && s.published);
       return available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
     }
-    return filtered[Math.floor(Math.random() * filtered.length)];
+
+    // Intelligent selection with difficulty weighting
+    const beginner = filtered.filter(s => s.difficulty_level === 'beginner');
+    const intermediate = filtered.filter(s => s.difficulty_level === 'intermediate'); 
+    const advanced = filtered.filter(s => s.difficulty_level === 'advanced');
+    
+    // Weighted distribution: beginner (50%), intermediate (35%), advanced (15%)
+    const weightedSources = [
+      ...beginner, ...beginner, ...beginner, ...beginner, ...beginner,
+      ...intermediate, ...intermediate, ...intermediate,
+      ...advanced
+    ];
+    
+    const sourcesToUse = weightedSources.length > 0 ? weightedSources : filtered;
+    return sourcesToUse[Math.floor(Math.random() * sourcesToUse.length)];
   };
 
   // Load initial source

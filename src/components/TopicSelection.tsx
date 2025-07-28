@@ -157,7 +157,7 @@ export const TopicSelection = ({
                 variant="ghost"
                 onClick={() => onTopicSelect(key)}
                 className={`
-                  h-auto p-0 transition-smooth
+                  h-auto p-0 transition-smooth bg-transparent hover:bg-transparent
                   ${isSelected ? 'ring-2 ring-primary' : ''}
                 `}
               >
@@ -165,8 +165,8 @@ export const TopicSelection = ({
                   className={`
                     learning-card w-full text-left hover:scale-105 transition-smooth
                     ${isSelected 
-                      ? 'bg-gradient-primary text-primary-foreground shadow-warm' 
-                      : 'bg-gradient-warm hover:bg-gradient-subtle'
+                      ? 'bg-gradient-primary text-primary-foreground shadow-warm border-primary border-2' 
+                      : 'bg-gradient-warm hover:bg-gradient-subtle border-transparent border-2'
                     }
                   `}
                 >

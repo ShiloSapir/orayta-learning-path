@@ -105,13 +105,20 @@ export type Database = {
           category: string
           commentaries: string[] | null
           created_at: string | null
+          difficulty_level: string | null
           end_ref: string
           estimated_time: number
           id: string
+          language_preference: string | null
+          learning_objectives: string[] | null
+          max_time: number | null
+          min_time: number | null
+          prerequisites: string[] | null
           published: boolean | null
           reflection_prompt: string
           reflection_prompt_he: string
           sefaria_link: string
+          source_type: string | null
           start_ref: string
           subcategory: string | null
           text_excerpt: string | null
@@ -124,13 +131,20 @@ export type Database = {
           category: string
           commentaries?: string[] | null
           created_at?: string | null
+          difficulty_level?: string | null
           end_ref: string
           estimated_time?: number
           id?: string
+          language_preference?: string | null
+          learning_objectives?: string[] | null
+          max_time?: number | null
+          min_time?: number | null
+          prerequisites?: string[] | null
           published?: boolean | null
           reflection_prompt: string
           reflection_prompt_he: string
           sefaria_link: string
+          source_type?: string | null
           start_ref: string
           subcategory?: string | null
           text_excerpt?: string | null
@@ -143,13 +157,20 @@ export type Database = {
           category?: string
           commentaries?: string[] | null
           created_at?: string | null
+          difficulty_level?: string | null
           end_ref?: string
           estimated_time?: number
           id?: string
+          language_preference?: string | null
+          learning_objectives?: string[] | null
+          max_time?: number | null
+          min_time?: number | null
+          prerequisites?: string[] | null
           published?: boolean | null
           reflection_prompt?: string
           reflection_prompt_he?: string
           sefaria_link?: string
+          source_type?: string | null
           start_ref?: string
           subcategory?: string | null
           text_excerpt?: string | null
