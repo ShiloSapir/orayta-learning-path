@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 import { useSupabaseData, Source } from "@/hooks/useSupabaseData";
+import { useSmartRecommendation } from "@/hooks/useSmartRecommendation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAppToast } from "@/hooks/useToast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
+import { SourceLoadingState } from "./SourceLoadingState";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -79,7 +81,18 @@ export const SourceRecommendationV2 = ({
   const [currentSource, setCurrentSource] = useState<Source | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sourceHistory, setSourceHistory] = useState<string[]>([]);
+  
+  // Enhanced smart recommendation system
+  const {
+    getRecommendedSource,
+    addToHistory,
+    updateUserHistory,
+    sourceHistory
+  } = useSmartRecommendation(sources, {
+    timeSelected,
+    topicSelected,
+    language
+  });
 
   const { announce } = useAccessibilityAnnouncements();
   
@@ -94,77 +107,23 @@ export const SourceRecommendationV2 = ({
     ]
   });
 
-  // Enhanced sources filtering with intelligent time matching
-  const getFilteredSources = () => {
-    // Primary filter: exact topic match + optimal time range
-    const primaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === topicSelected.toLowerCase();
-      const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 5) && 
-                       timeSelected <= (source.max_time || source.estimated_time + 10);
-      const notInHistory = !sourceHistory.includes(source.id);
-      return matchesTopic && timeMatch && notInHistory && source.published;
-    });
-
-    // If we have good primary matches, return them
-    if (primaryFilter.length >= 3) {
-      return primaryFilter;
+  // Load new source using smart recommendation
+  const loadNewSource = () => {
+    const newSource = getRecommendedSource();
+    if (newSource) {
+      setCurrentSource(newSource);
+      createSessionForSource(newSource);
+      return newSource;
     }
-
-    // Secondary filter: expand time range for fewer matches
-    const secondaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === topicSelected.toLowerCase();
-      const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 10) && 
-                       timeSelected <= (source.max_time || source.estimated_time + 15);
-      const notInHistory = !sourceHistory.includes(source.id);
-      return matchesTopic && timeMatch && notInHistory && source.published;
-    });
-
-    // Special handling for "surprise" category - include variety from all topics
-    if ((secondaryFilter.length < 3 && topicSelected.toLowerCase() === 'surprise') || topicSelected.toLowerCase() === 'surprise') {
-      const fallbackFilter = sources.filter(source => {
-        const timeMatch = timeSelected >= (source.min_time || source.estimated_time - 10) && 
-                         timeSelected <= (source.max_time || source.estimated_time + 15);
-        const notInHistory = !sourceHistory.includes(source.id);
-        return timeMatch && notInHistory && source.published;
-      });
-      return fallbackFilter.slice(0, 15); // Limit for variety
-    }
-
-    return secondaryFilter.length > 0 ? secondaryFilter : primaryFilter;
-  };
-
-  // Smart source selection with difficulty weighting
-  const getRandomSource = () => {
-    const filtered = getFilteredSources();
-    if (filtered.length === 0) {
-      // Final fallback: any available published source
-      const available = sources.filter(s => !sourceHistory.includes(s.id) && s.published);
-      return available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
-    }
-
-    // Intelligent selection with difficulty weighting
-    const beginner = filtered.filter(s => s.difficulty_level === 'beginner');
-    const intermediate = filtered.filter(s => s.difficulty_level === 'intermediate'); 
-    const advanced = filtered.filter(s => s.difficulty_level === 'advanced');
-    
-    // Weighted distribution: beginner (50%), intermediate (35%), advanced (15%)
-    const weightedSources = [
-      ...beginner, ...beginner, ...beginner, ...beginner, ...beginner,
-      ...intermediate, ...intermediate, ...intermediate,
-      ...advanced
-    ];
-    
-    const sourcesToUse = weightedSources.length > 0 ? weightedSources : filtered;
-    return sourcesToUse[Math.floor(Math.random() * sourcesToUse.length)];
+    return null;
   };
 
   // Load initial source
   useEffect(() => {
     if (sources.length > 0 && !currentSource) {
-      const source = getRandomSource();
-      if (source) {
-        setCurrentSource(source);
-        createSessionForSource(source);
+      const source = loadNewSource();
+      if (!source) {
+        error(content[language].noSources);
       }
     }
   }, [sources, currentSource]);
@@ -183,14 +142,13 @@ export const SourceRecommendationV2 = ({
     
     setLoading(true);
     
-    // Add current source to history
-    setSourceHistory(prev => [...prev, currentSource.id]);
+    // Update user learning patterns and history
+    addToHistory(currentSource.id);
+    updateUserHistory(currentSource, 'skipped');
     
-    // Get new source
-    const newSource = getRandomSource();
+    // Get new source using smart recommendation
+    const newSource = loadNewSource();
     if (newSource) {
-      setCurrentSource(newSource);
-      await createSessionForSource(newSource);
       announce(`Skipped to new source: ${language === 'he' ? newSource.title_he : newSource.title}`);
     } else {
       error(content[language].noSources);
@@ -200,19 +158,21 @@ export const SourceRecommendationV2 = ({
   };
 
   const handleSave = async () => {
-    if (!currentSessionId) return;
+    if (!currentSessionId || !currentSource) return;
     
     setLoading(true);
     await updateSessionStatus(currentSessionId, 'saved');
+    updateUserHistory(currentSource, 'saved');
     success(content[language].saveButton);
     setLoading(false);
   };
 
   const handleMarkLearned = async () => {
-    if (!currentSessionId) return;
+    if (!currentSessionId || !currentSource) return;
     
     setLoading(true);
     await updateSessionStatus(currentSessionId, 'learned');
+    updateUserHistory(currentSource, 'completed');
     success(content[language].learnedButton);
     setLoading(false);
   };
@@ -238,12 +198,10 @@ export const SourceRecommendationV2 = ({
 
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">{content[language].loading}</p>
-        </div>
-      </div>
+      <SourceLoadingState 
+        message={content[language].loading}
+        variant="detailed"
+      />
     );
   }
 

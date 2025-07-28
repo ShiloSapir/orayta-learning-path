@@ -92,6 +92,7 @@ export const OrayataApp = () => {
           <TopicSelection
             language={language}
             selectedTopic={selectedTopic}
+            timeSelected={selectedTime}
             onTopicSelect={handleTopicSelect}
             onBack={actions.goToPreviousStep}
             onNext={actions.goToNextStep}
