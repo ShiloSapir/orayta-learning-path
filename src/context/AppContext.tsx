@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
 import { Language } from '@/components/LanguageToggle';
 
 export type AppStep = 
@@ -217,7 +217,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  const actions = {
+  const actions = useMemo(() => ({
     setStep: (step: AppStep) => dispatch({ type: 'SET_STEP', payload: step }),
     setLanguage: (language: Language) => dispatch({ type: 'SET_LANGUAGE', payload: language }),
     setTime: (time: number) => dispatch({ type: 'SET_TIME', payload: time }),
@@ -252,7 +252,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_STEP', payload: stepOrder[currentIndex + 1] });
       }
     }
-  };
+  }), [state.currentStep]);
 
   return (
     <AppContext.Provider value={{ state, dispatch, actions }}>

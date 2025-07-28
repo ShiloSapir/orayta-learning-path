@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
-import { SourceRecommendation } from "./SourceRecommendation";
-import { ReflectionForm } from "./ReflectionForm";
+import { SourceRecommendationV2 } from "./SourceRecommendationV2";
+import { ReflectionFormV2 } from "./ReflectionFormV2";
 import { LearningJournal } from "./LearningJournal";
 import { ProfileSettings } from "./ProfileSettings";
 import { NavigationHeader } from "./NavigationHeader";
@@ -21,7 +21,7 @@ export const OrayataApp = () => {
     if (storedLang === 'he' || storedLang === 'en') {
       actions.setLanguage(storedLang);
     }
-  }, [actions]);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', language);
@@ -39,8 +39,8 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
-  const handleReflection = (sourceTitle: string) => {
-    actions.setSource(sourceTitle);
+  const handleReflection = (sessionId: string) => {
+    actions.setSource(sessionId);
     actions.setStep('reflection');
   };
 
@@ -52,17 +52,7 @@ export const OrayataApp = () => {
     actions.setStep('profile');
   };
 
-  const handleSaveReflection = (reflection: string, tags: string[]) => {
-    // Add session to state
-    actions.addSession({
-      sourceTitle: currentSource,
-      topic: selectedTopic || '',
-      timeSpent: selectedTime || 0,
-      reflection,
-      tags,
-      status: 'reflected'
-    });
-    
+  const handleSaveReflection = () => {
     // Reset session and go to welcome
     actions.resetSession();
   };
@@ -109,19 +99,19 @@ export const OrayataApp = () => {
         )}
 
         {currentStep === 'source' && selectedTime && selectedTopic && (
-          <SourceRecommendation
+          <SourceRecommendationV2
             language={language}
             timeSelected={selectedTime}
             topicSelected={selectedTopic}
             onBack={actions.goToPreviousStep}
-            onReflection={() => handleReflection(`${selectedTopic} Source`)}
+            onReflection={handleReflection}
           />
         )}
 
-        {currentStep === 'reflection' && (
-          <ReflectionForm
+        {currentStep === 'reflection' && currentSource && (
+          <ReflectionFormV2
             language={language}
-            sourceTitle={currentSource}
+            sessionId={currentSource}
             onBack={actions.goToPreviousStep}
             onSave={handleSaveReflection}
           />
