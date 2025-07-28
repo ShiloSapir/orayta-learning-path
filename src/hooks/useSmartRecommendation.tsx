@@ -70,7 +70,8 @@ export const useSmartRecommendation = (
     
     // Primary filter: exact topic match + optimal time + type compatibility + quality validation
     const primaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase();
+      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase() ||
+                          source.subcategory?.toLowerCase() === config.topicSelected.toLowerCase();
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
       const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
@@ -97,7 +98,8 @@ export const useSmartRecommendation = (
 
     // Secondary filter: expand time range but keep topic match
     const secondaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase();
+      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase() ||
+                          source.subcategory?.toLowerCase() === config.topicSelected.toLowerCase();
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -114,7 +116,8 @@ export const useSmartRecommendation = (
     // Tertiary filter: related topics with time compatibility
     const relatedTopics = getRelatedTopics(config.topicSelected);
     const tertiaryFilter = sources.filter(source => {
-      const matchesRelated = relatedTopics.includes(source.category.toLowerCase());
+      const matchesRelated = relatedTopics.includes(source.category.toLowerCase()) ||
+                            relatedTopics.includes(source.subcategory?.toLowerCase() || '');
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -140,18 +143,49 @@ export const useSmartRecommendation = (
     }).slice(0, 5);
   }, [sources, config, sourceHistory, getTimeBasedFilter]);
 
-  // Get related topics for tertiary filtering
+  // Get related topics for tertiary filtering - enhanced with subcategory mapping
   const getRelatedTopics = useCallback((topic: string): string[] => {
     const topicRelations: Record<string, string[]> = {
-      'halacha': ['rambam', 'talmud'],
-      'rambam': ['halacha', 'spiritual'],
-      'tanakh': ['spiritual', 'talmud'],
-      'talmud': ['halacha', 'tanakh'],
-      'spiritual': ['rambam', 'tanakh'],
+      'halacha': ['kashrut', 'shabbat', 'daily_practice'],
+      'rambam': ['hilchot_deot', 'hilchot_teshuva'],
+      'tanakh': ['weekly_portion', 'prophets', 'writings'],
+      'talmud': ['pirkei_avot', 'berakhot'],
+      'spiritual': ['mussar', 'chassidut', 'jewish_philosophy'],
       'surprise': ['halacha', 'rambam', 'tanakh', 'talmud', 'spiritual']
     };
     
-    return topicRelations[topic.toLowerCase()] || [];
+    // Also include subcategory mappings for better matching
+    const subcategoryRelations: Record<string, string[]> = {
+      'mussar': ['spiritual', 'chassidut', 'jewish_philosophy'],
+      'chassidut': ['spiritual', 'mussar', 'jewish_philosophy'],
+      'jewish_philosophy': ['spiritual', 'mussar', 'chassidut'],
+      'shabbat': ['halacha', 'kashrut', 'daily_practice'],
+      'kashrut': ['halacha', 'shabbat', 'daily_practice'],
+      'daily_practice': ['halacha', 'shabbat', 'kashrut'],
+      'hilchot_deot': ['rambam', 'hilchot_teshuva'],
+      'hilchot_teshuva': ['rambam', 'hilchot_deot'],
+      'weekly_portion': ['tanakh', 'prophets', 'writings'],
+      'prophets': ['tanakh', 'weekly_portion', 'writings'],
+      'writings': ['tanakh', 'weekly_portion', 'prophets'],
+      'pirkei_avot': ['talmud', 'berakhot'],
+      'berakhot': ['talmud', 'pirkei_avot']
+    };
+    
+    const relations = topicRelations[topic.toLowerCase()] || subcategoryRelations[topic.toLowerCase()] || [];
+    
+    // For main categories, also include their subcategories
+    if (topicRelations[topic.toLowerCase()]) {
+      return relations;
+    }
+    
+    // For subcategories, also include parent category
+    for (const [category, subcategories] of Object.entries(topicRelations)) {
+      if (subcategories.includes(topic.toLowerCase())) {
+        return [category, ...relations];
+      }
+    }
+    
+    return relations;
   }, []);
 
   // Difficulty weighting for intelligent selection
