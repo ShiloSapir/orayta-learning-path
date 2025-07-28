@@ -183,11 +183,14 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar_url: string | null
           calendar_synced: boolean | null
           created_at: string | null
+          daily_goal: number | null
           dark_mode: boolean | null
           email: string
           id: string
+          learning_preferences: Json | null
           name: string
           preferred_language: string | null
           reminder_time: string | null
@@ -195,11 +198,14 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          avatar_url?: string | null
           calendar_synced?: boolean | null
           created_at?: string | null
+          daily_goal?: number | null
           dark_mode?: boolean | null
           email: string
           id?: string
+          learning_preferences?: Json | null
           name: string
           preferred_language?: string | null
           reminder_time?: string | null
@@ -207,11 +213,14 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          avatar_url?: string | null
           calendar_synced?: boolean | null
           created_at?: string | null
+          daily_goal?: number | null
           dark_mode?: boolean | null
           email?: string
           id?: string
+          learning_preferences?: Json | null
           name?: string
           preferred_language?: string | null
           reminder_time?: string | null

@@ -160,7 +160,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
         {/* Login Button */}
         <button 
           onClick={() => {
-            console.log('Login/Signup clicked - requires Supabase integration');
+            window.location.href = '/auth';
           }}
           className="text-primary hover:text-primary/80 transition-smooth underline underline-offset-4"
         >

@@ -12,19 +12,38 @@ import { AdvancedSearchAndDiscovery } from "./AdvancedSearchAndDiscovery";
 import { NavigationHeader } from "./NavigationHeader";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export const OrayataApp = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { profile } = useUserProfile(user);
   const { state, actions } = useAppContext();
   const { currentStep, language, selectedTime, selectedTopic, currentSource } = state;
 
+  // Show loading spinner while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
   // Load persisted settings on mount
   useEffect(() => {
-    const storedLang = localStorage.getItem('orayta_lang');
-    if (storedLang === 'he' || storedLang === 'en') {
-      actions.setLanguage(storedLang);
+    // Load language preference from profile if available, otherwise from localStorage
+    if (profile?.preferred_language && (profile.preferred_language === 'en' || profile.preferred_language === 'he')) {
+      actions.setLanguage(profile.preferred_language);
+    } else {
+      const storedLang = localStorage.getItem('orayta_lang');
+      if (storedLang === 'he' || storedLang === 'en') {
+        actions.setLanguage(storedLang);
+      }
     }
-  }, []);
+  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', language);
