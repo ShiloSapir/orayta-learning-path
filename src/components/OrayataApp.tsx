@@ -7,6 +7,8 @@ import { ReflectionFormV2 } from "./ReflectionFormV2";
 import { LearningJournal } from "./LearningJournal";
 import { ProfileSettings } from "./ProfileSettings";
 import { LearningStreaks } from "./LearningStreaks";
+import { EnhancedLearningDashboard } from "./EnhancedLearningDashboard";
+import { AdvancedSearchAndDiscovery } from "./AdvancedSearchAndDiscovery";
 import { NavigationHeader } from "./NavigationHeader";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
@@ -53,6 +55,14 @@ export const OrayataApp = () => {
     actions.setStep('profile');
   };
 
+  const handleAnalytics = () => {
+    actions.setStep('analytics');
+  };
+
+  const handleSearch = () => {
+    actions.setStep('search');
+  };
+
   const handleSaveReflection = () => {
     // Reset session and go to welcome
     actions.resetSession();
@@ -76,6 +86,8 @@ export const OrayataApp = () => {
               onStartLearning={handleStartLearning}
               onJournal={handleJournal}
               onProfile={handleOpenProfile}
+              onAnalytics={handleAnalytics}
+              onSearch={handleSearch}
             />
         )}
 
@@ -133,6 +145,20 @@ export const OrayataApp = () => {
             onBack={() => actions.setStep('welcome')}
           />
         )}
+
+        {currentStep === 'analytics' && (
+          <EnhancedLearningDashboard
+            language={language}
+            onBack={() => actions.setStep('welcome')}
+          />
+        )}
+
+        {currentStep === 'search' && (
+          <AdvancedSearchAndDiscovery
+            language={language}
+            onBack={() => actions.setStep('welcome')}
+          />
+        )}
       </main>
 
       {/* Bottom Navigation - always visible */}
@@ -140,6 +166,8 @@ export const OrayataApp = () => {
         onHome={() => actions.setStep('welcome')}
         onJournal={handleJournal}
         onProfile={handleOpenProfile}
+        onAnalytics={handleAnalytics}
+        onSearch={handleSearch}
       />
 
       {/* Offline Support */}

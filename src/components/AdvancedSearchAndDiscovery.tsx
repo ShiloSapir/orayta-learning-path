@@ -27,6 +27,7 @@ import { Language } from './LanguageToggle';
 interface AdvancedSearchAndDiscoveryProps {
   language: Language;
   onSourceSelect?: (source: Source) => void;
+  onBack?: () => void;
 }
 
 interface SearchResult {
@@ -105,7 +106,7 @@ const content = {
   }
 };
 
-export function AdvancedSearchAndDiscovery({ language, onSourceSelect }: AdvancedSearchAndDiscoveryProps) {
+export function AdvancedSearchAndDiscovery({ language, onSourceSelect, onBack }: AdvancedSearchAndDiscoveryProps) {
   const { user } = useAuth();
   const { sources, loading } = useSupabaseData();
   const [searchQuery, setSearchQuery] = useState('');
@@ -483,6 +484,13 @@ export function AdvancedSearchAndDiscovery({ language, onSourceSelect }: Advance
     <div className={`space-y-6 ${isHebrew ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div className="text-center">
+        {onBack && (
+          <div className="flex justify-start mb-4">
+            <Button variant="ghost" onClick={onBack} className="gap-2">
+              ← Back
+            </Button>
+          </div>
+        )}
         <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
         <p className="text-muted-foreground">
           Discover personalized Torah learning experiences

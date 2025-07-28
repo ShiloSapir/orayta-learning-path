@@ -8,7 +8,9 @@ export type AppStep =
   | 'source'
   | 'reflection'
   | 'journal'
-  | 'profile';
+  | 'profile'
+  | 'analytics'
+  | 'search';
 
 interface LearningSession {
   id: string;

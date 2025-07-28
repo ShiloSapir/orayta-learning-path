@@ -27,6 +27,7 @@ import { Language } from './LanguageToggle';
 
 interface EnhancedLearningDashboardProps {
   language: Language;
+  onBack?: () => void;
 }
 
 const content = {
@@ -98,7 +99,7 @@ const content = {
   }
 };
 
-export function EnhancedLearningDashboard({ language }: EnhancedLearningDashboardProps) {
+export function EnhancedLearningDashboard({ language, onBack }: EnhancedLearningDashboardProps) {
   const { user } = useAuth();
   const { learningPattern, analytics, getSuggestedStudyTimes, getRecommendedTopics } = usePersonalizationEngine();
   const [dailyData, setDailyData] = useState({
@@ -227,6 +228,13 @@ export function EnhancedLearningDashboard({ language }: EnhancedLearningDashboar
     <div className={`space-y-6 ${isHebrew ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div className="text-center mb-6">
+        {onBack && (
+          <div className="flex justify-start mb-4">
+            <Button variant="ghost" onClick={onBack} className="gap-2">
+              ← Back
+            </Button>
+          </div>
+        )}
         <h1 className="text-3xl font-bold text-foreground mb-2">{t.title}</h1>
         <div className="flex items-center justify-center gap-4">
           <div className="flex items-center gap-2">

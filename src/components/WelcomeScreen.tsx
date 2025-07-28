@@ -9,6 +9,8 @@ interface WelcomeScreenProps {
   onStartLearning: () => void;
   onJournal: () => void;
   onProfile: () => void;
+  onAnalytics?: () => void;
+  onSearch?: () => void;
 }
 
 const content = {
@@ -20,6 +22,8 @@ const content = {
     startButton: "Begin Your Journey",
     journalButton: "Learning Journal",
     profileButton: "Profile",
+    analyticsButton: "Analytics",
+    searchButton: "Search",
     loginButton: "Login / Sign Up",
     features: [
       { icon: BookOpen, text: "Personalized Torah Sources" },
@@ -36,6 +40,8 @@ const content = {
     startButton: "התחל את המסע שלך", 
     journalButton: "יומן הלימוד",
     profileButton: "פרופיל",
+    analyticsButton: "סטטיסטיקות",
+    searchButton: "חיפוש",
     loginButton: "התחברות / הרשמה",
     features: [
       { icon: BookOpen, text: "מקורות תורה מותאמים אישית" },
@@ -46,7 +52,7 @@ const content = {
   }
 };
 
-export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, onAnalytics, onSearch }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
@@ -96,32 +102,59 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={onStartLearning}
-            size="lg"
-            className="btn-spiritual text-lg px-8 py-4"
-          >
-            ✨ {t.startButton} ✨
-          </Button>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={onStartLearning}
+              size="lg"
+              className="btn-spiritual text-lg px-8 py-4"
+            >
+              ✨ {t.startButton} ✨
+            </Button>
 
-          <Button
-            onClick={onJournal}
-            variant="outline"
-            size="lg"
-            className="btn-gentle text-lg px-8 py-4"
-          >
-            📚 {t.journalButton}
-          </Button>
+            <Button
+              onClick={onJournal}
+              variant="outline"
+              size="lg"
+              className="btn-gentle text-lg px-8 py-4"
+            >
+              📚 {t.journalButton}
+            </Button>
 
-          <Button
-            onClick={onProfile}
-            variant="outline"
-            size="lg"
-            className="btn-gentle text-lg px-8 py-4"
-          >
-            ⚙️ {t.profileButton}
-          </Button>
+            <Button
+              onClick={onProfile}
+              variant="outline"
+              size="lg"
+              className="btn-gentle text-lg px-8 py-4"
+            >
+              ⚙️ {t.profileButton}
+            </Button>
+          </div>
+
+          {/* Advanced Features */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {onAnalytics && (
+              <Button
+                onClick={onAnalytics}
+                variant="outline"
+                size="lg"
+                className="btn-gentle text-lg px-8 py-4"
+              >
+                📊 {t.analyticsButton}
+              </Button>
+            )}
+
+            {onSearch && (
+              <Button
+                onClick={onSearch}
+                variant="outline"
+                size="lg"
+                className="btn-gentle text-lg px-8 py-4"
+              >
+                🔍 {t.searchButton}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Login Button */}
