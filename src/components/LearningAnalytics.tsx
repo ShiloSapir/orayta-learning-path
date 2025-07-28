@@ -237,10 +237,10 @@ export function LearningAnalytics({ language }: LearningAnalyticsProps) {
         </TabsContent>
 
         <TabsContent value="search" className="space-y-6">
-          <AdvancedSearch 
-            language={language}
-            onResults={setSearchResults}
-          />
+          {/* Note: AdvancedSearch component would need sources prop and different interface */}
+          <div className="text-sm text-muted-foreground mb-4">
+            Advanced search functionality will be integrated here
+          </div>
           
           <div className="text-sm text-muted-foreground">
             {searchResults.length} {t.search.toLowerCase()} results

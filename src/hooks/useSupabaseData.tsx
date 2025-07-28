@@ -84,6 +84,13 @@ export const useSupabaseData = () => {
   const [sessions, setSessions] = useState<LearningSession[]>([]);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    sources: { page: 1, hasMore: true, total: 0 },
+    sessions: { page: 1, hasMore: true, total: 0 },
+    reflections: { page: 1, hasMore: true, total: 0 }
+  });
+
+  const ITEMS_PER_PAGE = 20;
 
   // Fetch published sources with pagination and validation
   const fetchSources = useCallback(async (limit?: number, offset?: number) => {
@@ -369,24 +376,28 @@ export const useSupabaseData = () => {
     }
   };
 
+  // Load initial data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       await Promise.all([
-        fetchSources(),
-        fetchSessions(),
-        fetchReflections()
+        fetchSources(ITEMS_PER_PAGE),
+        fetchSessions(ITEMS_PER_PAGE),
+        fetchReflections(ITEMS_PER_PAGE)
       ]);
       setLoading(false);
     };
 
-    loadData();
-  }, [user]);
+    if (user) {
+      loadData();
+    }
+  }, [user, fetchSources, fetchSessions, fetchReflections]);
 
   return {
     sources,
     sessions,
     reflections,
+    pagination,
     loading,
     createSession,
     createReflection,
@@ -395,9 +406,9 @@ export const useSupabaseData = () => {
     fetchSessions, 
     fetchReflections,
     refreshData: useCallback(() => {
-      fetchSources();
-      fetchSessions();
-      fetchReflections();
+      fetchSources(ITEMS_PER_PAGE);
+      fetchSessions(ITEMS_PER_PAGE);
+      fetchReflections(ITEMS_PER_PAGE);
     }, [fetchSources, fetchSessions, fetchReflections])
   };
 };

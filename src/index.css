@@ -192,3 +192,45 @@
     text-align: right;
   }
 }
+
+/* Accessibility styles */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --primary: 240 100% 50%;
+  --border: 0 0% 50%;
+}
+
+.font-small { font-size: 14px; }
+.font-medium { font-size: 16px; }  
+.font-large { font-size: 18px; }
+.font-xl { font-size: 20px; }
+
+/* Focus styles for keyboard navigation */
+:focus {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
