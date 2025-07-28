@@ -192,7 +192,7 @@ export const TopicSelection = ({
                   className={`
                     learning-card w-full text-left transition-all duration-300
                     ${isSelected 
-                      ? 'bg-gradient-primary text-primary-foreground shadow-warm border-primary border-2 scale-105' 
+                      ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm border-primary border-2 scale-105' 
                       : 'bg-gradient-warm hover:bg-gradient-subtle border-transparent border-2 hover:shadow-lg'
                     }
                   `}
