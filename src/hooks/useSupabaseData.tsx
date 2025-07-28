@@ -18,7 +18,10 @@ const SourceSchema = z.object({
   reflection_prompt: z.string().min(1, "Reflection prompt is required"),
   reflection_prompt_he: z.string().min(1, "Hebrew reflection prompt is required"),
   published: z.boolean(),
-  // New enhanced fields
+  start_ref: z.string().min(1, "Start reference is required"),
+  end_ref: z.string().min(1, "End reference is required"),
+  commentaries: z.array(z.string()).optional(),
+  // Enhanced fields
   difficulty_level: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
   source_type: z.enum(['text_study', 'practical_halacha', 'philosophical', 'historical', 'mystical']).optional(),
   language_preference: z.enum(['english', 'hebrew', 'both']).optional(),
@@ -62,7 +65,10 @@ export interface Source {
   reflection_prompt: string;
   reflection_prompt_he: string;
   published: boolean;
-  // New enhanced fields
+  start_ref: string;
+  end_ref: string;
+  commentaries?: string[];
+  // Enhanced fields
   difficulty_level?: 'beginner' | 'intermediate' | 'advanced';
   source_type?: 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical';
   language_preference?: 'english' | 'hebrew' | 'both';
