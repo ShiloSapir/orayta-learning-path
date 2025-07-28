@@ -1,7 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Validation schemas
+const SourceSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1, "Title is required"),
+  title_he: z.string().min(1, "Hebrew title is required"),
+  category: z.string().min(1, "Category is required"),
+  subcategory: z.string().optional(),
+  estimated_time: z.number().min(1, "Estimated time must be positive"),
+  sefaria_link: z.string().url("Invalid URL"),
+  text_excerpt: z.string().optional(),
+  text_excerpt_he: z.string().optional(),
+  reflection_prompt: z.string().min(1, "Reflection prompt is required"),
+  reflection_prompt_he: z.string().min(1, "Hebrew reflection prompt is required"),
+  published: z.boolean()
+});
+
+const SessionSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  topic_selected: z.string().min(1, "Topic is required"),
+  time_selected: z.number().min(1, "Time must be positive"),
+  source_id: z.string().uuid().optional(),
+  status: z.string(),
+  created_at: z.string(),
+  updated_at: z.string()
+});
+
+const ReflectionSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  session_id: z.string().uuid().optional(),
+  note: z.string().min(1, "Reflection note is required"),
+  tags: z.array(z.string()),
+  created_at: z.string(),
+  updated_at: z.string()
+});
 
 export interface Source {
   id: string;
@@ -47,140 +85,263 @@ export const useSupabaseData = () => {
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch published sources
-  const fetchSources = async () => {
+  // Fetch published sources with pagination and validation
+  const fetchSources = useCallback(async (limit?: number, offset?: number) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('sources')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('published', true)
         .order('created_at', { ascending: false });
 
+      if (limit) {
+        query = query.limit(limit);
+      }
+      if (offset) {
+        query = query.range(offset, offset + (limit || 10) - 1);
+      }
+
+      const { data, error, count } = await query;
+
       if (error) throw error;
-      setSources(data || []);
+      
+      // Validate data
+      const validatedSources = (data || []).filter(source => {
+        try {
+          SourceSchema.parse(source);
+          return true;
+        } catch {
+          console.warn('Invalid source data:', source);
+          return false;
+        }
+      });
+
+      setSources(validatedSources);
+      return { sources: validatedSources, total: count || 0 };
     } catch (error: any) {
+      console.error('Error fetching sources:', error);
       toast({
         title: "Error loading sources",
-        description: error.message,
+        description: error.message || "Failed to load sources",
         variant: "destructive"
       });
+      return { sources: [], total: 0 };
     }
-  };
+  }, [toast]);
 
-  // Fetch user's learning sessions
-  const fetchSessions = async () => {
-    if (!user) return;
+  // Fetch user's learning sessions with validation
+  const fetchSessions = useCallback(async (limit?: number) => {
+    if (!user) return { sessions: [], total: 0 };
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('learning_sessions')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data, error, count } = await query;
+
       if (error) throw error;
-      setSessions(data || []);
+      
+      // Validate and sanitize data
+      const validatedSessions = (data || []).filter(session => {
+        try {
+          SessionSchema.parse(session);
+          return true;
+        } catch {
+          console.warn('Invalid session data:', session);
+          return false;
+        }
+      });
+
+      setSessions(validatedSessions);
+      return { sessions: validatedSessions, total: count || 0 };
     } catch (error: any) {
+      console.error('Error fetching sessions:', error);
       toast({
         title: "Error loading sessions",
-        description: error.message,
+        description: error.message || "Failed to load sessions",
         variant: "destructive"
       });
+      return { sessions: [], total: 0 };
     }
-  };
+  }, [user, toast]);
 
-  // Fetch user's reflections
-  const fetchReflections = async () => {
-    if (!user) return;
+  // Fetch user's reflections with validation
+  const fetchReflections = useCallback(async (limit?: number) => {
+    if (!user) return { reflections: [], total: 0 };
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('reflections')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data, error, count } = await query;
+
       if (error) throw error;
-      setReflections(data || []);
+      
+      // Validate and sanitize data
+      const validatedReflections = (data || []).filter(reflection => {
+        try {
+          ReflectionSchema.parse(reflection);
+          return true;
+        } catch {
+          console.warn('Invalid reflection data:', reflection);
+          return false;
+        }
+      });
+
+      setReflections(validatedReflections);
+      return { reflections: validatedReflections, total: count || 0 };
     } catch (error: any) {
+      console.error('Error fetching reflections:', error);
       toast({
         title: "Error loading reflections",
-        description: error.message,
+        description: error.message || "Failed to load reflections",
         variant: "destructive"
       });
+      return { reflections: [], total: 0 };
     }
-  };
+  }, [user, toast]);
 
-  // Create a new learning session
-  const createSession = async (topicSelected: string, timeSelected: number, sourceId?: string) => {
+  // Create a new learning session with validation
+  const createSession = useCallback(async (topicSelected: string, timeSelected: number, sourceId?: string) => {
     if (!user) return null;
 
+    // Input validation
+    if (!topicSelected.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Topic selection is required",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    if (timeSelected <= 0) {
+      toast({
+        title: "Validation Error", 
+        description: "Time selection must be positive",
+        variant: "destructive"
+      });
+      return null;
+    }
+
     try {
+      const sessionData = {
+        user_id: user.id,
+        topic_selected: topicSelected.trim(),
+        time_selected: timeSelected,
+        source_id: sourceId,
+        status: 'recommended'
+      };
+
       const { data, error } = await supabase
         .from('learning_sessions')
-        .insert({
-          user_id: user.id,
-          topic_selected: topicSelected,
-          time_selected: timeSelected,
-          source_id: sourceId,
-          status: 'recommended'
-        })
+        .insert(sessionData)
         .select()
         .single();
 
       if (error) throw error;
       
-      setSessions(prev => [data, ...prev]);
+      // Validate returned data
+      const validatedSession = SessionSchema.parse(data);
+      
+      setSessions(prev => [validatedSession as LearningSession, ...prev]);
       toast({
         title: "Session created",
         description: "Your learning session has been saved"
       });
       
-      return data;
+      return validatedSession;
     } catch (error: any) {
+      console.error('Error creating session:', error);
       toast({
         title: "Error creating session",
-        description: error.message,
+        description: error.message || "Failed to create session",
         variant: "destructive"
       });
       return null;
     }
-  };
+  }, [user, toast]);
 
-  // Create a new reflection
-  const createReflection = async (sessionId: string, note: string, tags: string[] = []) => {
+  // Create a new reflection with validation
+  const createReflection = useCallback(async (sessionId: string, note: string, tags: string[] = []) => {
     if (!user) return null;
 
+    // Input validation and sanitization
+    const sanitizedNote = note.trim();
+    if (!sanitizedNote) {
+      toast({
+        title: "Validation Error",
+        description: "Reflection note is required",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    if (sanitizedNote.length > 5000) {
+      toast({
+        title: "Validation Error",
+        description: "Reflection note is too long (max 5000 characters)",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    // Sanitize tags
+    const sanitizedTags = tags
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0 && tag.length <= 50)
+      .slice(0, 10); // Limit to 10 tags
+
     try {
+      const reflectionData = {
+        user_id: user.id,
+        session_id: sessionId,
+        note: sanitizedNote,
+        tags: sanitizedTags
+      };
+
       const { data, error } = await supabase
         .from('reflections')
-        .insert({
-          user_id: user.id,
-          session_id: sessionId,
-          note,
-          tags
-        })
+        .insert(reflectionData)
         .select()
         .single();
 
       if (error) throw error;
       
-      setReflections(prev => [data, ...prev]);
+      // Validate returned data
+      const validatedReflection = ReflectionSchema.parse(data);
+      
+      setReflections(prev => [validatedReflection as Reflection, ...prev]);
       toast({
         title: "Reflection saved",
         description: "Your reflection has been recorded"
       });
       
-      return data;
+      return validatedReflection;
     } catch (error: any) {
+      console.error('Error saving reflection:', error);
       toast({
         title: "Error saving reflection",
-        description: error.message,
+        description: error.message || "Failed to save reflection",
         variant: "destructive"
       });
       return null;
     }
-  };
+  }, [user, toast]);
 
   // Update session status
   const updateSessionStatus = async (sessionId: string, status: string) => {
@@ -195,7 +356,7 @@ export const useSupabaseData = () => {
       setSessions(prev => 
         prev.map(session => 
           session.id === sessionId 
-            ? { ...session, status, updated_at: new Date().toISOString() }
+            ? { ...session, status, updated_at: new Date().toISOString() } as LearningSession
             : session
         )
       );
@@ -230,10 +391,13 @@ export const useSupabaseData = () => {
     createSession,
     createReflection,
     updateSessionStatus,
-    refreshData: () => {
+    fetchSources,
+    fetchSessions, 
+    fetchReflections,
+    refreshData: useCallback(() => {
       fetchSources();
       fetchSessions();
       fetchReflections();
-    }
+    }, [fetchSources, fetchSessions, fetchReflections])
   };
 };
