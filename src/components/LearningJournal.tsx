@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Language } from "./LanguageToggle";
+import { useSupabaseData, type Source, type LearningSession as DBLearningSession, type Reflection } from "@/hooks/useSupabaseData";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -13,7 +18,8 @@ import {
   ExternalLink,
   Trash2,
   RotateCcw,
-  Share
+  Share,
+  Loader2
 } from "lucide-react";
 
 interface LearningJournalProps {
@@ -21,7 +27,7 @@ interface LearningJournalProps {
   onBack: () => void;
 }
 
-interface LearningSession {
+interface EnrichedLearningSession {
   id: string;
   title: string;
   topic: string;
@@ -31,6 +37,7 @@ interface LearningSession {
   reflection?: string;
   tags?: string[];
   sefariaLink: string;
+  sourceId?: string;
 }
 
 const content = {
@@ -94,45 +101,61 @@ const content = {
   }
 };
 
-// Mock data
-const mockSessions: LearningSession[] = [
-  {
-    id: "1",
-    title: "Pirkei Avot 2:13 – Who is Wise?",
-    topic: "Ethics",
-    date: "2024-01-15",
-    duration: 15,
-    status: "reflected",
-    reflection: "This teaching really opened my eyes to the importance of intellectual humility...",
-    tags: ["Inspiring", "Ethical"],
-    sefariaLink: "https://www.sefaria.org/Pirkei_Avot.2.13"
-  },
-  {
-    id: "2", 
-    title: "Shulchan Aruch OC 1:1 – Morning Awakening",
-    topic: "Halacha",
-    date: "2024-01-12",
-    duration: 10,
-    status: "learned",
-    sefariaLink: "https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.1.1"
-  },
-  {
-    id: "3",
-    title: "Mishneh Torah Hilchot Teshuva 7:3",
-    topic: "Rambam", 
-    date: "2024-01-10",
-    duration: 20,
-    status: "saved",
-    sefariaLink: "https://www.sefaria.org/Mishneh_Torah%2C_Repentance.7.3"
-  }
-];
 
 export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
   const [activeTab, setActiveTab] = useState<'learned' | 'saved' | 'reflected'>('learned');
+  const [enrichedSessions, setEnrichedSessions] = useState<EnrichedLearningSession[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const { user } = useAuth();
+  const { sessions, reflections, sources, loading } = useSupabaseData();
+  const { toast } = useToast();
   const t = content[language];
   const isHebrew = language === 'he';
 
-  const filteredSessions = mockSessions.filter(session => {
+  // Enrich sessions with source data and reflections
+  const enrichSessions = useCallback(async () => {
+    if (!sessions.length || !sources.length) return;
+    
+    setDataLoading(true);
+    try {
+      const enriched: EnrichedLearningSession[] = sessions.map(session => {
+        const source = sources.find(s => s.id === session.source_id);
+        const sessionReflections = reflections.filter(r => r.session_id === session.id);
+        const hasReflection = sessionReflections.length > 0;
+        
+        // Determine session status based on actual data
+        let status: 'learned' | 'saved' | 'reflected' = 'saved';
+        if (session.status === 'learned' || session.status === 'completed') {
+          status = hasReflection ? 'reflected' : 'learned';
+        }
+        
+        return {
+          id: session.id,
+          title: source ? (language === 'he' ? source.title_he : source.title) : session.topic_selected,
+          topic: session.topic_selected,
+          date: session.created_at,
+          duration: session.time_selected,
+          status,
+          reflection: sessionReflections[0]?.note,
+          tags: sessionReflections[0]?.tags || [],
+          sefariaLink: source?.sefaria_link || '',
+          sourceId: session.source_id
+        };
+      });
+      
+      setEnrichedSessions(enriched);
+    } catch (error) {
+      console.error('Error enriching sessions:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  }, [sessions, sources, reflections, language]);
+
+  useEffect(() => {
+    enrichSessions();
+  }, [enrichSessions]);
+
+  const filteredSessions = enrichedSessions.filter(session => {
     switch (activeTab) {
       case 'learned':
         return session.status === 'learned' || session.status === 'reflected';
@@ -144,6 +167,30 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
         return true;
     }
   });
+
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('learning_sessions')
+        .delete()
+        .eq('id', sessionId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      setEnrichedSessions(prev => prev.filter(s => s.id !== sessionId));
+      toast({
+        title: "Session deleted",
+        description: "Learning session has been removed"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting session",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  }, [user?.id, toast]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -204,7 +251,19 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
           <TabsContent value="learned">
             <div className="space-y-4">
-              {filteredSessions.length === 0 ? (
+              {loading || dataLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="learning-card">
+                      <div className="space-y-3">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredSessions.length === 0 ? (
                 <Card className="learning-card text-center py-12">
                   <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">{t.empty.learned}</p>
@@ -247,14 +306,16 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(session.sefariaLink, '_blank')}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        {session.sefariaLink && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(session.sefariaLink, '_blank')}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        )}
                         {session.reflection && (
                           <Button
                             variant="ghost"
@@ -274,6 +335,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleDeleteSession(session.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -288,7 +350,18 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
           <TabsContent value="saved">
             <div className="space-y-4">
-              {filteredSessions.length === 0 ? (
+              {loading || dataLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="learning-card">
+                      <div className="space-y-3">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredSessions.length === 0 ? (
                 <Card className="learning-card text-center py-12">
                   <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">{t.empty.saved}</p>
@@ -313,14 +386,16 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(session.sefariaLink, '_blank')}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        {session.sefariaLink && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(session.sefariaLink, '_blank')}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -331,6 +406,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleDeleteSession(session.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -345,7 +421,19 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
           <TabsContent value="reflected">
             <div className="space-y-4">
-              {filteredSessions.length === 0 ? (
+              {loading || dataLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="learning-card">
+                      <div className="space-y-3">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-16 w-full" />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredSessions.length === 0 ? (
                 <Card className="learning-card text-center py-12">
                   <PenTool className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">{t.empty.reflected}</p>
@@ -388,14 +476,16 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(session.sefariaLink, '_blank')}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        {session.sefariaLink && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(session.sefariaLink, '_blank')}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -413,6 +503,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleDeleteSession(session.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
