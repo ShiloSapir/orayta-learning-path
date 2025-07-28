@@ -27,6 +27,7 @@ export const useSmartRecommendation = (
     topicPreferences: {},
     timePatterns: {}
   });
+  const [qualityValidated, setQualityValidated] = useState<Record<string, boolean>>({});
 
   // Time-based source optimization mapping
   const getTimeBasedFilter = useCallback((timeMinutes: number) => {
@@ -63,11 +64,11 @@ export const useSmartRecommendation = (
     }
   }, []);
 
-  // Enhanced filtering logic with multi-tier approach
+  // Enhanced filtering logic with multi-tier approach and quality assurance
   const getFilteredSources = useCallback(() => {
     const timeFilter = getTimeBasedFilter(config.timeSelected);
     
-    // Primary filter: exact topic match + optimal time + type compatibility
+    // Primary filter: exact topic match + optimal time + type compatibility + quality validation
     const primaryFilter = sources.filter(source => {
       const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase();
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
@@ -79,8 +80,14 @@ export const useSmartRecommendation = (
       const languageMatch = source.language_preference === 'both' || 
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
       
+      // Quality validation - ensure source has required Torah references and valid Sefaria link
+      const hasTorahRef = !!(source.start_ref && source.end_ref);
+      const hasValidPrompts = !!(source.reflection_prompt && source.reflection_prompt_he);
+      const hasSefariaLink = source.sefaria_link && source.sefaria_link.includes('sefaria.org');
+      const qualityCheck = hasTorahRef && hasValidPrompts && hasSefariaLink;
+      
       return matchesTopic && timeMatch && typeMatch && difficultyMatch && notInHistory && 
-             source.published && languageMatch;
+             source.published && languageMatch && qualityCheck;
     });
 
     // Return primary if we have good matches

@@ -10,6 +10,10 @@ import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
 import { SourceLoadingState } from "./SourceLoadingState";
+import { FallbackMechanisms } from "./FallbackMechanisms";
+import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
+import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
+import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -18,7 +22,8 @@ import {
   Calendar,
   SkipForward,
   CheckCircle,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from "lucide-react";
 
 interface SourceRecommendationProps {
@@ -81,18 +86,33 @@ export const SourceRecommendationV2 = ({
   const [currentSource, setCurrentSource] = useState<Source | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
+  const [qualityWarnings, setQualityWarnings] = useState<string[]>([]);
   
-  // Enhanced smart recommendation system
+  // Enhanced smart recommendation system with personalization
   const {
     getRecommendedSource,
     addToHistory,
     updateUserHistory,
-    sourceHistory
+    sourceHistory,
+    getFilteredSources
   } = useSmartRecommendation(sources, {
     timeSelected,
     topicSelected,
     language
   });
+
+  // Personalization engine
+  const { 
+    getPersonalizedRecommendations, 
+    updateLearningPattern 
+  } = usePersonalizationEngine();
+
+  // Content quality assurance
+  const { 
+    assessSourceQuality, 
+    validateTorahReferences 
+  } = useContentQualityAssurance();
 
   const { announce } = useAccessibilityAnnouncements();
   
@@ -107,26 +127,60 @@ export const SourceRecommendationV2 = ({
     ]
   });
 
-  // Load new source using smart recommendation
-  const loadNewSource = () => {
-    const newSource = getRecommendedSource();
-    if (newSource) {
-      setCurrentSource(newSource);
-      createSessionForSource(newSource);
-      return newSource;
+  // Load new source using enhanced smart recommendation with quality checks
+  const loadNewSource = async () => {
+    // Try personalized recommendations first
+    const personalizedSources = getPersonalizedRecommendations(sources, {
+      timeSelected,
+      topicSelected,
+      language
+    });
+
+    let selectedSource = null;
+    if (personalizedSources.length > 0) {
+      selectedSource = personalizedSources[0];
+    } else {
+      selectedSource = getRecommendedSource();
     }
+
+    if (selectedSource) {
+      // Validate source quality and Torah references
+      const qualityMetrics = await assessSourceQuality(selectedSource);
+      const torahValidation = validateTorahReferences(selectedSource);
+      
+      const warnings = [
+        ...torahValidation.warnings,
+        ...torahValidation.suggestions,
+        ...(qualityMetrics.score < 80 ? [`Source quality score: ${qualityMetrics.score}%`] : [])
+      ];
+      
+      setQualityWarnings(warnings);
+      setCurrentSource(selectedSource);
+      createSessionForSource(selectedSource);
+      setShowFallback(false);
+      return selectedSource;
+    }
+    
+    // Show fallback mechanisms if no suitable source found
+    setShowFallback(true);
     return null;
   };
 
-  // Load initial source
+  // Load initial source with enhanced error handling
   useEffect(() => {
-    if (sources.length > 0 && !currentSource) {
-      const source = loadNewSource();
-      if (!source) {
-        error(content[language].noSources);
-      }
+    if (sources.length > 0 && !currentSource && !showFallback) {
+      loadNewSource().then(source => {
+        if (!source) {
+          const filteredSources = getFilteredSources();
+          if (filteredSources.length === 0) {
+            setShowFallback(true);
+          } else {
+            error(content[language].noSources);
+          }
+        }
+      });
     }
-  }, [sources, currentSource]);
+  }, [sources, currentSource, showFallback]);
 
   const createSessionForSource = async (source: Source) => {
     if (!user) return;
@@ -145,13 +199,14 @@ export const SourceRecommendationV2 = ({
     // Update user learning patterns and history
     addToHistory(currentSource.id);
     updateUserHistory(currentSource, 'skipped');
+    updateLearningPattern(currentSource, 'skipped');
     
-    // Get new source using smart recommendation
-    const newSource = loadNewSource();
+    // Get new source using enhanced recommendation
+    const newSource = await loadNewSource();
     if (newSource) {
       announce(`Skipped to new source: ${language === 'he' ? newSource.title_he : newSource.title}`);
     } else {
-      error(content[language].noSources);
+      setShowFallback(true);
     }
     
     setLoading(false);
@@ -173,6 +228,7 @@ export const SourceRecommendationV2 = ({
     setLoading(true);
     await updateSessionStatus(currentSessionId, 'learned');
     updateUserHistory(currentSource, 'completed');
+    updateLearningPattern(currentSource, 'completed');
     success(content[language].learnedButton);
     setLoading(false);
   };
@@ -205,17 +261,26 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  if (!currentSource) {
+  // Show fallback mechanisms when no suitable sources found
+  if (showFallback || !currentSource) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6 text-center">
-          <p className="text-muted-foreground mb-4">{content[language].noSources}</p>
-          <Button onClick={onBack} variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {content[language].backButton}
-          </Button>
-        </Card>
-      </div>
+      <FallbackMechanisms
+        language={language}
+        timeSelected={timeSelected}
+        topicSelected={topicSelected}
+        availableSources={sources}
+        onTopicChange={(topic) => {
+          // Update topic and try to load new source
+          setShowFallback(false);
+          setCurrentSource(null);
+        }}
+        onTimeChange={(time) => {
+          // Update time and try to load new source
+          setShowFallback(false);
+          setCurrentSource(null);
+        }}
+        onBack={onBack}
+      />
     );
   }
 
@@ -245,43 +310,40 @@ export const SourceRecommendationV2 = ({
           <div className="w-20" /> {/* Spacer for centering */}
         </div>
 
-        {/* Source Card */}
-        <Card className="p-6 space-y-6">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">{title}</h2>
-              <p className="text-sm text-muted-foreground">
-                Estimated time: {currentSource.estimated_time} minutes
-              </p>
-            </div>
-
-            {textExcerpt && (
-              <div className="bg-secondary/50 p-4 rounded-lg">
-                <p className="leading-relaxed">{textExcerpt}</p>
-              </div>
-            )}
-
-            <div>
-              <h3 className="font-semibold mb-2">Category</h3>
-              <div className="flex flex-wrap gap-2">
-                <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                  {currentSource.category}
-                </span>
-                {currentSource.subcategory && (
-                  <span className="bg-secondary/50 text-secondary-foreground px-2 py-1 rounded-md text-sm">
-                    {currentSource.subcategory}
-                  </span>
-                )}
+        {/* Quality Warnings */}
+        {qualityWarnings.length > 0 && (
+          <Card className="p-4 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  Content Quality Notes
+                </h4>
+                <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-0.5">
+                  {qualityWarnings.map((warning, index) => (
+                    <li key={index}>• {warning}</li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </Card>
+        )}
 
-            <div>
-              <h3 className="font-semibold mb-2">{content[language].reflectionPromptLabel}</h3>
-              <p className="text-muted-foreground italic">{reflectionPrompt}</p>
-            </div>
-          </div>
+        {/* Enhanced Source Display */}
+        <EnhancedSourceDisplay 
+          source={currentSource}
+          language={language}
+          onSefariaClick={() => window.open(currentSource.sefaria_link, '_blank')}
+        />
 
-          {/* Action Buttons */}
+        {/* Reflection Prompt */}
+        <Card className="p-6">
+          <h3 className="font-semibold mb-2">{content[language].reflectionPromptLabel}</h3>
+          <p className="text-muted-foreground italic">{reflectionPrompt}</p>
+        </Card>
+
+        {/* Action Buttons */}
+        <Card className="p-6 space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Button 
               onClick={handleSkip} 

@@ -6,6 +6,7 @@ import { SourceRecommendationV2 } from "./SourceRecommendationV2";
 import { ReflectionFormV2 } from "./ReflectionFormV2";
 import { LearningJournal } from "./LearningJournal";
 import { ProfileSettings } from "./ProfileSettings";
+import { LearningStreaks } from "./LearningStreaks";
 import { NavigationHeader } from "./NavigationHeader";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
