@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from '@/hooks/use-toast';
+import { getRelatedTopics } from '@/utils/topicRelations';
 
 interface GenerationRequest {
   topic: string;
@@ -157,14 +158,17 @@ export const useAISourceGenerator = () => {
   };
 
   const generateFallbackSource = async (
-    topic: string, 
-    timeMinutes: number, 
+    topic: string,
+    timeMinutes: number,
     difficulty: string = 'beginner'
   ): Promise<GeneratedSource | null> => {
-    console.log('Generating fallback source for:', { topic, timeMinutes, difficulty });
-    
+    const relatedTopics = getRelatedTopics(topic);
+    const fallbackTopic = relatedTopics.length > 0 ? relatedTopics[0] : topic;
+
+    console.debug('Fallback generation topic:', { original: topic, fallbackTopic });
+
     return generateSource({
-      topic,
+      topic: fallbackTopic,
       timeMinutes,
       difficulty: difficulty as 'beginner' | 'intermediate' | 'advanced',
       saveToDatabase: true,
