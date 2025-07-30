@@ -1,0 +1,151 @@
+-- Add comprehensive sources for all time+topic combinations
+-- Ensure balanced distribution across categories and time slots
+
+-- Additional Halacha sources for various time slots
+INSERT INTO sources (
+    title, title_he, category, subcategory, difficulty_level,
+    estimated_time, min_time, max_time,
+    start_ref, end_ref, sefaria_link,
+    text_excerpt, text_excerpt_he,
+    reflection_prompt, reflection_prompt_he,
+    commentaries, learning_objectives,
+    published, language_preference
+) VALUES
+
+-- Short Halacha sources (5-15 minutes)
+('Daily Blessings: Gratitude in Action', 'ברכות היום: הכרת הטוב בפעולה', 'halacha', 'blessings', 'beginner', 
+ 10, 5, 15, 'Berakhot 35a', 'Berakhot 35b', 'https://www.sefaria.org/Berakhot.35a',
+ 'The Talmud teaches that one who enjoys worldly pleasures without blessing shows ingratitude. This fundamental concept shapes our relationship with the physical world.',
+ 'התלמוד מלמד שמי שנהנה מן העולם בלא ברכה מעל. עיקרון בסיסי זה מעצב את יחסנו לעולם הגשמי.',
+ 'How does saying blessings transform ordinary moments into spiritual opportunities? Consider the last meal you ate - what would change if you truly felt grateful?',
+ 'כיצד אמירת ברכות הופכת רגעים רגילים להזדמנויות רוחניות? חשב על הארוחה האחרונה שאכלת - מה היה משתנה אילו באמת הרגשת הכרת הטוב?',
+ ARRAY['Rashi', 'Tosafot', 'Meiri'], 
+ ARRAY['Understand the purpose of blessings', 'Develop mindful eating practices'],
+ true, 'both'),
+
+('Mezuzah: Guardian of the Home', 'מזוזה: שומרת הבית', 'halacha', 'home', 'beginner',
+ 12, 8, 18, 'Deuteronomy 6:9', 'Deuteronomy 6:9', 'https://www.sefaria.org/Deuteronomy.6.9',
+ 'The mezuzah serves as both a physical reminder and spiritual protection. Its placement on doorposts connects our private and public lives to Divine consciousness.',
+ 'המזוזה משמשת כזיכרון פיזי והגנה רוחנית כאחד. הצבתה על המשקופים מחברת את חיינו הפרטיים והציבוריים לתודעה אלוהית.',
+ 'What does it mean to have reminders of our values in our physical spaces? How might a mezuzah change your awareness when entering or leaving home?',
+ 'מה המשמעות של תזכורות לערכינו במרחבים הפיזיים שלנו? כיצד עשויה מזוזה לשנות את המודעות שלך בכניסה או יציאה מהבית?',
+ ARRAY['Rambam', 'Shulchan Aruch'], 
+ ARRAY['Learn mezuzah laws', 'Connect home life to spirituality'],
+ true, 'both'),
+
+-- Medium Halacha sources (20-35 minutes)
+('Shabbat Candles: Bringing in the Light', 'נרות שבת: הכנסת האור', 'halacha', 'shabbat', 'intermediate',
+ 25, 20, 35, 'Shabbat 23b', 'Shabbat 24a', 'https://www.sefaria.org/Shabbat.23b',
+ 'The lighting of Shabbat candles marks the transition from ordinary time to sacred time. This ritual, primarily performed by women, brings peace and light into the home.',
+ 'הדלקת נרות שבת מסמנת את המעבר מזמן רגיל לזמן קדוש. טקס זה, המתבצע בעיקר על ידי נשים, מביא שלום ואור לבית.',
+ 'How do rituals help us transition between different states of being? What preparations in your life help you shift from work mode to rest mode?',
+ 'כיצד טקסים עוזרים לנו לעבור בין מצבי הוויה שונים? אילו הכנות בחייך עוזרות לך לעבור ממצב עבודה למצב מנוחה?',
+ ARRAY['Rashi', 'Tosafot', 'Ran'], 
+ ARRAY['Understand Shabbat preparation', 'Appreciate the role of ritual in life'],
+ true, 'both'),
+
+('Kashrut: Mindful Consumption', 'כשרות: צריכה מודעת', 'halacha', 'kashrut', 'intermediate',
+ 30, 25, 40, 'Leviticus 11:1', 'Leviticus 11:47', 'https://www.sefaria.org/Leviticus.11.1',
+ 'The laws of kashrut transform eating from a purely physical act into a spiritual discipline. These ancient guidelines continue to shape Jewish identity and consciousness.',
+ 'דיני הכשרות הופכים את האכילה ממעשה גשמי בלבד למשמעת רוחנית. הנחיות עתיקות אלו ממשיכות לעצב את הזהות והתודעה היהודית.',
+ 'What does it mean to eat consciously? How might dietary restrictions serve as daily reminders of our values and commitments?',
+ 'מה המשמעות של אכילה מודעת? כיצד עשויות הגבלות תזונתיות לשמש כתזכורות יומיות לערכינו והתחייבויותינו?',
+ ARRAY['Rambam', 'Shulchan Aruch', 'Modern Poskim'], 
+ ARRAY['Learn basic kashrut principles', 'Develop mindful eating habits'],
+ true, 'both'),
+
+-- Long Halacha sources (40-60 minutes)
+('Teshuvah: The Art of Return', 'תשובה: אמנות החזרה', 'halacha', 'ethics', 'advanced',
+ 45, 40, 55, 'Rambam Hilchot Teshuvah 1:1', 'Rambam Hilchot Teshuvah 2:10', 'https://www.sefaria.org/Mishneh_Torah%2C_Repentance.1.1',
+ 'Maimonides outlines a systematic approach to teshuvah (repentance) that transforms mistakes into opportunities for growth. This process involves recognition, regret, confession, and resolution.',
+ 'הרמב"ם מתאר גישה שיטתית לתשובה שהופכת טעויות להזדמנויות לצמיחה. תהליך זה כולל הכרה, חרטה, וידוי והחלטה.',
+ 'How can mistakes become catalysts for personal growth? Reflect on a time when an error led you to become a better person. What elements made that transformation possible?',
+ 'כיצד יכולות טעויות להפוך לזרזים לצמיחה אישית? הרהר בפעם שבה שגיאה הובילה אותך להפוך לאדם טוב יותר. אילו מרכיבים אפשרו את השינוי הזה?',
+ ARRAY['Rambam', 'Raavad', 'Ramban'], 
+ ARRAY['Understand the teshuvah process', 'Develop personal growth mindset'],
+ true, 'both'),
+
+-- Additional Tanakh sources
+('Creation and Wonder', 'בריאה ותמיהה', 'tanakh', 'genesis', 'beginner',
+ 15, 10, 20, 'Genesis 1:1', 'Genesis 1:5', 'https://www.sefaria.org/Genesis.1.1-5',
+ 'The opening verses of Genesis present creation as an ordered, purposeful process. Light emerges from darkness, establishing the fundamental rhythm of day and night.',
+ 'הפסוקים הפותחים של בראשית מציגים את הבריאה כתהליך מסודר ומכוון. האור מגיח מן החושך, ומבסס את הקצב הבסיסי של יום ולילה.',
+ 'What does it mean that light was the first thing created? How do you experience the daily cycle of light and darkness in your own life?',
+ 'מה המשמעות של כך שהאור היה הדבר הראשון שנברא? כיצד אתה חווה את המחזור היומי של אור וחושך בחייך שלך?',
+ ARRAY['Rashi', 'Ramban', 'Sforno'], 
+ ARRAY['Explore creation themes', 'Appreciate natural rhythms'],
+ true, 'both'),
+
+('The Binding of Isaac: Ultimate Trust', 'עקידת יצחק: אמונה מוחלטת', 'tanakh', 'genesis', 'advanced',
+ 40, 35, 50, 'Genesis 22:1', 'Genesis 22:19', 'https://www.sefaria.org/Genesis.22.1-19',
+ 'The Akedah challenges us to consider the nature of faith, sacrifice, and divine command. This pivotal narrative explores the depths of Abraham''s relationship with God.',
+ 'העקידה מאתגרת אותנו לחשוב על טבע האמונה, ההקרבה והציווי האלוהי. הסיפור המרכזי הזה חוקר את עומק יחסיו של אברהם עם האל.',
+ 'When have you faced a moment that tested your deepest values? How do we balance absolute principles with compassionate action?',
+ 'מתי עמדת בפני רגע שבחן את הערכים העמוקים ביותר שלך? כיצד אנו מאזנים עקרונות מוחלטים עם פעולה רחמנית?',
+ ARRAY['Rashi', 'Ramban', 'Abarbanel'], 
+ ARRAY['Examine faith and sacrifice', 'Understand divine-human relationship'],
+ true, 'both'),
+
+-- Additional Talmud sources
+('Learning Partnership: Chavruta', 'שותפות בלמידה: חברותא', 'talmud', 'methodology', 'intermediate',
+ 20, 15, 30, 'Taanit 7a', 'Taanit 7a', 'https://www.sefaria.org/Taanit.7a',
+ 'The Talmud emphasizes that Torah learning is enhanced through partnership. "Much have I learned from my teachers, more from my colleagues, but most of all from my students."',
+ 'התלמוד מדגיש כי לימוד התורה משתפר באמצעות שותפות. "הרבה למדתי מרבותי, יותר מחברי, ומכולם יותר מתלמידי."',
+ 'How does learning with others change your understanding? What can you learn from teaching or explaining ideas to someone else?',
+ 'כיצד למידה עם אחרים משנה את ההבנה שלך? מה אתה יכול ללמוד מהוראה או הסברת רעיונות למישהו אחר?',
+ ARRAY['Rashi', 'Tosafot'], 
+ ARRAY['Value collaborative learning', 'Develop teaching skills'],
+ true, 'both'),
+
+-- Additional Spiritual sources
+('Prayer as Conversation', 'תפילה כשיחה', 'spiritual', 'prayer', 'beginner',
+ 18, 12, 25, 'Berakhot 31a', 'Berakhot 31a', 'https://www.sefaria.org/Berakhot.31a',
+ 'Hannah''s prayer in the Temple serves as a model for sincere, heartfelt prayer. Her silent, intense devotion teaches us about authentic spiritual communication.',
+ 'תפילתה של חנה במקדש משמשת כמודל לתפילה כנה ומלאת לב. התפילה השקטה והעזה שלה מלמדת אותנו על תקשורת רוחנית אמיתית.',
+ 'What makes a conversation meaningful versus merely going through the motions? How can you bring more authenticity to your daily interactions?',
+ 'מה הופך שיחה למשמעותית לעומת סתם ביצוע תנועות? כיצד אתה יכול להביא יותר אותנטיות לאינטראקציות היומיות שלך?',
+ ARRAY['Rashi', 'Maharsha'], 
+ ARRAY['Develop authentic prayer', 'Understand spiritual communication'],
+ true, 'both'),
+
+('Shabbat Peace: Rest as Resistance', 'שלום שבת: מנוחה כהתנגדות', 'spiritual', 'shabbat', 'intermediate',
+ 35, 30, 45, 'Exodus 31:12', 'Exodus 31:17', 'https://www.sefaria.org/Exodus.31.12-17',
+ 'Shabbat represents more than rest; it''s a weekly declaration that we are more than what we produce. In a world of constant activity, Shabbat offers radical peace.',
+ 'שבת מייצגת יותר ממנוחה; זו הכרזה שבועית שאנחנו יותר ממה שאנו מייצרים. בעולם של פעילות מתמדת, השבת מציעה שלום רדיקלי.',
+ 'In what ways do you define yourself by your productivity? How might regular rest change your relationship with work and achievement?',
+ 'באילו דרכים אתה מגדיר את עצמך לפי הפרודוקטיביות שלך? כיצד עשויה מנוחה קבועה לשנות את יחסך לעבודה והישגים?',
+ ARRAY['Rambam', 'Ramban', 'Modern commentaries'], 
+ ARRAY['Understand Shabbat''s meaning', 'Practice healthy rest'],
+ true, 'both'),
+
+-- Additional Rambam sources
+('Medical Ethics: Healing as Divine Partnership', 'אתיקה רפואית: ריפוי כשותפות אלוהית', 'rambam', 'ethics', 'advanced',
+ 50, 45, 60, 'Rambam Mishneh Torah Hilchot De''ot 4:1', 'Rambam Mishneh Torah Hilchot De''ot 4:23', 'https://www.sefaria.org/Mishneh_Torah%2C_Human_Dispositions.4.1',
+ 'Maimonides, himself a physician, viewed healing as a sacred duty. He integrated Greek medical knowledge with Jewish values, seeing the body as a vessel for the soul.',
+ 'הרמב"ם, שהיה בעצמו רופא, ראה ברפואה חובה קדושה. הוא שילב ידע רפואי יווני עם ערכים יהודיים, וראה בגוף כלי לנשמה.',
+ 'How do you balance physical health with spiritual well-being? What responsibilities do we have to care for our bodies and help others heal?',
+ 'כיצד אתה מאזן בריאות גשמית עם רווחה רוחנית? אילו אחריויות יש לנו לטפל בגופנו ולעזור לאחרים להתרפא?',
+ ARRAY['Rambam', 'Modern medical ethics'], 
+ ARRAY['Explore medical ethics', 'Understand body-soul relationship'],
+ true, 'both'),
+
+-- Additional Surprise/Mixed sources
+('The Four Questions: Curiosity as Wisdom', 'ארבע הקושיות: סקרנות כחוכמה', 'surprise', 'passover', 'beginner',
+ 22, 18, 30, 'Exodus 13:8', 'Exodus 13:8', 'https://www.sefaria.org/Exodus.13.8',
+ 'The Passover Seder encourages children to ask questions, recognizing that curiosity is the beginning of wisdom. Questions open doors that statements cannot.',
+ 'ליל הסדר מעודד ילדים לשאול שאלות, מתוך הכרה שסקרנות היא תחילת החוכמה. שאלות פותחות דלתות שהצהרות אינן יכולות.',
+ 'When did a good question change your perspective more than any answer? How can we cultivate curiosity in our daily learning?',
+ 'מתי שאלה טובה שינתה את נקודת המבט שלך יותר מכל תשובה? כיצד אנו יכולים לטפח סקרנות בלמידה היומיומית שלנו?',
+ ARRAY['Haggadah commentaries', 'Educational philosophy'], 
+ ARRAY['Value questioning', 'Develop learning curiosity'],
+ true, 'both'),
+
+('Arguing for the Sake of Heaven', 'מחלוקת לשם שמים', 'surprise', 'ethics', 'intermediate',
+ 28, 25, 35, 'Avot 5:17', 'Avot 5:17', 'https://www.sefaria.org/Pirkei_Avot.5.17',
+ 'The Mishna distinguishes between arguments that serve truth and those that serve ego. Hillel and Shammai exemplify disagreement that strengthens rather than destroys.',
+ 'המשנה מבחינה בין ויכוחים המשרתים אמת לאלה המשרתים את האגו. הלל ושמאי מדגימים מחלוקת שמחזקת במקום להרוס.',
+ 'Think of a recent disagreement you had. What made it constructive or destructive? How can we disagree while maintaining respect and seeking truth?',
+ 'חשב על מחלוקת שהייתה לך לאחרונה. מה עשה אותה בונה או הרסנית? כיצד אנו יכולים לחלוק תוך שמירה על כבוד וחיפוש אחר האמת?',
+ ARRAY['Classical commentaries', 'Modern conflict resolution'], 
+ ARRAY['Learn constructive disagreement', 'Develop dialogue skills'],
+ true, 'both');

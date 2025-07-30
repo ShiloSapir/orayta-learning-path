@@ -16,6 +16,22 @@ export const DarkModeToggle = ({ darkMode, onToggle }: DarkModeToggleProps) => {
         aria-label="Toggle dark mode"
       />
       <Moon className="h-4 w-4" />
+=======
+import { useTheme } from "@/components/ThemeProvider";
+
+export const DarkModeToggle = () => {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
+
+  return (
+    <div className="flex items-center gap-2">
+      <Sun className="h-4 w-4 text-muted-foreground" />
+      <Switch
+        checked={isDark}
+        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+        aria-label="Toggle dark mode"
+      />
+      <Moon className="h-4 w-4 text-muted-foreground" />
     </div>
   );
 };

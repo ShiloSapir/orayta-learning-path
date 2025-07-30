@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Language } from "./LanguageToggle";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useSmartRecommendation } from "@/hooks/useSmartRecommendation";
 import { 
   ArrowLeft, 
   Book, 
@@ -7,12 +10,15 @@ import {
   Scroll, 
   Users, 
   Heart, 
-  Shuffle
+  Shuffle,
+  Clock,
+  TrendingUp
 } from "lucide-react";
 
 interface TopicSelectionProps {
   language: Language;
   selectedTopic: string | null;
+  timeSelected: number;
   onTopicSelect: (topic: string) => void;
   onBack: () => void;
   onNext: () => void;
@@ -109,15 +115,28 @@ const topicIcons = {
 export const TopicSelection = ({ 
   language, 
   selectedTopic, 
+  timeSelected,
   onTopicSelect, 
   onBack, 
   onNext 
 }: TopicSelectionProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
+  
+  // Get source statistics for enhanced display
+  const { sources } = useSupabaseData();
+  const { getSourceStats } = useSmartRecommendation(sources, {
+    timeSelected,
+    topicSelected: selectedTopic || '',
+    language
+  });
+  
+  const sourceStats = getSourceStats();
 
   return (
     <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+=======
+    <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -150,6 +169,16 @@ export const TopicSelection = ({
           {Object.entries(t.topics).map(([key, topic]) => {
             const Icon = topicIcons[key as keyof typeof topicIcons];
             const isSelected = selectedTopic === key;
+            const stats = sourceStats[key] || { total: 0, timeRanges: {}, difficulties: {} };
+            
+            // Calculate time range compatibility
+            const compatibleSources = Object.entries(stats.timeRanges).reduce((sum, [range, count]) => {
+              const [min, max] = range.split('-').map(r => parseInt(r.replace('min', '')));
+              if (timeSelected >= min && timeSelected <= max) {
+                return sum + (count as number);
+              }
+              return sum;
+            }, 0);
             
             return (
               <Button
@@ -157,38 +186,81 @@ export const TopicSelection = ({
                 variant="ghost"
                 onClick={() => onTopicSelect(key)}
                 className={`
-                  h-auto p-0 transition-smooth
-                  ${isSelected ? 'ring-2 ring-primary' : ''}
+                  h-auto p-0 transition-all duration-300 bg-transparent hover:bg-transparent
+                  ${isSelected ? 'ring-2 ring-primary animate-scale-in' : 'hover:scale-105'}
                 `}
               >
                 <div 
                   className={`
-                    learning-card w-full text-left hover:scale-105 transition-smooth
+                    learning-card w-full text-left transition-all duration-300
                     ${isSelected 
                       ? 'gradient-primary text-primary-foreground shadow-warm' 
                       : 'gradient-warm hover:gradient-subtle'
+=======
+                      ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm border-primary border-2 scale-105' 
+                      : 'bg-gradient-warm hover:bg-gradient-subtle border-transparent border-2 hover:shadow-lg'
                     }
                   `}
                 >
-                  <Icon className={`h-8 w-8 mb-4 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
+                  {/* Header with icon and stats */}
+                  <div className="flex items-start justify-between mb-3">
+                    <Icon className={`h-8 w-8 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge 
+                        variant={isSelected ? "secondary" : "outline"}
+                        className={`text-xs ${isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : ''}`}
+                      >
+                        {stats.total} sources
+                      </Badge>
+                      {compatibleSources > 0 && (
+                        <Badge 
+                          variant={isSelected ? "secondary" : "outline"}
+                          className={`text-xs ${isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-green-100 text-green-800'}`}
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          {compatibleSources} for {timeSelected}min
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  
                   <h3 className="font-bold text-lg mb-2">{topic.title}</h3>
                   <p className={`text-sm mb-3 ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     {topic.subtitle}
                   </p>
+                  
+                  {/* Enhanced subcategories with progressive disclosure */}
                   {topic.subcategories.length > 0 && (
-                    <div className="space-y-1">
-                      {topic.subcategories.map((sub, index) => (
-                        <div 
-                          key={index}
-                          className={`text-xs px-2 py-1 rounded-md ${
-                            isSelected 
-                              ? 'bg-primary-foreground/20 text-primary-foreground' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {sub}
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-1">
+                        {topic.subcategories.slice(0, isSelected ? topic.subcategories.length : 2).map((sub, index) => (
+                          <div 
+                            key={index}
+                            className={`text-xs px-2 py-1 rounded-md transition-all duration-200 ${
+                              isSelected 
+                                ? 'bg-primary-foreground/20 text-primary-foreground' 
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                          >
+                            {sub}
+                          </div>
+                        ))}
+                        {!isSelected && topic.subcategories.length > 2 && (
+                          <div className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground">
+                            +{topic.subcategories.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Time availability indicator */}
+                      {isSelected && Object.keys(stats.timeRanges).length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-primary-foreground/20">
+                          <div className="flex items-center gap-1 text-xs opacity-80">
+                            <TrendingUp className="h-3 w-3" />
+                            Available: {Object.entries(stats.timeRanges).map(([range, count]) => `${range} (${count})`).join(', ')}
+                          </div>
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>

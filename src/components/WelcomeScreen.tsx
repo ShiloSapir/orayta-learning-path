@@ -11,6 +11,9 @@ interface WelcomeScreenProps {
   onProfile: () => void;
   darkMode: boolean;
   onToggleDark: (value: boolean) => void;
+=======
+  onAnalytics?: () => void;
+  onSearch?: () => void;
 }
 
 const content = {
@@ -22,6 +25,9 @@ const content = {
     startButton: "Begin Your Journey",
     journalButton: "Learning Journal",
     profileButton: "Profile",
+=======
+    analyticsButton: "Analytics",
+    searchButton: "Search",
     loginButton: "Login / Sign Up",
     features: [
       { icon: BookOpen, text: "Personalized Torah Sources" },
@@ -38,6 +44,9 @@ const content = {
     startButton: "התחל את המסע שלך", 
     journalButton: "יומן הלימוד",
     profileButton: "פרופיל",
+=======
+    analyticsButton: "סטטיסטיקות",
+    searchButton: "חיפוש",
     loginButton: "התחברות / הרשמה",
     features: [
       { icon: BookOpen, text: "מקורות תורה מותאמים אישית" },
@@ -49,12 +58,17 @@ const content = {
 };
 
 export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, darkMode, onToggleDark }: WelcomeScreenProps) => {
+=======
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, onAnalytics, onSearch }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
   return (
     <div className={`min-h-screen gradient-warm flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-warm">
+=======
+    <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
         {/* Header with Language Toggle */}
         <div className="flex justify-between items-center">
           <div className="w-20"></div> {/* Spacer */}
@@ -64,6 +78,8 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           <div className="flex items-center gap-2">
             <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
             <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
+=======
+            <DarkModeToggle />
           </div>
         </div>
 
@@ -124,12 +140,66 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           >
             ⚙️ {t.profileButton}
           </Button>
+=======
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={onStartLearning}
+              size="lg"
+              className="btn-spiritual text-lg px-8 py-4"
+            >
+              ✨ {t.startButton} ✨
+            </Button>
+
+            <Button
+              onClick={onJournal}
+              variant="outline"
+              size="lg"
+              className="btn-gentle text-lg px-8 py-4"
+            >
+              📚 {t.journalButton}
+            </Button>
+
+            <Button
+              onClick={onProfile}
+              variant="outline"
+              size="lg"
+              className="btn-gentle text-lg px-8 py-4"
+            >
+              ⚙️ {t.profileButton}
+            </Button>
+          </div>
+
+          {/* Advanced Features */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {onAnalytics && (
+              <Button
+                onClick={onAnalytics}
+                variant="outline"
+                size="lg"
+                className="btn-gentle text-lg px-8 py-4"
+              >
+                📊 {t.analyticsButton}
+              </Button>
+            )}
+
+            {onSearch && (
+              <Button
+                onClick={onSearch}
+                variant="outline"
+                size="lg"
+                className="btn-gentle text-lg px-8 py-4"
+              >
+                🔍 {t.searchButton}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Login Button */}
         <button 
           onClick={() => {
-            console.log('Login/Signup clicked - requires Supabase integration');
+            window.location.href = '/auth';
           }}
           className="text-primary hover:text-primary/80 transition-smooth underline underline-offset-4"
         >

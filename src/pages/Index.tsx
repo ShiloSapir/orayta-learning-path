@@ -9,6 +9,14 @@ const Index = () => {
         <OrayataApp />
       </AppProvider>
     </ErrorBoundary>
+=======
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+const Index = () => {
+  return (
+    <ProtectedRoute>
+      <OrayataApp />
+    </ProtectedRoute>
   );
 };
 

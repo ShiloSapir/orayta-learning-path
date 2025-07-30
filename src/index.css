@@ -179,7 +179,89 @@
 
   /* Torah Learning Cards */
   .learning-card {
-    @apply bg-card border border-border rounded-xl p-6 shadow-soft hover:shadow-warm transition-smooth;
+    @apply bg-card border border-border rounded-xl p-6 shadow-soft hover:shadow-warm transition-smooth relative overflow-hidden;
+  }
+
+  /* Enhanced Topic Selection Cards */
+  .learning-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    z-index: -1;
+  }
+
+  .learning-card.selected::before {
+    opacity: 0.1;
+  }
+
+  .learning-card:hover::before {
+    opacity: 0.05;
+  }
+
+  /* Pulse animation for interactive elements */
+  .pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-gentle {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.9; }
+  }
+
+  /* Enhanced selection indicators */
+  .selection-indicator {
+    @apply absolute top-2 right-2 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold opacity-0 scale-75 transition-all duration-200;
+  }
+
+  .selection-indicator.active {
+    @apply opacity-100 scale-100;
+  }
+
+  /* Interactive hover states */
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-warm);
+  }
+
+  /* Progressive disclosure animations */
+  .disclosure-enter {
+    animation: disclosure-enter 0.3s ease-out;
+  }
+
+  @keyframes disclosure-enter {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+    }
+  }
+
+  /* Source stats badges */
+  .stats-badge {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200;
+  }
+
+  .stats-badge.compatible {
+    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200;
+  }
+
+  .stats-badge.neutral {
+    @apply bg-muted text-muted-foreground;
   }
 
   /* Bilingual Text Styles */
@@ -192,4 +274,56 @@
     direction: rtl;
     text-align: right;
   }
+
+  /* Loading skeleton animations */
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+
+  /* Enhanced focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+  }
+}
+
+/* Accessibility styles */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --primary: 240 100% 50%;
+  --border: 0 0% 50%;
+}
+
+.font-small { font-size: 14px; }
+.font-medium { font-size: 16px; }  
+.font-large { font-size: 18px; }
+.font-xl { font-size: 20px; }
+
+/* Focus styles for keyboard navigation */
+:focus {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
 }
