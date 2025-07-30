@@ -133,6 +133,11 @@
     font-variant-numeric: oldstyle-nums;
   }
 
+  html {
+    font-size: clamp(14px, 0.9vw + 14px, 18px);
+    line-height: 1.5;
+  }
+
   /* Hebrew Typography */
   .hebrew {
     @apply font-alef;
