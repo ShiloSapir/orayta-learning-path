@@ -1,8 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Source } from "@/hooks/useSupabaseData";
+import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
 import { Language } from "./LanguageToggle";
+import { useEffect, useState } from "react";
 import { 
   ExternalLink, 
   MapPin, 
@@ -44,6 +47,9 @@ const content = {
     historical: "Historical",
     mystical: "Mystical"
     ,exact: "Exact match", related: "Related topic"
+=======
+    ,
+    qualityScore: "Quality Score"
   },
   he: {
     torahReference: "מקור תורני",
@@ -68,6 +74,9 @@ const content = {
     historical: "היסטורי",
     mystical: "מיסטי"
     ,exact: "התאמה מלאה", related: "נושא קשור"
+=======
+    ,
+    qualityScore: "מדד איכות"
   }
 };
 
@@ -76,10 +85,25 @@ export const EnhancedSourceDisplay = ({
   language,
   onSefariaClick,
   matchType
+=======
+  onSefariaClick
 }: EnhancedSourceDisplayProps) => {
   const t = content[language];
   const title = language === 'he' ? source.title_he : source.title;
   const textExcerpt = language === 'he' ? source.text_excerpt_he : source.text_excerpt;
+
+  const { assessSourceQuality } = useContentQualityAssurance();
+  const [qualityScore, setQualityScore] = useState<number | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    assessSourceQuality(source).then(metrics => {
+      if (mounted) setQualityScore(metrics.score);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [source, assessSourceQuality]);
 
   const getDifficultyColor = (difficulty?: string) => {
     switch (difficulty) {
@@ -124,6 +148,17 @@ export const EnhancedSourceDisplay = ({
               <Badge variant="secondary" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
                 AI
               </Badge>
+            )}
+            {qualityScore !== null && (
+              <div className="flex items-center gap-1 ml-auto">
+                <span className="text-xs font-medium">
+                  {t.qualityScore}
+                </span>
+                <Progress value={qualityScore} className="w-20 h-2" />
+                <span className="text-xs text-muted-foreground">
+                  {Math.round(qualityScore)}%
+                </span>
+              </div>
             )}
           </div>
         </div>
