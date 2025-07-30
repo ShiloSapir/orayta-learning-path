@@ -7,9 +7,14 @@ export const topicAliases: Record<string, string> = {
   'hilchot-teshuva': 'hilchot_teshuva',
   'weekly portion': 'weekly_portion',
   'weekly-portion': 'weekly_portion',
+  'parasha': 'weekly_portion',
+  'parsha': 'weekly_portion',
+  'parashat_hashavua': 'weekly_portion',
   'pirkei avot': 'pirkei_avot',
   'short sugyot': 'short_sugyot',
-  'jewish thought': 'jewish_philosophy'
+  'jewish thought': 'jewish_philosophy',
+  'tanach': 'tanakh',
+  'chasidut': 'chassidut'
 };
 
 export const normalizeTopic = (topic: string): string => {
