@@ -98,6 +98,10 @@ export const useSmartRecommendation = (
              source.published && languageMatch && qualityCheck;
     });
 
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('primaryFilter', primaryFilter.length);
+    }
+
     // Return primary if we have good matches
     if (primaryFilter.length > 0) {
       return primaryFilter;
@@ -121,6 +125,10 @@ export const useSmartRecommendation = (
       return matchesTopic && timeMatch && notInHistory && source.published && languageMatch;
     });
 
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('secondaryFilter', secondaryFilter.length);
+    }
+
     if (secondaryFilter.length > 0) {
       return secondaryFilter;
     }
@@ -138,6 +146,10 @@ export const useSmartRecommendation = (
       
       return matchesRelated && timeMatch && notInHistory && source.published && languageMatch;
     });
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('tertiaryFilter', tertiaryFilter.length);
+    }
 
     if (tertiaryFilter.length > 0) {
       return tertiaryFilter;
@@ -158,9 +170,15 @@ export const useSmartRecommendation = (
         relatedSet.has(normalizeTopic(s.subcategory || ''))
       );
 
-    const pool = prioritized.length > 0 ? prioritized : allSources;
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('quaternary candidates', prioritized.length);
+    }
 
-    return pool.sort((a, b) => {
+    if (prioritized.length === 0) {
+      return [];
+    }
+
+    return prioritized.sort((a, b) => {
       const aTimeDiff = Math.abs(a.estimated_time - config.timeSelected);
       const bTimeDiff = Math.abs(b.estimated_time - config.timeSelected);
       return aTimeDiff - bTimeDiff;
