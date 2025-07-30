@@ -22,6 +22,7 @@ export const topicAliases: Record<string, string> = {
   'mixed topics': 'mixed',
   'mixed-topics': 'mixed',
   'musar': 'mussar',
+  'chasidus': 'chassidut',
   'shabbos': 'shabbat',
   'hilchot_deos': 'hilchot_deot',
   'hilchos_deos': 'hilchot_deot'
