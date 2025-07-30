@@ -133,14 +133,26 @@ export const useSmartRecommendation = (
       return tertiaryFilter;
     }
 
-    // Quaternary filter: closest time match across all topics
-    const allSources = sources.filter(source => 
+    // Quaternary filter: closest time match with preference for related topics
+    const allSources = sources.filter(source =>
       !sourceHistory.includes(source.id) && source.published
     );
-    
-    return allSources.sort((a, b) => {
-      const aTimeDiff = Math.abs((a.estimated_time) - config.timeSelected);
-      const bTimeDiff = Math.abs((b.estimated_time) - config.timeSelected);
+
+    const relatedSet = new Set(
+      getRelatedTopics(normalizedTopic)
+    );
+
+    const prioritized = allSources
+      .filter(s =>
+        relatedSet.has(normalizeTopic(s.category)) ||
+        relatedSet.has(normalizeTopic(s.subcategory || ''))
+      );
+
+    const pool = prioritized.length > 0 ? prioritized : allSources;
+
+    return pool.sort((a, b) => {
+      const aTimeDiff = Math.abs(a.estimated_time - config.timeSelected);
+      const bTimeDiff = Math.abs(b.estimated_time - config.timeSelected);
       return aTimeDiff - bTimeDiff;
     }).slice(0, 5);
   }, [sources, config, sourceHistory, getTimeBasedFilter, normalizeTopic]);
@@ -149,29 +161,29 @@ export const useSmartRecommendation = (
   const getRelatedTopics = useCallback((topic: string): string[] => {
     const normalized = normalizeTopic(topic);
     const topicRelations: Record<string, string[]> = {
-      'halacha': ['kashrut', 'shabbat', 'daily_practice'],
-      'rambam': ['hilchot_deot', 'hilchot_teshuva'],
-      'tanakh': ['weekly_portion', 'prophets', 'writings'],
-      'talmud': ['pirkei_avot', 'berakhot'],
-      'spiritual': ['mussar', 'chassidut', 'jewish_philosophy'],
-      'surprise': ['halacha', 'rambam', 'tanakh', 'talmud', 'spiritual']
+      halacha: ['kashrut', 'shabbat', 'daily_practice'],
+      rambam: ['hilchot_deot', 'hilchot_teshuva'],
+      tanakh: ['weekly_portion', 'prophets', 'writings'],
+      talmud: ['pirkei_avot', 'berakhot'],
+      spiritual: ['mussar', 'chassidut', 'jewish_philosophy'],
+      surprise: ['halacha', 'rambam', 'tanakh', 'talmud', 'spiritual']
     };
     
     // Also include subcategory mappings for better matching
     const subcategoryRelations: Record<string, string[]> = {
-      'mussar': ['spiritual', 'chassidut', 'jewish_philosophy'],
-      'chassidut': ['spiritual', 'mussar', 'jewish_philosophy'],
-      'jewish_philosophy': ['spiritual', 'mussar', 'chassidut'],
-      'shabbat': ['halacha', 'kashrut', 'daily_practice'],
-      'kashrut': ['halacha', 'shabbat', 'daily_practice'],
-      'daily_practice': ['halacha', 'shabbat', 'kashrut'],
-      'hilchot_deot': ['rambam', 'hilchot_teshuva'],
-      'hilchot_teshuva': ['rambam', 'hilchot_deot'],
-      'weekly_portion': ['tanakh', 'prophets', 'writings'],
-      'prophets': ['tanakh', 'weekly_portion', 'writings'],
-      'writings': ['tanakh', 'weekly_portion', 'prophets'],
-      'pirkei_avot': ['talmud', 'berakhot'],
-      'berakhot': ['talmud', 'pirkei_avot']
+      mussar: ['spiritual', 'chassidut', 'jewish_philosophy'],
+      chassidut: ['spiritual', 'mussar', 'jewish_philosophy'],
+      jewish_philosophy: ['spiritual', 'mussar', 'chassidut'],
+      shabbat: ['halacha', 'kashrut', 'daily_practice'],
+      kashrut: ['halacha', 'shabbat', 'daily_practice'],
+      daily_practice: ['halacha', 'shabbat', 'kashrut'],
+      hilchot_deot: ['rambam', 'hilchot_teshuva'],
+      hilchot_teshuva: ['rambam', 'hilchot_deot'],
+      weekly_portion: ['tanakh', 'prophets', 'writings'],
+      prophets: ['tanakh', 'weekly_portion', 'writings'],
+      writings: ['tanakh', 'weekly_portion', 'prophets'],
+      pirkei_avot: ['talmud', 'berakhot'],
+      berakhot: ['talmud', 'pirkei_avot']
     };
     
     const relations = topicRelations[normalized] || subcategoryRelations[normalized] || [];

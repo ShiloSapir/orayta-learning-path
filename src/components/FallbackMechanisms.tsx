@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Language } from "./LanguageToggle";
 import { Source } from "@/hooks/useSupabaseData";
+import { normalizeTopic } from "@/utils/normalizeTopic";
 import { 
   AlertTriangle, 
   Clock, 
@@ -101,20 +102,24 @@ export const FallbackMechanisms = ({
   // Analyze available alternatives
   const getRelatedTopics = () => {
     const topicRelations: Record<string, string[]> = {
-      'halacha': ['rambam', 'talmud'],
-      'rambam': ['halacha', 'spiritual'],
-      'tanakh': ['spiritual', 'talmud'],
-      'talmud': ['halacha', 'tanakh'],
-      'spiritual': ['rambam', 'tanakh']
+      halacha: ['rambam', 'talmud'],
+      rambam: ['halacha', 'spiritual'],
+      tanakh: ['spiritual', 'talmud'],
+      talmud: ['halacha', 'tanakh'],
+      spiritual: ['rambam', 'tanakh']
     };
-    
-    const related = topicRelations[topicSelected.toLowerCase()] || [];
-    return related.map(topic => {
-      const sourcesCount = availableSources.filter(s => 
-        s.category.toLowerCase() === topic && s.published
-      ).length;
-      return { topic, count: sourcesCount };
-    }).filter(item => item.count > 0);
+
+    const normalized = normalizeTopic(topicSelected);
+    const related = topicRelations[normalized] || [];
+
+    return related
+      .map(topic => {
+        const count = availableSources.filter(s =>
+          normalizeTopic(s.category) === topic && s.published
+        ).length;
+        return { topic, count };
+      })
+      .filter(item => item.count > 0);
   };
 
   const getAlternativeTimes = () => {
@@ -135,25 +140,26 @@ export const FallbackMechanisms = ({
   };
 
   const getClosestSources = () => {
+    const normalized = normalizeTopic(topicSelected);
+    const related = getRelatedTopics().map(r => r.topic);
+
     return availableSources
       .filter(s => s.published)
       .map(source => {
         let score = 0;
-        
-        // Topic similarity (exact match gets highest score)
-        if (source.category.toLowerCase() === topicSelected.toLowerCase()) {
+
+        const cat = normalizeTopic(source.category);
+        const sub = normalizeTopic(source.subcategory || '');
+
+        if (cat === normalized || sub === normalized) {
           score += 10;
-        } else {
-          const related = getRelatedTopics();
-          if (related.some(r => r.topic === source.category.toLowerCase())) {
-            score += 5;
-          }
+        } else if (related.includes(cat) || related.includes(sub)) {
+          score += 5;
         }
-        
-        // Time compatibility
+
         const timeDiff = Math.abs(source.estimated_time - timeSelected);
         score += Math.max(0, 5 - timeDiff / 5);
-        
+
         return { source, score };
       })
       .sort((a, b) => b.score - a.score)
