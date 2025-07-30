@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Source } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeTopic } from "@/utils/normalizeTopic";
+import { getRelatedTopics } from "@/utils/topicRelations";
 
 interface RecommendationConfig {
   timeSelected: number;
@@ -75,11 +76,11 @@ export const useSmartRecommendation = (
     const primaryFilter = sources.filter(source => {
       const categorySlug = normalizeTopic(source.category);
       const subSlug = normalizeTopic(source.subcategory || '');
-      const matchesTopic =
-        categorySlug === normalizedTopic ||
-        subSlug === normalizedTopic ||
-        categorySlug.includes(normalizedTopic) ||
-        subSlug.includes(normalizedTopic);
+      const matchesTopic = [categorySlug, subSlug].some(slug =>
+        slug === normalizedTopic ||
+        slug.includes(normalizedTopic) ||
+        normalizedTopic.includes(slug)
+      );
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
       const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
@@ -98,6 +99,8 @@ export const useSmartRecommendation = (
              source.published && languageMatch && qualityCheck;
     });
 
+    console.debug('Primary filter results', primaryFilter.length);
+=======
     if (process.env.NODE_ENV === 'development') {
       console.debug('primaryFilter', primaryFilter.length);
     }
@@ -111,11 +114,11 @@ export const useSmartRecommendation = (
     const secondaryFilter = sources.filter(source => {
       const categorySlug = normalizeTopic(source.category);
       const subSlug = normalizeTopic(source.subcategory || '');
-      const matchesTopic =
-        categorySlug === normalizedTopic ||
-        subSlug === normalizedTopic ||
-        categorySlug.includes(normalizedTopic) ||
-        subSlug.includes(normalizedTopic);
+      const matchesTopic = [categorySlug, subSlug].some(slug =>
+        slug === normalizedTopic ||
+        slug.includes(normalizedTopic) ||
+        normalizedTopic.includes(slug)
+      );
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -125,6 +128,8 @@ export const useSmartRecommendation = (
       return matchesTopic && timeMatch && notInHistory && source.published && languageMatch;
     });
 
+    console.debug('Secondary filter results', secondaryFilter.length);
+=======
     if (process.env.NODE_ENV === 'development') {
       console.debug('secondaryFilter', secondaryFilter.length);
     }
@@ -147,6 +152,8 @@ export const useSmartRecommendation = (
       return matchesRelated && timeMatch && notInHistory && source.published && languageMatch;
     });
 
+    console.debug('Tertiary filter results', tertiaryFilter.length);
+=======
     if (process.env.NODE_ENV === 'development') {
       console.debug('tertiaryFilter', tertiaryFilter.length);
     }
@@ -178,6 +185,10 @@ export const useSmartRecommendation = (
       return [];
     }
 
+    console.debug('Quaternary pool size', pool.length);
+
+    return pool.sort((a, b) => {
+=======
     return prioritized.sort((a, b) => {
       const aTimeDiff = Math.abs(a.estimated_time - config.timeSelected);
       const bTimeDiff = Math.abs(b.estimated_time - config.timeSelected);
@@ -185,51 +196,6 @@ export const useSmartRecommendation = (
     }).slice(0, 5);
   }, [sources, config, sourceHistory, getTimeBasedFilter, normalizeTopic]);
 
-  // Get related topics for tertiary filtering - enhanced with subcategory mapping
-  const getRelatedTopics = useCallback((topic: string): string[] => {
-    const normalized = normalizeTopic(topic);
-    const topicRelations: Record<string, string[]> = {
-      halacha: ['kashrut', 'shabbat', 'daily_practice'],
-      rambam: ['hilchot_deot', 'hilchot_teshuva'],
-      tanakh: ['weekly_portion', 'prophets', 'writings'],
-      talmud: ['pirkei_avot', 'berakhot'],
-      spiritual: ['mussar', 'chassidut', 'jewish_philosophy'],
-      surprise: ['halacha', 'rambam', 'tanakh', 'talmud', 'spiritual']
-    };
-    
-    // Also include subcategory mappings for better matching
-    const subcategoryRelations: Record<string, string[]> = {
-      mussar: ['spiritual', 'chassidut', 'jewish_philosophy'],
-      chassidut: ['spiritual', 'mussar', 'jewish_philosophy'],
-      jewish_philosophy: ['spiritual', 'mussar', 'chassidut'],
-      shabbat: ['halacha', 'kashrut', 'daily_practice'],
-      kashrut: ['halacha', 'shabbat', 'daily_practice'],
-      daily_practice: ['halacha', 'shabbat', 'kashrut'],
-      hilchot_deot: ['rambam', 'hilchot_teshuva'],
-      hilchot_teshuva: ['rambam', 'hilchot_deot'],
-      weekly_portion: ['tanakh', 'prophets', 'writings'],
-      prophets: ['tanakh', 'weekly_portion', 'writings'],
-      writings: ['tanakh', 'weekly_portion', 'prophets'],
-      pirkei_avot: ['talmud', 'berakhot'],
-      berakhot: ['talmud', 'pirkei_avot']
-    };
-    
-    const relations = topicRelations[normalized] || subcategoryRelations[normalized] || [];
-    
-    // For main categories, also include their subcategories
-    if (topicRelations[normalized]) {
-      return relations;
-    }
-    
-    // For subcategories, also include parent category
-    for (const [category, subcategories] of Object.entries(topicRelations)) {
-      if (subcategories.includes(normalized)) {
-        return [category, ...relations];
-      }
-    }
-    
-    return relations;
-  }, [normalizeTopic]);
 
   // Difficulty weighting for intelligent selection
   const getDifficultyWeight = useCallback((difficulty: string): number => {

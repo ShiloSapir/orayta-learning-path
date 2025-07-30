@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Language } from "./LanguageToggle";
 import { Source } from "@/hooks/useSupabaseData";
 import { normalizeTopic } from "@/utils/normalizeTopic";
+import { getRelatedTopics } from "@/utils/topicRelations";
 import { 
   AlertTriangle, 
   Clock, 
@@ -100,17 +101,8 @@ export const FallbackMechanisms = ({
   const t = content[language];
 
   // Analyze available alternatives
-  const getRelatedTopics = () => {
-    const topicRelations: Record<string, string[]> = {
-      halacha: ['rambam', 'talmud'],
-      rambam: ['halacha', 'spiritual'],
-      tanakh: ['spiritual', 'talmud'],
-      talmud: ['halacha', 'tanakh'],
-      spiritual: ['rambam', 'tanakh']
-    };
-
-    const normalized = normalizeTopic(topicSelected);
-    const related = topicRelations[normalized] || [];
+  const fetchRelatedTopics = () => {
+    const related = getRelatedTopics(topicSelected);
 
     return related
       .map(topic => {
@@ -141,7 +133,7 @@ export const FallbackMechanisms = ({
 
   const getClosestSources = () => {
     const normalized = normalizeTopic(topicSelected);
-    const related = getRelatedTopics().map(r => r.topic);
+    const related = fetchRelatedTopics().map(r => r.topic);
 
     return availableSources
       .filter(s => s.published)
@@ -172,7 +164,7 @@ export const FallbackMechanisms = ({
     // Here you would typically save the notification request to the database
   };
 
-  const relatedTopics = getRelatedTopics();
+  const relatedTopics = fetchRelatedTopics();
   const alternativeTimes = getAlternativeTimes();
   const closestSources = getClosestSources();
 

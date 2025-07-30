@@ -16,6 +16,8 @@ import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
 import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
 import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
 import { useAISourceGenerator } from "@/hooks/useAISourceGenerator";
+import { normalizeTopic } from "@/utils/normalizeTopic";
+import { getRelatedTopics } from "@/utils/topicRelations";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -90,6 +92,7 @@ export const SourceRecommendationV2 = ({
   const { success, error } = useAppToast();
   const [currentSource, setCurrentSource] = useState<Source | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [matchType, setMatchType] = useState<'exact' | 'related' | null>(null);
   const [loading, setLoading] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const [qualityWarnings, setQualityWarnings] = useState<string[]>([]);
@@ -125,6 +128,15 @@ export const SourceRecommendationV2 = ({
   const showAIGenerating = useMinimumLoading(isGenerating);
 
   const { announce } = useAccessibilityAnnouncements();
+
+  const determineMatchType = (source: Source): 'exact' | 'related' => {
+    const normalized = normalizeTopic(topicSelected);
+    const cat = normalizeTopic(source.category);
+    const sub = normalizeTopic(source.subcategory || '');
+    if (cat === normalized || sub === normalized) return 'exact';
+    const related = getRelatedTopics(normalized);
+    return related.includes(cat) || related.includes(sub) ? 'related' : 'related';
+  };
   
   // Set up keyboard navigation
   useKeyboardNavigation({
@@ -166,6 +178,7 @@ export const SourceRecommendationV2 = ({
       
       setQualityWarnings(warnings);
       setCurrentSource(selectedSource);
+      setMatchType(determineMatchType(selectedSource));
       createSessionForSource(selectedSource);
       setShowFallback(false);
       return selectedSource;
@@ -186,6 +199,7 @@ export const SourceRecommendationV2 = ({
           ai_generated: true,
         };
         setCurrentSource(convertedSource);
+        setMatchType('related');
         createSessionForSource(convertedSource);
         setShowFallback(false);
         announce(`Generated new source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
@@ -261,6 +275,7 @@ export const SourceRecommendationV2 = ({
           ai_generated: true
         };
         setCurrentSource(converted);
+        setMatchType('related');
         createSessionForSource(converted);
         announce(`Generated AI source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
       }
@@ -339,11 +354,13 @@ export const SourceRecommendationV2 = ({
           // Update topic and try to load new source
           setShowFallback(false);
           setCurrentSource(null);
+          setMatchType(null);
         }}
         onTimeChange={(time) => {
           // Update time and try to load new source
           setShowFallback(false);
           setCurrentSource(null);
+          setMatchType(null);
         }}
         onBack={onBack}
       />
@@ -396,10 +413,11 @@ export const SourceRecommendationV2 = ({
         )}
 
         {/* Enhanced Source Display */}
-        <EnhancedSourceDisplay 
+        <EnhancedSourceDisplay
           source={currentSource}
           language={language}
           onSefariaClick={() => window.open(currentSource.sefaria_link, '_blank')}
+          matchType={matchType || undefined}
         />
 
         {/* Reflection Prompt */}

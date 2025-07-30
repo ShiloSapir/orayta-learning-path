@@ -20,6 +20,7 @@ interface EnhancedSourceDisplayProps {
   source: Source;
   language: Language;
   onSefariaClick: () => void;
+  matchType?: 'exact' | 'related';
 }
 
 const content = {
@@ -45,6 +46,8 @@ const content = {
     philosophical: "Philosophical",
     historical: "Historical",
     mystical: "Mystical"
+    ,exact: "Exact match", related: "Related topic"
+=======
     ,
     qualityScore: "Quality Score"
   },
@@ -70,6 +73,8 @@ const content = {
     philosophical: "פילוסופי",
     historical: "היסטורי",
     mystical: "מיסטי"
+    ,exact: "התאמה מלאה", related: "נושא קשור"
+=======
     ,
     qualityScore: "מדד איכות"
   }
@@ -78,6 +83,9 @@ const content = {
 export const EnhancedSourceDisplay = ({
   source,
   language,
+  onSefariaClick,
+  matchType
+=======
   onSefariaClick
 }: EnhancedSourceDisplayProps) => {
   const t = content[language];
@@ -130,6 +138,11 @@ export const EnhancedSourceDisplay = ({
             </Badge>
             {source.subcategory && (
               <Badge variant="secondary">{source.subcategory}</Badge>
+            )}
+            {matchType && (
+              <Badge variant="outline" className="text-xs">
+                {t[matchType]}
+              </Badge>
             )}
             {source.ai_generated && (
               <Badge variant="secondary" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
