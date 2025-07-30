@@ -12,7 +12,7 @@ import { AdvancedSearchAndDiscovery } from "./AdvancedSearchAndDiscovery";
 import { NavigationHeader } from "./NavigationHeader";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { SourceLoadingState } from "./SourceLoadingState";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -23,13 +23,9 @@ export const OrayataApp = () => {
   const { state, actions } = useAppContext();
   const { currentStep, language, selectedTime, selectedTopic, currentSource } = state;
 
-  // Show loading spinner while checking authentication
+  // Show skeleton while checking authentication
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <SourceLoadingState variant="minimal" />;
   }
 
   // Load persisted settings on mount
@@ -186,6 +182,7 @@ export const OrayataApp = () => {
 
       {/* Bottom Navigation - always visible */}
       <BottomNav
+        currentStep={currentStep}
         onHome={() => actions.setStep('welcome')}
         onJournal={handleJournal}
         onProfile={handleOpenProfile}
