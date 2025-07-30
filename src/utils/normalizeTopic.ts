@@ -7,9 +7,11 @@ export const topicAliases: Record<string, string> = {
   'hilchot-teshuva': 'hilchot_teshuva',
   'weekly portion': 'weekly_portion',
   'weekly-portion': 'weekly_portion',
-  'parasha': 'weekly_portion',
-  'parsha': 'weekly_portion',
-  'parashat_hashavua': 'weekly_portion',
+  // Treat various parasha spellings as the Tanakh category
+  // since weekly portions are stored under Tanakh in the database
+  'parasha': 'tanakh',
+  'parsha': 'tanakh',
+  'parashat_hashavua': 'tanakh',
   'pirkei avot': 'pirkei_avot',
   'short sugyot': 'short_sugyot',
   'jewish thought': 'jewish_philosophy',
