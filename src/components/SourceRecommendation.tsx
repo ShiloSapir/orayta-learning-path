@@ -5,6 +5,7 @@ import { Language } from "./LanguageToggle";
 import { useAppToast } from "@/hooks/useToast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
+import { useMinimumLoading } from "@/hooks/useMinimumLoading";
 import { SocialSharing } from "./SocialSharing";
 import { 
   ArrowLeft, 
@@ -602,13 +603,22 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
   }
 };
 
-const getSourceForTopic = (topic: string, language: Language): SourceEntry => {
+const getSourceForTopic = (
+  topic: string,
+  language: Language
+): SourceEntry | null => {
   let topicKey = topic as keyof typeof sourcesByTopic;
-  if (topicKey === 'surprise') {
-    const keys = Object.keys(sourcesByTopic) as Array<keyof typeof sourcesByTopic>;
+  if (topicKey === "surprise") {
+    const keys = Object.keys(
+      sourcesByTopic
+    ) as Array<keyof typeof sourcesByTopic>;
     topicKey = keys[Math.floor(Math.random() * keys.length)];
   }
-  const options = sourcesByTopic[topicKey]?.[language] || sourcesByTopic.spiritual[language];
+
+  const options = sourcesByTopic[topicKey]?.[language];
+  if (!options || options.length === 0) {
+    return null;
+  }
   return options[Math.floor(Math.random() * options.length)];
 };
 
@@ -620,7 +630,8 @@ export const SourceRecommendation = ({
   onReflection 
 }: SourceRecommendationProps) => {
   const [currentSource, setCurrentSource] = useState<SourceEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+  const showGenerating = useMinimumLoading(isLoading);
   const [error, setError] = useState<string | null>(null);
   
   const t = content[language];
@@ -641,8 +652,13 @@ export const SourceRecommendation = ({
   // Initialize source on component mount or when topic/language changes
   useEffect(() => {
     const source = getSourceForTopic(topicSelected, language);
-    setCurrentSource(source);
-    setError(null);
+    if (source) {
+      setCurrentSource(source);
+      setError(null);
+    } else {
+      setCurrentSource(null);
+      setError('No sources available for this topic');
+    }
   }, [topicSelected, language]);
 
   const generateNewSource = () => {
@@ -734,7 +750,10 @@ export const SourceRecommendation = ({
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <div className="space-x-2">
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <Button variant="secondary" onClick={onBack}>Change Topic</Button>
+          </div>
         </div>
       </div>
     );
@@ -766,19 +785,19 @@ export const SourceRecommendation = ({
               {timeSelected} min • {topicSelected}
             </div>
           </div>
-          <Button
-            variant="ghost"
-            onClick={() => handleAction('skip')}
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            {isLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
-            ) : (
-              <SkipForward className="h-4 w-4" />
-            )}
-            {isLoading ? 'Loading...' : t.skipButton}
-          </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handleAction('skip')}
+              disabled={showGenerating}
+              className="flex items-center gap-2"
+            >
+              {showGenerating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+              ) : (
+                <SkipForward className="h-4 w-4" />
+              )}
+              {showGenerating ? 'Loading...' : t.skipButton}
+            </Button>
         </div>
 
         {/* Title */}

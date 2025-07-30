@@ -10,6 +10,7 @@ import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
 import { SourceLoadingState } from "./SourceLoadingState";
+import { useMinimumLoading } from "@/hooks/useMinimumLoading";
 import { FallbackMechanisms } from "./FallbackMechanisms";
 import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
 import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
@@ -120,6 +121,8 @@ export const SourceRecommendationV2 = ({
 
   // AI Source Generator for fallback
   const { generateFallbackSource, isGenerating } = useAISourceGenerator();
+  const showDataLoading = useMinimumLoading(dataLoading);
+  const showAIGenerating = useMinimumLoading(isGenerating);
 
   const { announce } = useAccessibilityAnnouncements();
   
@@ -306,7 +309,7 @@ export const SourceRecommendationV2 = ({
     }
   };
 
-  if (dataLoading) {
+  if (showDataLoading) {
     return (
       <SourceLoadingState
         message={content[language].loading}
@@ -315,7 +318,7 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  if (isGenerating) {
+  if (showAIGenerating) {
     return (
       <SourceLoadingState
         message="Generating new source..."

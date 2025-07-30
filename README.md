@@ -71,3 +71,16 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Environment Variables
+
+Some features rely on external services. To enable AI source generation you must
+set an `OPENAI_API_KEY` environment variable in your Supabase function or local
+environment. Without this key the `ai-source-generator` function will fail.
+
+Example `.env` entry:
+
+```bash
+OPENAI_API_KEY=your-openai-api-key
+```
+
