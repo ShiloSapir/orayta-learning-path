@@ -67,45 +67,45 @@ export const useSmartRecommendation = (
     }
   }, [normalizeTopic]);
 
-  // Enhanced filtering logic with multi-tier approach and quality assurance
+  // Enhanced filtering logic with exact topic matching priority
   const getFilteredSources = useCallback(() => {
-    const timeFilter = getTimeBasedFilter(config.timeSelected);
     const normalizedTopic = normalizeTopic(config.topicSelected);
     
-    // Primary filter: exact topic match + optimal time + type compatibility + quality validation
-    const primaryFilter = sources.filter(source => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Filtering for topic:', config.topicSelected, '→', normalizedTopic);
+    }
+    
+    // Primary filter: EXACT topic match only (most strict)
+    const exactMatches = sources.filter(source => {
       const categorySlug = normalizeTopic(source.category);
       const subSlug = normalizeTopic(source.subcategory || '');
-      const matchesTopic = [categorySlug, subSlug].some(slug =>
-        slug === normalizedTopic ||
-        slug.includes(normalizedTopic) ||
-        normalizedTopic.includes(slug)
-      );
+      
+      // Only exact matches
+      const exactTopicMatch = categorySlug === normalizedTopic || subSlug === normalizedTopic;
+      
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
-      const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
-      const difficultyMatch = getDifficultyWeight(source.difficulty_level || 'beginner') <= 
-                             getDifficultyWeight(timeFilter.maxComplexity);
       const notInHistory = !sourceHistory.includes(source.id);
       const languageMatch = source.language_preference === 'both' || 
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
+      const basicQuality = source.published && source.reflection_prompt && source.sefaria_link;
       
-      // Quality validation - ensure source has required Torah references and valid Sefaria link
-      const hasValidPrompts = !!(source.reflection_prompt && source.reflection_prompt_he);
-      const hasSefariaLink = !!(source.sefaria_link && source.sefaria_link.includes('sefaria.org'));
-      const qualityCheck = hasValidPrompts && hasSefariaLink;
+      const matches = exactTopicMatch && timeMatch && notInHistory && languageMatch && basicQuality;
       
-      return matchesTopic && timeMatch && typeMatch && difficultyMatch && notInHistory && 
-             source.published && languageMatch && qualityCheck;
+      if (process.env.NODE_ENV === 'development' && exactTopicMatch) {
+        console.log('📝 Exact match found:', source.title, 'Category:', categorySlug, 'Sub:', subSlug);
+      }
+      
+      return matches;
     });
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Primary filter results', primaryFilter.length);
+      console.log('✅ Exact matches found:', exactMatches.length);
     }
 
-    // Return primary if we have good matches
-    if (primaryFilter.length > 0) {
-      return primaryFilter;
+    // Return exact matches if we have them
+    if (exactMatches.length > 0) {
+      return exactMatches;
     }
 
     // Secondary filter: expand time range but keep topic match
