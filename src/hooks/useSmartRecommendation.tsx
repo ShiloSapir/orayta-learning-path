@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { Source } from "@/hooks/useSupabaseData";
-import { useAuth } from "@/hooks/useAuth";
 import { normalizeTopic } from "@/utils/normalizeTopic";
 import { getRelatedTopics } from "@/utils/topicRelations";
 
@@ -30,50 +29,16 @@ export const useSmartRecommendation = (
   });
 
 
-  // Time-based source optimization mapping
-  const getTimeBasedFilter = useCallback((timeMinutes: number) => {
-    if (timeMinutes <= 10) {
-      return {
-        types: ['practical_halacha', 'text_study'],
-        maxComplexity: 'beginner',
-        focus: 'quick_insights'
-      };
-    } else if (timeMinutes <= 20) {
-      return {
-        types: ['text_study', 'philosophical'],
-        maxComplexity: 'intermediate',
-        focus: 'standard_study'
-      };
-    } else if (timeMinutes <= 30) {
-      return {
-        types: ['text_study', 'philosophical', 'historical'],
-        maxComplexity: 'intermediate',
-        focus: 'complex_topics'
-      };
-    } else if (timeMinutes <= 45) {
-      return {
-        types: ['philosophical', 'mystical', 'historical'],
-        maxComplexity: 'advanced',
-        focus: 'comprehensive_study'
-      };
-    } else {
-      return {
-        types: ['mystical', 'philosophical', 'historical'],
-        maxComplexity: 'advanced',
-        focus: 'deep_analysis'
-      };
-    }
-  }, [normalizeTopic]);
 
   // Enhanced filtering logic with exact topic matching priority
   const getFilteredSources = useCallback(() => {
     const normalizedTopic = normalizeTopic(config.topicSelected);
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Filtering for topic:', config.topicSelected, '→', normalizedTopic);
-    }
+    console.log('🔍 Filtering for topic:', config.topicSelected, '→', normalizedTopic);
+    console.log('📊 Total sources available:', sources.length);
+    console.log('⏰ Time selected:', config.timeSelected, 'minutes');
     
-    // Primary filter: EXACT topic match only (most strict)
+    // Primary filter: EXACT topic match with flexible time (±15 minutes)
     const exactMatches = sources.filter(source => {
       const categorySlug = normalizeTopic(source.category);
       const subSlug = normalizeTopic(source.subcategory || '');
@@ -81,32 +46,32 @@ export const useSmartRecommendation = (
       // Only exact matches
       const exactTopicMatch = categorySlug === normalizedTopic || subSlug === normalizedTopic;
       
-      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
-                       config.timeSelected <= (source.max_time || source.estimated_time + 5);
+      // Much more flexible time matching
+      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 15) && 
+                       config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
       const languageMatch = source.language_preference === 'both' || 
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
-      const basicQuality = source.published && source.reflection_prompt && source.sefaria_link;
+      // Simplified quality check - just needs to be published
+      const basicQuality = source.published;
       
       const matches = exactTopicMatch && timeMatch && notInHistory && languageMatch && basicQuality;
       
-      if (process.env.NODE_ENV === 'development' && exactTopicMatch) {
-        console.log('📝 Exact match found:', source.title, 'Category:', categorySlug, 'Sub:', subSlug);
+      if (exactTopicMatch) {
+        console.log('📝 Exact match found:', source.title, 'Category:', categorySlug, 'Sub:', subSlug, 'Time:', source.estimated_time, 'Matches all filters:', matches);
       }
       
       return matches;
     });
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ Exact matches found:', exactMatches.length);
-    }
+    console.log('✅ Exact matches found:', exactMatches.length);
 
     // Return exact matches if we have them
     if (exactMatches.length > 0) {
       return exactMatches;
     }
 
-    // Secondary filter: expand time range but keep topic match
+    // Secondary filter: partial topic match with even more flexible time
     const secondaryFilter = sources.filter(source => {
       const categorySlug = normalizeTopic(source.category);
       const subSlug = normalizeTopic(source.subcategory || '');
@@ -115,8 +80,9 @@ export const useSmartRecommendation = (
         slug.includes(normalizedTopic) ||
         normalizedTopic.includes(slug)
       );
-      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
-                       config.timeSelected <= (source.max_time || source.estimated_time + 15);
+      // Very flexible time matching for secondary results
+      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 20) && 
+                       config.timeSelected <= (source.max_time || source.estimated_time + 20);
       const notInHistory = !sourceHistory.includes(source.id);
       const languageMatch = source.language_preference === 'both' || 
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
@@ -124,21 +90,23 @@ export const useSmartRecommendation = (
       return matchesTopic && timeMatch && notInHistory && source.published && languageMatch;
     });
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Secondary filter results', secondaryFilter.length);
-    }
+    console.log('🔄 Secondary filter results:', secondaryFilter.length);
 
     if (secondaryFilter.length > 0) {
       return secondaryFilter;
     }
 
-    // Tertiary filter: related topics with time compatibility
+    // Tertiary filter: related topics with flexible time
     const relatedTopics = getRelatedTopics(normalizedTopic);
+    console.log('🔗 Related topics for', normalizedTopic, ':', relatedTopics);
+    
     const tertiaryFilter = sources.filter(source => {
-      const matchesRelated = relatedTopics.includes(source.category.toLowerCase()) ||
-                            relatedTopics.includes(source.subcategory?.toLowerCase() || '');
-      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
-                       config.timeSelected <= (source.max_time || source.estimated_time + 15);
+      const categorySlug = normalizeTopic(source.category);
+      const subSlug = normalizeTopic(source.subcategory || '');
+      const matchesRelated = relatedTopics.includes(categorySlug) ||
+                            relatedTopics.includes(subSlug);
+      const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 20) && 
+                       config.timeSelected <= (source.max_time || source.estimated_time + 20);
       const notInHistory = !sourceHistory.includes(source.id);
       const languageMatch = source.language_preference === 'both' || 
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
@@ -146,50 +114,32 @@ export const useSmartRecommendation = (
       return matchesRelated && timeMatch && notInHistory && source.published && languageMatch;
     });
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Tertiary filter results', tertiaryFilter.length);
-    }
+    console.log('🎯 Tertiary filter results:', tertiaryFilter.length);
 
     if (tertiaryFilter.length > 0) {
       return tertiaryFilter;
     }
 
-    // Quaternary filter: closest time match with preference for related topics
-    const allSources = sources.filter(source =>
+    // Final fallback: any published source not in history, sorted by time proximity
+    const fallbackSources = sources.filter(source =>
       !sourceHistory.includes(source.id) && source.published
     );
 
-    const relatedSet = new Set(
-      getRelatedTopics(normalizedTopic)
-    );
+    console.log('🆘 Fallback sources available:', fallbackSources.length);
 
-    const prioritized = allSources
-      .filter(s =>
-        relatedSet.has(normalizeTopic(s.category)) ||
-        relatedSet.has(normalizeTopic(s.subcategory || ''))
-      );
-
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('quaternary candidates', prioritized.length);
-    }
-
-    if (prioritized.length === 0) {
+    if (fallbackSources.length === 0) {
       return [];
     }
 
-    return prioritized.sort((a, b) => {
+    // Sort by time proximity and return top 5
+    return fallbackSources.sort((a, b) => {
       const aTimeDiff = Math.abs(a.estimated_time - config.timeSelected);
       const bTimeDiff = Math.abs(b.estimated_time - config.timeSelected);
       return aTimeDiff - bTimeDiff;
     }).slice(0, 5);
-  }, [sources, config, sourceHistory, getTimeBasedFilter, normalizeTopic]);
+  }, [sources, config, sourceHistory]);
 
 
-  // Difficulty weighting for intelligent selection
-  const getDifficultyWeight = useCallback((difficulty: string): number => {
-    const weights = { 'beginner': 1, 'intermediate': 2, 'advanced': 3 };
-    return weights[difficulty as keyof typeof weights] || 1;
-  }, []);
 
   // Smart source selection with user history weighting
   const getRecommendedSource = useCallback(() => {

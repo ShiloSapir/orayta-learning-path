@@ -26,7 +26,6 @@ import {
   Calendar,
   SkipForward,
   CheckCircle,
-  Loader2,
   AlertTriangle,
   Sparkles
 } from "lucide-react";
@@ -149,34 +148,33 @@ export const SourceRecommendationV2 = ({
     ]
   });
 
-  // Load new source using enhanced smart recommendation with quality checks
+  // Load new source using enhanced smart recommendation with minimal quality checks
   const loadNewSource = async () => {
-    // Try personalized recommendations first
-    const personalizedSources = getPersonalizedRecommendations(sources, {
-      timeSelected,
-      topicSelected,
-      language
-    });
-
-    let selectedSource = null;
-    if (personalizedSources.length > 0) {
-      selectedSource = personalizedSources[0];
-    } else {
-      selectedSource = getRecommendedSource();
-    }
-
+    console.log('🔄 Loading new source...');
+    
+    // Try smart recommendation first (primary method)
+    let selectedSource = getRecommendedSource();
+    
     if (selectedSource) {
-      // Validate source quality and Torah references
-      const qualityMetrics = await assessSourceQuality(selectedSource);
-      const torahValidation = validateTorahReferences(selectedSource);
+      console.log('✅ Found source via smart recommendation:', selectedSource.title);
       
-      const warnings = [
-        ...torahValidation.warnings,
-        ...torahValidation.suggestions,
-        ...(qualityMetrics.score < 80 ? [`Source quality score: ${qualityMetrics.score}%`] : [])
-      ];
+      // Minimal quality validation (just warnings, don't block)
+      try {
+        const qualityMetrics = await assessSourceQuality(selectedSource);
+        const torahValidation = validateTorahReferences(selectedSource);
+        
+        const warnings = [
+          ...torahValidation.warnings,
+          ...torahValidation.suggestions,
+          ...(qualityMetrics.score < 60 ? [`Source quality score: ${qualityMetrics.score}%`] : [])
+        ];
+        
+        setQualityWarnings(warnings);
+      } catch (error) {
+        console.warn('Quality check failed, proceeding anyway:', error);
+        setQualityWarnings([]);
+      }
       
-      setQualityWarnings(warnings);
       setCurrentSource(selectedSource);
       setMatchType(determineMatchType(selectedSource));
       createSessionForSource(selectedSource);
@@ -184,34 +182,78 @@ export const SourceRecommendationV2 = ({
       return selectedSource;
     }
     
-    // Try AI fallback generation if no suitable source found
+    console.log('❌ No source found via smart recommendation, trying personalized...');
+    
+    // Try personalized recommendations as backup
     try {
-      const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
-      if (aiSource) {
-        // Convert AI source to Source type
-        const convertedSource: Source = {
-          ...aiSource,
-          id: aiSource.id || crypto.randomUUID(),
-          published: aiSource.published || true,
-          difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
-          source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
-          language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
-          ai_generated: true,
-        };
-        setCurrentSource(convertedSource);
-        setMatchType('related');
-        createSessionForSource(convertedSource);
+      const personalizedSources = getPersonalizedRecommendations(sources, {
+        timeSelected,
+        topicSelected,
+        language
+      });
+
+      if (personalizedSources.length > 0) {
+        selectedSource = personalizedSources[0];
+        console.log('✅ Found source via personalization:', selectedSource.title);
+        setCurrentSource(selectedSource);
+        setMatchType(determineMatchType(selectedSource));
+        createSessionForSource(selectedSource);
         setShowFallback(false);
-        announce(`Generated new source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
-        return convertedSource;
+        setQualityWarnings([]);
+        return selectedSource;
       }
     } catch (error) {
-      console.error('AI fallback generation failed:', error);
+      console.warn('Personalization failed:', error);
     }
     
-    // Show fallback mechanisms if AI generation also fails
-    setShowFallback(true);
-    return null;
+    console.log('❌ No personalized sources, checking if any sources exist at all...');
+    
+    // Check if we have ANY published sources
+    const anyPublishedSources = sources.filter(s => s.published && !sourceHistory.includes(s.id));
+    
+    if (anyPublishedSources.length === 0) {
+      console.log('❌ No published sources available, trying AI generation...');
+      
+      // Try AI fallback generation only if truly no sources exist
+      try {
+        const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
+        if (aiSource) {
+          const convertedSource: Source = {
+            ...aiSource,
+            id: aiSource.id || crypto.randomUUID(),
+            published: aiSource.published || true,
+            difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
+            source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
+            language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
+            ai_generated: true,
+          };
+          setCurrentSource(convertedSource);
+          setMatchType('related');
+          createSessionForSource(convertedSource);
+          setShowFallback(false);
+          setQualityWarnings([]);
+          announce(`Generated new source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
+          return convertedSource;
+        }
+      } catch (error) {
+        console.error('AI fallback generation failed:', error);
+      }
+      
+      // Last resort: show fallback mechanisms
+      console.log('❌ All methods failed, showing fallback UI');
+      setShowFallback(true);
+      return null;
+    }
+    
+    // If we have sources but filtering is too strict, grab a random one
+    console.log('🎲 Fallback to random source from', anyPublishedSources.length, 'available');
+    selectedSource = anyPublishedSources[Math.floor(Math.random() * anyPublishedSources.length)];
+    setCurrentSource(selectedSource);
+    setMatchType('related');
+    createSessionForSource(selectedSource);
+    setShowFallback(false);
+    setQualityWarnings(['This source may not perfectly match your criteria, but it\'s a good learning opportunity!']);
+    return selectedSource;
   };
 
   // Load initial source with enhanced error handling
@@ -242,22 +284,34 @@ export const SourceRecommendationV2 = ({
   const handleSkip = async () => {
     if (!currentSource) return;
     
+    console.log('⏭️ Skipping source:', currentSource.title);
     setLoading(true);
     
-    // Update user learning patterns and history
-    addToHistory(currentSource.id);
-    updateUserHistory(currentSource, 'skipped');
-    updateLearningPattern(currentSource, 'skipped');
-    
-    // Get new source using enhanced recommendation
-    const newSource = await loadNewSource();
-    if (newSource) {
-      announce(`Skipped to new source: ${language === 'he' ? newSource.title_he : newSource.title}`);
-    } else {
-      setShowFallback(true);
+    try {
+      // Update user learning patterns and history
+      addToHistory(currentSource.id);
+      updateUserHistory(currentSource, 'skipped');
+      updateLearningPattern(currentSource, 'skipped');
+      
+      // Clear current source before loading new one
+      setCurrentSource(null);
+      setQualityWarnings([]);
+      
+      // Get new source using enhanced recommendation
+      const newSource = await loadNewSource();
+      if (newSource) {
+        console.log('✅ Successfully skipped to new source:', newSource.title);
+        announce(`Skipped to new source: ${language === 'he' ? newSource.title_he : newSource.title}`);
+      } else {
+        console.log('❌ No new source found after skip');
+        error('No more sources available. Try adjusting your time or topic selection.');
+      }
+    } catch (skipError) {
+      console.error('Error during skip:', skipError);
+      error('Failed to skip source. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleGenerateAI = async () => {
@@ -342,21 +396,21 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  // Show fallback mechanisms when no suitable sources found
-  if (showFallback || !currentSource) {
+  // Only show fallback mechanisms when we truly have no sources AND have tried everything
+  if (showFallback && !currentSource && sources.length > 0) {
     return (
       <FallbackMechanisms
         language={language}
         timeSelected={timeSelected}
         topicSelected={topicSelected}
         availableSources={sources}
-        onTopicChange={(topic) => {
+        onTopicChange={() => {
           // Update topic and try to load new source
           setShowFallback(false);
           setCurrentSource(null);
           setMatchType(null);
         }}
-        onTimeChange={(time) => {
+        onTimeChange={() => {
           // Update time and try to load new source
           setShowFallback(false);
           setCurrentSource(null);
@@ -365,6 +419,29 @@ export const SourceRecommendationV2 = ({
         onBack={onBack}
       />
     );
+  }
+
+  // If no source is available and we're not loading, show simple error
+  if (!currentSource && !loading && !showDataLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
+        <Card className="p-6 max-w-md text-center">
+          <h2 className="text-xl font-semibold mb-4">No Sources Available</h2>
+          <p className="text-muted-foreground mb-4">
+            We couldn't find any Torah sources matching your preferences.
+          </p>
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {content[language].backButton}
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Add null safety checks
+  if (!currentSource) {
+    return null;
   }
 
   const title = language === 'he' ? currentSource.title_he : currentSource.title;
@@ -416,7 +493,7 @@ export const SourceRecommendationV2 = ({
         <EnhancedSourceDisplay
           source={currentSource}
           language={language}
-          onSefariaClick={() => window.open(currentSource.sefaria_link, '_blank')}
+          onSefariaClick={() => currentSource && window.open(currentSource.sefaria_link, '_blank')}
           matchType={matchType || undefined}
         />
 
@@ -487,7 +564,7 @@ export const SourceRecommendationV2 = ({
             </Button>
             
             <Button 
-              onClick={() => window.open(currentSource.sefaria_link, '_blank')} 
+              onClick={() => currentSource && window.open(currentSource.sefaria_link, '_blank')} 
               variant="outline"
               className="flex-1"
             >
@@ -502,14 +579,14 @@ export const SourceRecommendationV2 = ({
             source={{
               title,
               text: textExcerpt || '',
-              sefariaLink: currentSource.sefaria_link
+              sefariaLink: currentSource?.sefaria_link || ''
             }}
           />
         </Card>
 
         {/* Estimated Time */}
         <div className="text-center text-sm text-muted-foreground">
-          Estimated time: {currentSource.estimated_time} minutes
+          Estimated time: {currentSource?.estimated_time || 15} minutes
         </div>
       </div>
     </div>
