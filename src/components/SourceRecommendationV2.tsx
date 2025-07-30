@@ -177,7 +177,9 @@ export const SourceRecommendationV2 = ({
           difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
           source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
           language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
+                    ai_generated: true,
         };
+
         setCurrentSource(convertedSource);
         createSessionForSource(convertedSource);
         setShowFallback(false);
@@ -274,12 +276,15 @@ export const SourceRecommendationV2 = ({
   };
 
   const handleReflection = () => {
-    if (currentSessionId) {
-      onReflection(currentSessionId);
-    }
-  };
-
-  if (dataLoading) {
+ if (dataLoading) {
+    return (
+      <SourceLoadingState
+        message={content[language].loading}
+        variant="detailed"
+      />
+    );
+  }
+      <SourceLoadingState
     return (
       <SourceLoadingState 
         message={content[language].loading}
@@ -288,6 +293,15 @@ export const SourceRecommendationV2 = ({
     );
   }
 
+    if (isGenerating) {
+    return (
+      <SourceLoadingState
+        message="Generating new source..."
+        variant="minimal"
+      />
+    );
+  }
+  
   // Show fallback mechanisms when no suitable sources found
   if (showFallback || !currentSource) {
     return (
