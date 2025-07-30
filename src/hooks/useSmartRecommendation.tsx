@@ -30,6 +30,9 @@ export const useSmartRecommendation = (
   });
   const [qualityValidated, setQualityValidated] = useState<Record<string, boolean>>({});
 
+=======
+  const normalizeTopic = useCallback((topic: string) =>
+    topic.toLowerCase().replace(/[\s-]+/g, '_').trim(), []);
 
   // Time-based source optimization mapping
   const getTimeBasedFilter = useCallback((timeMinutes: number) => {
