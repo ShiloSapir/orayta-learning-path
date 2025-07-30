@@ -13,13 +13,28 @@ export const topicAliases: Record<string, string> = {
   'parsha': 'tanakh',
   'parashat_hashavua': 'tanakh',
   'pirkei avot': 'pirkei_avot',
+  'pirkei_avos': 'pirkei_avot',
+  'pirkei avos': 'pirkei_avot',
   'short sugyot': 'short_sugyot',
   'jewish thought': 'jewish_philosophy',
   'tanach': 'tanakh',
-  'chasidut': 'chassidut'
+  'chasidut': 'chassidut',
+  'mixed topics': 'mixed',
+  'mixed-topics': 'mixed',
+  'musar': 'mussar',
+  'shabbos': 'shabbat',
+  'hilchot_deos': 'hilchot_deot',
+  'hilchos_deos': 'hilchot_deot'
 };
 
 export const normalizeTopic = (topic: string): string => {
-  const slug = topic.toLowerCase().replace(/[\s-]+/g, '_').trim();
+  const slug = topic
+    .toLowerCase()
+    .replace(/[’'"`]/g, '')
+    .replace(/[&]/g, 'and')
+    .replace(/[.,:!?]/g, '')
+    .replace(/[\s-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .trim();
   return topicAliases[slug] || slug;
 };
