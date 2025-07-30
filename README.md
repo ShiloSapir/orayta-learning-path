@@ -75,8 +75,7 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 ## Environment Variables
 
 Some features rely on external services. To enable AI source generation you must
-set an `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
-` environment variable in your Supabase function or local
+set an `OPENAI_API_KEY` environment variable in your Supabase function or local
 environment. Without this key the `ai-source-generator` function will fail.
 
 Example `.env` entry:
