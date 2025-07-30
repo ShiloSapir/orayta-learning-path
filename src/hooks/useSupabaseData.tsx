@@ -34,23 +34,23 @@ const SourceSchema = z.object({
 
 const SessionSchema = z.object({
   id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  user_id: z.string().uuid().nullable(),
   topic_selected: z.string().min(1, "Topic is required"),
   time_selected: z.number().min(1, "Time must be positive"),
-  source_id: z.string().uuid().optional(),
-  status: z.string(),
-  created_at: z.string(),
-  updated_at: z.string()
+  source_id: z.string().uuid().nullable(),
+  status: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable()
 });
 
 const ReflectionSchema = z.object({
   id: z.string().uuid(),
-  user_id: z.string().uuid(),
-  session_id: z.string().uuid().optional(),
+  user_id: z.string().uuid().nullable(),
+  session_id: z.string().uuid().nullable(),
   note: z.string().min(1, "Reflection note is required"),
-  tags: z.array(z.string()),
-  created_at: z.string(),
-  updated_at: z.string()
+  tags: z.array(z.string()).nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable()
 });
 
 export interface Source {
@@ -82,23 +82,23 @@ export interface Source {
 
 export interface LearningSession {
   id: string;
-  user_id: string;
+  user_id: string | null;
   topic_selected: string;
   time_selected: number;
-  source_id?: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
+  source_id: string | null;
+  status: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface Reflection {
   id: string;
-  user_id: string;
-  session_id?: string;
+  user_id: string | null;
+  session_id: string | null;
   note: string;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
+  tags: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export const useSupabaseData = () => {
@@ -108,7 +108,7 @@ export const useSupabaseData = () => {
   const [sessions, setSessions] = useState<LearningSession[]>([]);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({
+  const [pagination] = useState({
     sources: { page: 1, hasMore: true, total: 0 },
     sessions: { page: 1, hasMore: true, total: 0 },
     reflections: { page: 1, hasMore: true, total: 0 }

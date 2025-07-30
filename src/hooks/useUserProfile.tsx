@@ -9,14 +9,14 @@ export interface UserProfile {
   email: string | null;
   avatar_url: string | null;
   learning_preferences: any; // JSONB field
-  daily_goal: number;
+  daily_goal: number | null;
   preferred_language: string | null;
   role: string | null;
   calendar_synced: boolean | null;
   dark_mode: boolean | null;
   reminder_time: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export const useUserProfile = (user: User | null) => {
@@ -66,7 +66,7 @@ export const useUserProfile = (user: User | null) => {
     }
   };
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
+  const updateProfile = async (updates: any) => {
     if (!user) return false;
 
     try {
