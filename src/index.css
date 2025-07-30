@@ -128,7 +128,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply text-foreground font-inter;
+    background: var(--gradient-subtle);
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: oldstyle-nums;
   }
@@ -169,7 +170,7 @@
 @layer components {
   /* Spiritual Button Variants */
   .btn-spiritual {
-    @apply bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm hover:shadow-lg transition-smooth rounded-lg px-6 py-3 font-medium;
+    @apply bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm hover:shadow-lg transition-smooth rounded-lg px-6 py-3 font-medium animate-glow;
   }
 
   .btn-gentle {

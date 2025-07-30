@@ -9,6 +9,9 @@ interface WelcomeScreenProps {
   onStartLearning: () => void;
   onJournal: () => void;
   onProfile: () => void;
+  darkMode: boolean;
+  onToggleDark: (value: boolean) => void;
+=======
   onAnalytics?: () => void;
   onSearch?: () => void;
 }
@@ -22,6 +25,7 @@ const content = {
     startButton: "Begin Your Journey",
     journalButton: "Learning Journal",
     profileButton: "Profile",
+=======
     analyticsButton: "Analytics",
     searchButton: "Search",
     loginButton: "Login / Sign Up",
@@ -40,6 +44,7 @@ const content = {
     startButton: "התחל את המסע שלך", 
     journalButton: "יומן הלימוד",
     profileButton: "פרופיל",
+=======
     analyticsButton: "סטטיסטיקות",
     searchButton: "חיפוש",
     loginButton: "התחברות / הרשמה",
@@ -52,11 +57,16 @@ const content = {
   }
 };
 
+export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, darkMode, onToggleDark }: WelcomeScreenProps) => {
+=======
 export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, onAnalytics, onSearch }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
   return (
+    <div className={`min-h-screen gradient-warm flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-warm">
+=======
     <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
         {/* Header with Language Toggle */}
@@ -67,6 +77,8 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
+            <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
+=======
             <DarkModeToggle />
           </div>
         </div>
@@ -91,7 +103,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           {t.features.map((feature, index) => (
             <div 
               key={index}
-              className="learning-card hover:scale-105 transition-smooth bg-gradient-warm"
+              className="learning-card hover:scale-105 transition-smooth gradient-warm"
             >
               <feature.icon className="h-8 w-8 text-primary mx-auto mb-3" />
               <p className="font-medium text-foreground">
@@ -102,6 +114,33 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
         </div>
 
         {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={onStartLearning}
+            size="lg"
+            className="btn-spiritual text-lg px-8 py-4"
+          >
+            ✨ {t.startButton} ✨
+          </Button>
+
+          <Button
+            onClick={onJournal}
+            variant="outline"
+            size="lg"
+            className="btn-gentle text-lg px-8 py-4"
+          >
+            📚 {t.journalButton}
+          </Button>
+
+          <Button
+            onClick={onProfile}
+            variant="outline"
+            size="lg"
+            className="btn-gentle text-lg px-8 py-4"
+          >
+            ⚙️ {t.profileButton}
+          </Button>
+=======
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button

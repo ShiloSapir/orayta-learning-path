@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
+import {
+  ArrowLeft,
+  ExternalLink,
+  BookOpen,
+  Heart,
+=======
 import { useAppToast } from "@/hooks/useToast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
@@ -15,13 +21,16 @@ import {
   SkipForward,
   CheckCircle
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import sourcesByTopic, { SourceEntry } from "../data/sources";
 interface SourceRecommendationProps {
   language: Language;
   timeSelected: number;
   topicSelected: string;
   onBack: () => void;
-  onReflection: () => void;
+  onReflection: (source: SourceEntry) => void;
+  onSessionAction?: (status: "saved" | "learned", source: SourceEntry) => void;
 }
 
 const content = {
@@ -57,6 +66,13 @@ const content = {
   }
 };
 
+
+const getSourceForTopic = (
+  topic: string,
+  language: Language,
+  time: number
+): SourceEntry => {
+=======
 // Sample sources organized by category. Each topic contains several entries per language for diversity
 interface SourceEntry {
   title: string;
@@ -608,22 +624,32 @@ const getSourceForTopic = (topic: string, language: Language): SourceEntry => {
     const keys = Object.keys(sourcesByTopic) as Array<keyof typeof sourcesByTopic>;
     topicKey = keys[Math.floor(Math.random() * keys.length)];
   }
+  const options =
+    sourcesByTopic[topicKey]?.[language] || sourcesByTopic.spiritual[language];
+  const filtered = options.filter((s) => s.estimatedTime <= time);
+  const chooseFrom = filtered.length ? filtered : options;
+  return chooseFrom[Math.floor(Math.random() * chooseFrom.length)];
+=======
   const options = sourcesByTopic[topicKey]?.[language] || sourcesByTopic.spiritual[language];
   return options[Math.floor(Math.random() * options.length)];
 };
 
-export const SourceRecommendation = ({ 
-  language, 
-  timeSelected, 
-  topicSelected, 
-  onBack, 
-  onReflection 
+export const SourceRecommendation = ({
+  language,
+  timeSelected,
+  topicSelected,
+  onBack,
+  onReflection
 }: SourceRecommendationProps) => {
   const [currentSource, setCurrentSource] = useState<SourceEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const t = content[language];
+  const [source, setSource] = useState<SourceEntry>(
+    () => getSourceForTopic(topicSelected, language, timeSelected)
+  );
+=======
   const isHebrew = language === 'he';
   const toast = useAppToast();
   const { announce } = useAccessibilityAnnouncements();
@@ -682,7 +708,48 @@ export const SourceRecommendation = ({
     }
   };
 
+  // refresh source if topic, language or time changes
+  useEffect(() => {
+    setSource(getSourceForTopic(topicSelected, language, timeSelected));
+  }, [topicSelected, language, timeSelected]);
+
+  const handleSkip = () => {
+    setSource(getSourceForTopic(topicSelected, language, timeSelected));
+  };
+
+  const handleCalendar = () => {
+    const start = new Date();
+    const end = new Date(start.getTime() + timeSelected * 60000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
+    const url =
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+        source.title
+      )}` +
+      `&dates=${fmt(start)}/${fmt(end)}` +
+      `&details=${encodeURIComponent(`${source.summary} ${source.sefariaLink}`)}`;
+    window.open(url, "_blank");
+  };
+
   const handleAction = (action: string) => {
+    switch (action) {
+      case 'skip':
+        handleSkip();
+        break;
+      case 'calendar':
+        handleCalendar();
+        break;
+      case 'reflection':
+        onReflection(source);
+        break;
+      case 'save':
+        onSessionAction?.('saved', source);
+        break;
+      case 'learned':
+        onSessionAction?.('learned', source);
+        break;
+      default:
+        break;
+=======
     console.log(`Action: ${action}`);
     
     switch (action) {
@@ -743,6 +810,9 @@ export const SourceRecommendation = ({
   const source = currentSource!;
 
   return (
+    <div className={`min-h-screen gradient-primary flex items-start justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-4xl mx-auto py-8 animate-fade-in bg-background/80 backdrop-blur-lg rounded-xl p-6 shadow-soft">
+=======
     <div 
       className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}
       id="main-content"
@@ -792,7 +862,7 @@ export const SourceRecommendation = ({
         </div>
 
         {/* Source Card */}
-        <Card className="learning-card mb-8 bg-gradient-warm">
+        <Card className="learning-card mb-8 gradient-warm">
           <div className="space-y-6">
             {/* Source Title */}
             <div>
@@ -889,7 +959,7 @@ export const SourceRecommendation = ({
           </Button>
           
           <Button
-            onClick={onReflection}
+            onClick={() => onReflection(source)}
             className="btn-spiritual flex items-center gap-2"
           >
             <BookOpen className="h-4 w-4" />
