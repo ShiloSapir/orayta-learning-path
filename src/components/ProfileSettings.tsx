@@ -6,9 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { LanguageToggle, Language } from "./LanguageToggle";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { ArrowLeft, User, LogOut, Sparkles } from "lucide-react";
-
-import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useState } from "react";
 
@@ -139,20 +138,6 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
           <span className="font-medium">{t.themeLabel}</span>
           <DarkModeToggle />
         </div>
-        {/* Admin Tools */}
-        {profile?.role === 'admin' && (
-          <Card>
-            <CardContent className="pt-6">
-              <Button
-                onClick={() => window.location.assign('/admin')}
-                className="w-full"
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Admin Tools
-              </Button>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Admin Tools */}
         {profile?.role === 'admin' && (
@@ -170,9 +155,6 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
         )}
 
         {/* Sign Out */}
-
-          
-        
         <Separator />
         
         <Card>

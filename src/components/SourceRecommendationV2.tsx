@@ -179,7 +179,6 @@ export const SourceRecommendationV2 = ({
           language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
           ai_generated: true,
         };
-
         setCurrentSource(convertedSource);
         createSessionForSource(convertedSource);
         setShowFallback(false);
@@ -276,8 +275,9 @@ export const SourceRecommendationV2 = ({
   };
 
   const handleReflection = () => {
-    if (!currentSessionId) return;
-    onReflection(currentSessionId);
+    if (currentSessionId) {
+      onReflection(currentSessionId);
+    }
   };
 
   if (dataLoading) {

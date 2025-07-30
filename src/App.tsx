@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -38,4 +39,5 @@ const App = () => (
     </QueryClientProvider>
   </ErrorBoundary>
 );
+
 export default App;

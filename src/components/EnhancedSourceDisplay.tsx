@@ -116,7 +116,6 @@ export const EnhancedSourceDisplay = ({
                 AI
               </Badge>
             )}
-
           </div>
         </div>
 
