@@ -14,6 +14,7 @@ import { FallbackMechanisms } from "./FallbackMechanisms";
 import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
 import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
 import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
+import { useAISourceGenerator } from "@/hooks/useAISourceGenerator";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -114,6 +115,9 @@ export const SourceRecommendationV2 = ({
     validateTorahReferences 
   } = useContentQualityAssurance();
 
+  // AI Source Generator for fallback
+  const { generateFallbackSource, isGenerating } = useAISourceGenerator();
+
   const { announce } = useAccessibilityAnnouncements();
   
   // Set up keyboard navigation
@@ -161,7 +165,30 @@ export const SourceRecommendationV2 = ({
       return selectedSource;
     }
     
-    // Show fallback mechanisms if no suitable source found
+    // Try AI fallback generation if no suitable source found
+    try {
+      const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
+      if (aiSource) {
+        // Convert AI source to Source type
+        const convertedSource: Source = {
+          ...aiSource,
+          id: aiSource.id || crypto.randomUUID(),
+          published: aiSource.published || true,
+          difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
+          source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
+          language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
+        };
+        setCurrentSource(convertedSource);
+        createSessionForSource(convertedSource);
+        setShowFallback(false);
+        announce(`Generated new source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
+        return convertedSource;
+      }
+    } catch (error) {
+      console.error('AI fallback generation failed:', error);
+    }
+    
+    // Show fallback mechanisms if AI generation also fails
     setShowFallback(true);
     return null;
   };
