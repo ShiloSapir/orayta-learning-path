@@ -34,12 +34,12 @@ INSERT INTO public.sources (
   estimated_time, min_time, max_time, difficulty_level, source_type, language_preference,
   learning_objectives, published
 ) VALUES 
--- HALACHA SOURCES (Daily Practice)
+-- HALACHA SOURCES (daily_practice)
 (
   'Morning Blessings: Starting Your Day with Gratitude',
   'ברכות השחר: התחלת היום בהכרת הטוב',
   'halacha',
-  'Daily Practice',
+  'daily_practice',
   'Berakhot 60b',
   'Berakhot 61a',
   'https://www.sefaria.org/Berakhot.60b-61a',
@@ -55,7 +55,7 @@ INSERT INTO public.sources (
   'The Art of Handwashing: Netilat Yadayim',
   'אמנות נטילת ידיים',
   'halacha',
-  'Daily Practice',
+  'daily_practice',
   'Orach Chaim 158',
   'Orach Chaim 162',
   'https://www.sefaria.org/Shulchan_Arukh,_Orach_Chayim.158',
@@ -71,7 +71,7 @@ INSERT INTO public.sources (
   'Mezuzah: The Doorway to Jewish Consciousness',
   'מזוזה: השער לתודעה יהודית',
   'halacha',
-  'Daily Practice',
+  'daily_practice',
   'Yoreh Deah 285',
   'Yoreh Deah 291',
   'https://www.sefaria.org/Shulchan_Arukh,_Yoreh_Deah.285',
@@ -83,12 +83,12 @@ INSERT INTO public.sources (
   ARRAY['Home sanctification', 'Jewish identity', 'Constant awareness'],
   true
 ),
--- HALACHA SOURCES (Shabbat)
+-- HALACHA SOURCES (shabbat)
 (
   'Candle Lighting: Bringing Peace into Your Home',
   'הדלקת נרות: הבאת שלום לבית',
   'halacha',
-  'Shabbat',
+  'shabbat',
   'Orach Chaim 263',
   'Orach Chaim 264',
   'https://www.sefaria.org/Shulchan_Arukh,_Orach_Chayim.263',
@@ -104,7 +104,7 @@ INSERT INTO public.sources (
   'Kiddush: Sanctifying Time Through Wine',
   'קידוש: קידוש הזמן באמצעות יין',
   'halacha',
-  'Shabbat',
+  'shabbat',
   'Orach Chaim 271',
   'Orach Chaim 273',
   'https://www.sefaria.org/Shulchan_Arukh,_Orach_Chayim.271',
@@ -116,12 +116,12 @@ INSERT INTO public.sources (
   ARRAY['Time sanctification', 'Ritual consciousness', 'Shabbat joy'],
   true
 ),
--- RAMBAM SOURCES (Hilchot Deot)
+-- RAMBAM SOURCES (hilchot_deot)
 (
   'The Middle Path: Balanced Character Development',
   'דרך האמצע: פיתוח אופי מאוזן',
   'rambam',
-  'Hilchot Deot',
+  'hilchot_deot',
   'Hilchot Deot 1:4',
   'Hilchot Deot 2:1',
   'https://www.sefaria.org/Mishneh_Torah,_Human_Dispositions.1.4',
@@ -137,7 +137,7 @@ INSERT INTO public.sources (
   'Anger Management: The Rambam''s Approach',
   'ניהול כעס: הגישה של הרמב"ם',
   'rambam',
-  'Hilchot Deot',
+  'hilchot_deot',
   'Hilchot Deot 2:3',
   'Hilchot Deot 2:4',
   'https://www.sefaria.org/Mishneh_Torah,_Human_Dispositions.2.3',
@@ -149,12 +149,12 @@ INSERT INTO public.sources (
   ARRAY['Emotional regulation', 'Self-control', 'Practical wisdom'],
   true
 ),
--- TANAKH SOURCES (Weekly Portion)
+-- TANAKH SOURCES (weekly_portion)
 (
   'Abraham''s Hospitality: Lessons in Kindness',
   'הכנסת אורחים של אברהם: לקחים בחסד',
   'tanakh',
-  'Weekly Portion',
+  'weekly_portion',
   'Genesis 18:1',
   'Genesis 18:8',
   'https://www.sefaria.org/Genesis.18.1-8',
@@ -170,7 +170,7 @@ INSERT INTO public.sources (
   'Jacob''s Dream: Connecting Heaven and Earth',
   'חלום יעקב: חיבור שמים וארץ',
   'tanakh',
-  'Weekly Portion',
+  'weekly_portion',
   'Genesis 28:10',
   'Genesis 28:22',
   'https://www.sefaria.org/Genesis.28.10-22',
@@ -182,12 +182,12 @@ INSERT INTO public.sources (
   ARRAY['Spiritual connection', 'Dreams and vision', 'Sacred places'],
   true
 ),
--- TALMUD SOURCES (Pirkei Avot)
+-- TALMUD SOURCES (pirkei_avot)
 (
   'Who is Wise? Learning from Everyone',
   'איזהו חכם? הלומד מכל אדם',
   'talmud',
-  'Pirkei Avot',
+  'pirkei_avot',
   'Pirkei Avot 4:1',
   'Pirkei Avot 4:1',
   'https://www.sefaria.org/Pirkei_Avot.4.1',
@@ -203,7 +203,7 @@ INSERT INTO public.sources (
   'In a Place Where There Are No People',
   'במקום שאין אנשים',
   'talmud',
-  'Pirkei Avot',
+  'pirkei_avot',
   'Pirkei Avot 2:5',
   'Pirkei Avot 2:5',
   'https://www.sefaria.org/Pirkei_Avot.2.5',
@@ -215,12 +215,12 @@ INSERT INTO public.sources (
   ARRAY['Leadership', 'Responsibility', 'Moral courage'],
   true
 ),
--- SPIRITUAL GROWTH SOURCES (Mussar)
+-- SPIRITUAL GROWTH SOURCES (mussar)
 (
   'The Practice of Self-Examination',
   'תרגיל חשבון הנפש',
   'spiritual',
-  'Mussar',
+  'mussar',
   'Shaarei Teshuvah 1:1',
   'Shaarei Teshuvah 1:5',
   'https://www.sefaria.org/Shaarei_Teshuvah.1.1',
@@ -254,7 +254,7 @@ INSERT INTO public.sources (
   'One Minute of Gratitude: The Shehecheyanu Blessing',
   'דקה של הכרת טובה: ברכת שהחיינו',
   'halacha',
-  'Daily Practice',
+  'daily_practice',
   'Orach Chaim 225',
   'Orach Chaim 225',
   'https://www.sefaria.org/Shulchan_Arukh,_Orach_Chayim.225',
@@ -271,7 +271,7 @@ INSERT INTO public.sources (
   'Deep Dive: The Philosophy of Shabbat',
   'צלילה עמוקה: פילוסופיית השבת',
   'halacha',
-  'Shabbat',
+  'shabbat',
   'Orach Chaim 242',
   'Orach Chaim 244',
   'https://www.sefaria.org/Shulchan_Arukh,_Orach_Chayim.242',
@@ -287,7 +287,7 @@ INSERT INTO public.sources (
   'Comprehensive Study: Rambam''s Guide to Repentance',
   'לימוד מקיף: מדריך הרמב"ם לתשובה',
   'rambam',
-  'Hilchot Teshuva',
+  'hilchot_teshuva',
   'Hilchot Teshuva 1:1',
   'Hilchot Teshuva 2:10',
   'https://www.sefaria.org/Mishneh_Torah,_Repentance.1.1',

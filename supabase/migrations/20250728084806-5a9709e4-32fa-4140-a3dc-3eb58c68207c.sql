@@ -2,7 +2,7 @@
 -- Adding 150+ sources across all categories with proper time distribution and commentaries
 
 -- HALACHA SOURCES (30 total)
--- Daily Practice (8 sources)
+-- daily_practice (8 sources)
 INSERT INTO sources (title, title_he, category, subcategory, estimated_time, min_time, max_time, difficulty_level, start_ref, end_ref, sefaria_link, text_excerpt, text_excerpt_he, reflection_prompt, reflection_prompt_he, commentaries, learning_objectives, published) VALUES
 ('Morning Blessings Structure', 'סדר ברכות השחר', 'halacha', 'daily_practice', 10, 5, 15, 'beginner', 'Orach Chaim 46:1', 'Orach Chaim 46:3', 'https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.46.1', 'The structure and meaning of morning blessings that begin our day', 'מבנה ומשמעות ברכות השחר המתחילות את יומנו', 'How do morning blessings set the tone for your entire day?', 'כיצד ברכות השחר קובעות את הטון לכל היום שלך?', '["Mishnah Berurah", "Aruch HaShulchan", "Kaf HaChaim"]', '["Understanding daily blessing structure", "Spiritual preparation for the day"]', true),
 ('Hand Washing Laws', 'הלכות נטילת ידיים', 'halacha', 'daily_practice', 15, 10, 20, 'intermediate', 'Orach Chaim 158:1', 'Orach Chaim 158:12', 'https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.158.1', 'Complete laws governing when and how we wash our hands', 'הלכות המפרטות מתי וכיצד נוטלים ידיים', 'What spiritual significance do you find in the act of washing hands before eating?', 'איזה משמעות רוחנית אתה מוצא במעשה נטילת הידיים לפני האכילה?', '["Mishnah Berurah", "Shaar HaTziyun", "Biur Halakha"]', '["Practical hand washing knowledge", "Understanding ritual purity"]', true),
