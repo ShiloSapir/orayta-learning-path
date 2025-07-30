@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Source } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/hooks/useAuth";
+import { normalizeTopic } from "@/utils/normalizeTopic";
 
 interface RecommendationConfig {
   timeSelected: number;
@@ -29,6 +30,7 @@ export const useSmartRecommendation = (
   });
   const [qualityValidated, setQualityValidated] = useState<Record<string, boolean>>({});
 
+=======
   const normalizeTopic = useCallback((topic: string) =>
     topic.toLowerCase().replace(/[\s-]+/g, '_').trim(), []);
 
@@ -86,17 +88,16 @@ export const useSmartRecommendation = (
                            source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
       
       // Quality validation - ensure source has required Torah references and valid Sefaria link
-      const hasTorahRef = !!(source.start_ref && source.end_ref);
       const hasValidPrompts = !!(source.reflection_prompt && source.reflection_prompt_he);
-      const hasSefariaLink = source.sefaria_link && source.sefaria_link.includes('sefaria.org');
-      const qualityCheck = hasTorahRef && hasValidPrompts && hasSefariaLink;
+      const hasSefariaLink = !!(source.sefaria_link && source.sefaria_link.includes('sefaria.org'));
+      const qualityCheck = hasValidPrompts && hasSefariaLink;
       
       return matchesTopic && timeMatch && typeMatch && difficultyMatch && notInHistory && 
              source.published && languageMatch && qualityCheck;
     });
 
     // Return primary if we have good matches
-    if (primaryFilter.length >= 3) {
+    if (primaryFilter.length > 0) {
       return primaryFilter;
     }
 
@@ -113,7 +114,7 @@ export const useSmartRecommendation = (
       return matchesTopic && timeMatch && notInHistory && source.published && languageMatch;
     });
 
-    if (secondaryFilter.length >= 2) {
+    if (secondaryFilter.length > 0) {
       return secondaryFilter;
     }
 
@@ -131,7 +132,7 @@ export const useSmartRecommendation = (
       return matchesRelated && timeMatch && notInHistory && source.published && languageMatch;
     });
 
-    if (tertiaryFilter.length >= 1) {
+    if (tertiaryFilter.length > 0) {
       return tertiaryFilter;
     }
 
