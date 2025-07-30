@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { normalizeTopic } from "@/utils/normalizeTopic";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -140,7 +139,7 @@ export const useSupabaseData = () => {
       // Validate and transform data
       const validatedSources = (data || []).map(source => {
         // Safely cast enum values to proper types
-        const difficulty_level = (['beginner', 'intermediate', 'advanced'] as const).includes(source.difficulty_level as any)
+        const difficulty_level = (['beginner', 'intermediate', 'advanced'] as const).includes(source.difficulty_level as any) 
           ? source.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
           : 'beginner';
         
@@ -154,8 +153,6 @@ export const useSupabaseData = () => {
 
         return {
           ...source,
-          category: normalizeTopic(source.category),
-          subcategory: source.subcategory ? normalizeTopic(source.subcategory) : undefined,
           difficulty_level,
           source_type,
           language_preference,

@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+=======
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -104,6 +106,21 @@ const content = {
 
 export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
   const [activeTab, setActiveTab] = useState<'learned' | 'saved' | 'reflected'>('learned');
+  const [storedSessions, setStoredSessions] = useState<LearningSession[]>([]);
+  const t = content[language];
+  const isHebrew = language === 'he';
+
+  useEffect(() => {
+    const stored = localStorage.getItem('orayta_sessions');
+    if (stored) {
+      setStoredSessions(JSON.parse(stored));
+    }
+  }, []);
+
+  const allSessions = [...storedSessions, ...mockSessions];
+
+  const filteredSessions = allSessions.filter(session => {
+=======
   const [enrichedSessions, setEnrichedSessions] = useState<EnrichedLearningSession[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const { user } = useAuth();
@@ -217,11 +234,13 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
   };
 
   return (
+    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+=======
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-6xl mx-auto py-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Button
+          <Button 
             variant="ghost"
             onClick={onBack}
             className="flex items-center gap-2"
@@ -290,7 +309,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
                         {session.reflection && (
                           <p className="text-foreground/80 mb-3 italic">
-                            "{session.reflection.substring(0, 100)}..."
+                            {session.reflection.substring(0, 100)}...
                           </p>
                         )}
 
@@ -460,7 +479,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
                         {session.reflection && (
                           <p className="text-foreground/80 mb-3 italic">
-                            "{session.reflection}"
+                            {session.reflection}
                           </p>
                         )}
 

@@ -134,6 +134,8 @@ export const TopicSelection = ({
   const sourceStats = getSourceStats();
 
   return (
+    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
+=======
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
@@ -192,6 +194,9 @@ export const TopicSelection = ({
                   className={`
                     learning-card w-full text-left transition-all duration-300
                     ${isSelected 
+                      ? 'gradient-primary text-primary-foreground shadow-warm' 
+                      : 'gradient-warm hover:gradient-subtle'
+=======
                       ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-warm border-primary border-2 scale-105' 
                       : 'bg-gradient-warm hover:bg-gradient-subtle border-transparent border-2 hover:shadow-lg'
                     }
