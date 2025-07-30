@@ -177,7 +177,7 @@ export const SourceRecommendationV2 = ({
           difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
           source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
           language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
-                    ai_generated: true,
+          ai_generated: true,
         };
 
         setCurrentSource(convertedSource);
@@ -286,7 +286,8 @@ export const SourceRecommendationV2 = ({
   }
       <SourceLoadingState
     return (
-      <SourceLoadingState 
+      <SourceLoadingState
+ 
         message={content[language].loading}
         variant="detailed"
       />
