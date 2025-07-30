@@ -29,6 +29,9 @@ export const useSmartRecommendation = (
   });
   const [qualityValidated, setQualityValidated] = useState<Record<string, boolean>>({});
 
+  const normalizeTopic = useCallback((topic: string) =>
+    topic.toLowerCase().replace(/[\s-]+/g, '_').trim(), []);
+
   // Time-based source optimization mapping
   const getTimeBasedFilter = useCallback((timeMinutes: number) => {
     if (timeMinutes <= 10) {
@@ -62,16 +65,17 @@ export const useSmartRecommendation = (
         focus: 'deep_analysis'
       };
     }
-  }, []);
+  }, [normalizeTopic]);
 
   // Enhanced filtering logic with multi-tier approach and quality assurance
   const getFilteredSources = useCallback(() => {
     const timeFilter = getTimeBasedFilter(config.timeSelected);
+    const normalizedTopic = normalizeTopic(config.topicSelected);
     
     // Primary filter: exact topic match + optimal time + type compatibility + quality validation
     const primaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase() ||
-                          source.subcategory?.toLowerCase() === config.topicSelected.toLowerCase();
+      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
+                          normalizeTopic(source.subcategory || '') === normalizedTopic;
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
       const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
@@ -98,8 +102,8 @@ export const useSmartRecommendation = (
 
     // Secondary filter: expand time range but keep topic match
     const secondaryFilter = sources.filter(source => {
-      const matchesTopic = source.category.toLowerCase() === config.topicSelected.toLowerCase() ||
-                          source.subcategory?.toLowerCase() === config.topicSelected.toLowerCase();
+      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
+                          normalizeTopic(source.subcategory || '') === normalizedTopic;
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -114,7 +118,7 @@ export const useSmartRecommendation = (
     }
 
     // Tertiary filter: related topics with time compatibility
-    const relatedTopics = getRelatedTopics(config.topicSelected);
+    const relatedTopics = getRelatedTopics(normalizedTopic);
     const tertiaryFilter = sources.filter(source => {
       const matchesRelated = relatedTopics.includes(source.category.toLowerCase()) ||
                             relatedTopics.includes(source.subcategory?.toLowerCase() || '');
@@ -141,10 +145,11 @@ export const useSmartRecommendation = (
       const bTimeDiff = Math.abs((b.estimated_time) - config.timeSelected);
       return aTimeDiff - bTimeDiff;
     }).slice(0, 5);
-  }, [sources, config, sourceHistory, getTimeBasedFilter]);
+  }, [sources, config, sourceHistory, getTimeBasedFilter, normalizeTopic]);
 
   // Get related topics for tertiary filtering - enhanced with subcategory mapping
   const getRelatedTopics = useCallback((topic: string): string[] => {
+    const normalized = normalizeTopic(topic);
     const topicRelations: Record<string, string[]> = {
       'halacha': ['kashrut', 'shabbat', 'daily_practice'],
       'rambam': ['hilchot_deot', 'hilchot_teshuva'],
@@ -171,22 +176,22 @@ export const useSmartRecommendation = (
       'berakhot': ['talmud', 'pirkei_avot']
     };
     
-    const relations = topicRelations[topic.toLowerCase()] || subcategoryRelations[topic.toLowerCase()] || [];
+    const relations = topicRelations[normalized] || subcategoryRelations[normalized] || [];
     
     // For main categories, also include their subcategories
-    if (topicRelations[topic.toLowerCase()]) {
+    if (topicRelations[normalized]) {
       return relations;
     }
     
     // For subcategories, also include parent category
     for (const [category, subcategories] of Object.entries(topicRelations)) {
-      if (subcategories.includes(topic.toLowerCase())) {
+      if (subcategories.includes(normalized)) {
         return [category, ...relations];
       }
     }
     
     return relations;
-  }, []);
+  }, [normalizeTopic]);
 
   // Difficulty weighting for intelligent selection
   const getDifficultyWeight = useCallback((difficulty: string): number => {
@@ -203,7 +208,7 @@ export const useSmartRecommendation = (
     }
 
     // For surprise category, implement true variety
-    if (config.topicSelected.toLowerCase() === 'surprise') {
+    if (normalizeTopic(config.topicSelected) === 'surprise') {
       const categoryCounts: Record<string, number> = {};
       filteredSources.forEach(source => {
         categoryCounts[source.category] = (categoryCounts[source.category] || 0) + 1;

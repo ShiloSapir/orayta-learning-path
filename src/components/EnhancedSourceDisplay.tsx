@@ -116,11 +116,7 @@ export const EnhancedSourceDisplay = ({
                 AI
               </Badge>
             )}
-             {source.ai_generated && (
-              <Badge variant="secondary" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
-                AI
-              </Badge>
-            )}
+
           </div>
         </div>
 

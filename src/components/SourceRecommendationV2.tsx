@@ -297,7 +297,7 @@ export const SourceRecommendationV2 = ({
       />
     );
   }
-  
+
   // Show fallback mechanisms when no suitable sources found
   if (showFallback || !currentSource) {
     return (
