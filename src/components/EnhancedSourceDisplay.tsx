@@ -45,10 +45,9 @@ const content = {
     practical_halacha: "Practical Halacha",
     philosophical: "Philosophical",
     historical: "Historical",
-    mystical: "Mystical"
-    ,exact: "Exact match", related: "Related topic"
-=======
-    ,
+    mystical: "Mystical",
+    exact: "Exact match", 
+    related: "Related topic",
     qualityScore: "Quality Score"
   },
   he: {
@@ -72,10 +71,9 @@ const content = {
     practical_halacha: "הלכה למעשה",
     philosophical: "פילוסופי",
     historical: "היסטורי",
-    mystical: "מיסטי"
-    ,exact: "התאמה מלאה", related: "נושא קשור"
-=======
-    ,
+    mystical: "מיסטי",
+    exact: "התאמה מלאה", 
+    related: "נושא קשור",
     qualityScore: "מדד איכות"
   }
 };
@@ -85,8 +83,6 @@ export const EnhancedSourceDisplay = ({
   language,
   onSefariaClick,
   matchType
-=======
-  onSefariaClick
 }: EnhancedSourceDisplayProps) => {
   const t = content[language];
   const title = language === 'he' ? source.title_he : source.title;
