@@ -28,7 +28,6 @@ const SourceSchema = z.object({
   min_time: z.number().min(5).optional(),
   max_time: z.number().max(60).optional(),
   learning_objectives: z.array(z.string()).optional(),
-  prerequisites: z.array(z.string()).optional(),
   ai_generated: z.boolean().optional()
 });
 
@@ -77,7 +76,6 @@ export interface Source {
   max_time?: number;
   learning_objectives?: string[];
   prerequisites?: string[];
-  ai_generated?: boolean;
 }
 
 export interface LearningSession {
@@ -159,7 +157,6 @@ export const useSupabaseData = () => {
           min_time: source.min_time || Math.max(5, source.estimated_time - 5),
           max_time: source.max_time || Math.min(60, source.estimated_time + 10),
           learning_objectives: source.learning_objectives || [],
-          prerequisites: source.prerequisites || [],
           ai_generated: !!(source as any).ai_generated
         } as Source;
       }).filter(source => {

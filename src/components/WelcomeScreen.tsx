@@ -177,3 +177,14 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
     </div>
   );
 };
+
+import { AdminSourceGenerator } from "@/components/AdminSourceGenerator";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+const Admin = () => (
+  <ProtectedRoute>
+    <AdminSourceGenerator />
+  </ProtectedRoute>
+);
+
+export default Admin;
