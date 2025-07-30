@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Home, Clock, BookOpen, PenTool } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Clock, BookOpen, PenTool, Calendar, User, Search, BarChart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 
 const stepIcons = {
@@ -11,8 +11,10 @@ const stepIcons = {
   topic: BookOpen,
   source: BookOpen,
   reflection: PenTool,
-  journal: BookOpen,
-  profile: Home
+  journal: Calendar,
+  profile: User,
+  search: Search,
+  analytics: BarChart
 };
 
 const stepTitles = {
@@ -23,7 +25,9 @@ const stepTitles = {
     source: 'Source Study',
     reflection: 'Reflection',
     journal: 'Learning Journal',
-    profile: 'Profile Settings'
+    profile: 'Profile Settings',
+    search: 'Search',
+    analytics: 'Analytics'
   },
   he: {
     welcome: 'ברוכים הבאים',
@@ -32,7 +36,9 @@ const stepTitles = {
     source: 'לימוד המקור',
     reflection: 'הרהור',
     journal: 'יומן לימוד',
-    profile: 'הגדרות פרופיל'
+    profile: 'הגדרות פרופיל',
+    search: 'חיפוש',
+    analytics: 'ניתוחים'
   }
 };
 

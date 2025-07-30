@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Source } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeTopic } from "@/utils/normalizeTopic";
@@ -21,7 +21,6 @@ export const useSmartRecommendation = (
   sources: Source[], 
   config: RecommendationConfig
 ) => {
-  const { user } = useAuth();
   const [sourceHistory, setSourceHistory] = useState<string[]>([]);
   const [userHistory, setUserHistory] = useState<UserLearningHistory>({
     completedSources: [],
@@ -29,7 +28,6 @@ export const useSmartRecommendation = (
     topicPreferences: {},
     timePatterns: {}
   });
-  const [qualityValidated, setQualityValidated] = useState<Record<string, boolean>>({});
 
 
   // Time-based source optimization mapping

@@ -87,7 +87,7 @@ export const usePersonalizationEngine = () => {
 
       // Calculate study streaks
       const sortedSessions = sessions.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        new Date(b.created_at || new Date()).getTime() - new Date(a.created_at || new Date()).getTime()
       );
       
       let currentStreak = 0;
@@ -98,7 +98,7 @@ export const usePersonalizationEngine = () => {
       if (sortedSessions.length > 0) {
         lastStudyDate = sortedSessions[0].created_at;
         const today = new Date();
-        const lastStudy = new Date(sortedSessions[0].created_at);
+        const lastStudy = new Date(sortedSessions[0].created_at || new Date());
         
         // Check if studied today or yesterday
         const daysDiff = Math.floor((today.getTime() - lastStudy.getTime()) / (1000 * 60 * 60 * 24));
@@ -108,8 +108,8 @@ export const usePersonalizationEngine = () => {
 
         // Calculate longest streak
         for (let i = 0; i < sortedSessions.length - 1; i++) {
-          const current = new Date(sortedSessions[i].created_at);
-          const next = new Date(sortedSessions[i + 1].created_at);
+          const current = new Date(sortedSessions[i].created_at || new Date());
+          const next = new Date(sortedSessions[i + 1].created_at || new Date());
           const diff = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
           
           if (diff <= 1) {

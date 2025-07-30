@@ -174,7 +174,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
         .from('learning_sessions')
         .delete()
         .eq('id', sessionId)
-        .eq('user_id', user?.id);
+        .eq('user_id', user?.id || '');
 
       if (error) throw error;
 
