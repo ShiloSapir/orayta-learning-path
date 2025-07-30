@@ -1,14 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Language, LanguageToggle } from "./LanguageToggle";
-import { DarkModeToggle } from "./DarkModeToggle";
-import { ArrowLeft, User } from "lucide-react";
-
-interface ProfileSettingsProps {
-  language: Language;
-  darkMode: boolean;
-  onLanguageChange: (lang: Language) => void;
-  onToggleDark: (value: boolean) => void;
-=======
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -32,9 +22,6 @@ const content = {
     title: "Profile Settings",
     subtitle: "Manage your preferences",
     backButton: "Back",
-    languageLabel: "Language",
-    themeLabel: "Dark Mode"
-=======
     languageLabel: "Language", 
     themeLabel: "Dark Mode",
     signOutButton: "Sign Out",
@@ -49,27 +36,6 @@ const content = {
     subtitle: "נהל את ההעדפות שלך",
     backButton: "חזור",
     languageLabel: "שפה",
-    themeLabel: "מצב כהה"
-  }
-};
-
-export const ProfileSettings = ({
-  language,
-  darkMode,
-  onLanguageChange,
-  onToggleDark,
-  onBack
-}: ProfileSettingsProps) => {
-  const t = content[language];
-  const isHebrew = language === "he";
-
-  return (
-    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? "hebrew" : ""}`}>
-      <div className="max-w-xl mx-auto py-8 animate-fade-in space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
-=======
     themeLabel: "מצב כהה",
     signOutButton: "התנתק",
     profile: "פרופיל",
@@ -125,7 +91,6 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
           <p className="text-muted-foreground">{t.subtitle}</p>
         </div>
 
-=======
         {/* Profile Information */}
         <Card>
           <CardHeader>
@@ -168,16 +133,6 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
           <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
         </div>
 
-        {/* Dark Mode */}
-        <div className="flex items-center justify-between gap-4">
-          <span className="font-medium">{t.themeLabel}</span>
-          <DarkModeToggle darkMode={darkMode} onToggle={onToggleDark} />
-        </div>
-      </div>
-    </div>
-  );
-};
-=======
         {/* Theme */}
         <div className="flex items-center justify-between gap-4">
           <span className="font-medium">{t.themeLabel}</span>
