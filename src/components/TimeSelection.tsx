@@ -40,8 +40,6 @@ export const TimeSelection = ({
   const isHebrew = language === 'he';
 
   return (
-    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-=======
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-2xl mx-auto py-8 animate-fade-in">
         {/* Header */}

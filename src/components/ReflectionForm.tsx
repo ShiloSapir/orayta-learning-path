@@ -6,11 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Language } from "./LanguageToggle";
 import { ArrowLeft, Save, Sparkles } from "lucide-react";
 
-import type { SourceEntry } from "../data/sources";
-
 interface ReflectionFormProps {
   language: Language;
-  source: SourceEntry;
+  sourceTitle: string;
   onBack: () => void;
   onSave: (reflection: string, tags: string[]) => void;
 }
@@ -38,7 +36,7 @@ const content = {
   }
 };
 
-export const ReflectionForm = ({ language, source, onBack, onSave }: ReflectionFormProps) => {
+export const ReflectionForm = ({ language, sourceTitle, onBack, onSave }: ReflectionFormProps) => {
   const [reflection, setReflection] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const t = content[language];
@@ -59,8 +57,6 @@ export const ReflectionForm = ({ language, source, onBack, onSave }: ReflectionF
   };
 
   return (
-    <div className={`min-h-screen gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-=======
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
@@ -76,7 +72,7 @@ export const ReflectionForm = ({ language, source, onBack, onSave }: ReflectionF
           <div className="text-center flex-1 mx-4">
             <Sparkles className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-sm text-muted-foreground max-w-md mx-auto truncate">
-              {source.title}
+              {sourceTitle}
             </div>
           </div>
           <div className="w-16" /> {/* Spacer for balance */}
@@ -93,7 +89,7 @@ export const ReflectionForm = ({ language, source, onBack, onSave }: ReflectionF
         </div>
 
         {/* Reflection Form */}
-        <Card className="learning-card gradient-warm">
+        <Card className="learning-card bg-gradient-warm">
           <div className="space-y-6">
             {/* Textarea */}
             <div>
