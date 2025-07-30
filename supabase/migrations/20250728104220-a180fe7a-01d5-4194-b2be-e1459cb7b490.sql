@@ -21,7 +21,7 @@ INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, e
 
 ('Kosher Slaughter', 'שחיטה כשרה', 'halacha', 'kashrut', 'Shulchan Aruch Yoreh Deah 1:1', 'Shulchan Aruch Yoreh Deah 1:10', 'https://www.sefaria.org/Shulchan_Arukh%2C_Yoreh_De%27ah.1.1', 'The requirements for proper ritual slaughter of animals.', 'הדרישות לשחיטה טקסית נכונה של בעלי חיים.', 'What ethical principles underlie the laws of kosher slaughter?', 'אילו עקרונות אתיים עומדים בבסיס דיני השחיטה הכשרה?', 20, 15, 35, 'intermediate', 'practical_halacha', ARRAY['Understanding shechita requirements', 'Learning about animal ethics in Judaism'], ARRAY['Basic kashrut knowledge'], ARRAY['Shach', 'Pitchei Teshuva'], true);
 
--- Daily Practice sources (15)
+-- daily_practice sources (15)
 INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, end_ref, sefaria_link, text_excerpt, text_excerpt_he, reflection_prompt, reflection_prompt_he, estimated_time, min_time, max_time, difficulty_level, source_type, learning_objectives, prerequisites, commentaries, published) VALUES
 ('Morning Blessings', 'ברכות השחר', 'halacha', 'daily_practice', 'Shulchan Aruch Orach Chaim 46:1', 'Shulchan Aruch Orach Chaim 46:8', 'https://www.sefaria.org/Shulchan_Arukh%2C_Orach_Chayim.46.1', 'The daily morning blessings that express gratitude for basic life functions.', 'ברכות השחר היומיות המבטאות הכרת הטוב על תפקודי החיים הבסיסיים.', 'How do morning blessings shape your awareness and gratitude throughout the day?', 'כיצד ברכות השחר מעצבות את המודעות וההכרת הטוב שלך לאורך היום?', 10, 5, 18, 'beginner', 'practical_halacha', ARRAY['Learning daily blessing structure', 'Developing gratitude practices'], ARRAY['Basic Hebrew reading'], ARRAY['Mishnah Berurah', 'Kitzur Shulchan Aruch'], true),
 
@@ -39,7 +39,7 @@ INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, e
 ('Steps of Repentance', 'מעלות התשובה', 'rambam', 'hilchot_teshuva', 'Mishneh Torah, Teshuva 2:1', 'Mishneh Torah, Teshuva 2:3', 'https://www.sefaria.org/Mishneh_Torah%2C_Repentance.2.1', 'The process of complete repentance involves recognition, regret, and resolution.', 'תהליך התשובה השלמה כולל הכרה, חרטה והחלטה.', 'Which step of teshuva do you find most challenging in your personal growth?', 'איזה שלב של תשובה אתה מוצא הכי מאתגר בצמיחה האישית שלך?', 18, 12, 30, 'intermediate', 'philosophical', ARRAY['Understanding repentance process', 'Learning self-reflection'], ARRAY['Basic teshuva concepts'], ARRAY['Kesef Mishneh', 'Lechem Mishneh'], true);
 
 -- Tanakh Sources (60 total)
--- Weekly Portion sources (25)
+-- weekly_portion sources (25)
 INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, end_ref, sefaria_link, text_excerpt, text_excerpt_he, reflection_prompt, reflection_prompt_he, estimated_time, min_time, max_time, difficulty_level, source_type, learning_objectives, prerequisites, commentaries, published) VALUES
 ('Creation and Purpose', 'בריאה ותכלית', 'tanakh', 'weekly_portion', 'Genesis 1:1', 'Genesis 1:5', 'https://www.sefaria.org/Genesis.1.1', 'In the beginning, God created the heavens and the earth.', 'בראשית ברא אלהים את השמים ואת הארץ.', 'What does the creation story teach about your purpose in the world?', 'מה סיפור הבריאה מלמד על המטרה שלך בעולם?', 10, 5, 18, 'beginner', 'text_study', ARRAY['Understanding creation narrative', 'Exploring divine purpose'], ARRAY['Basic Hebrew reading'], ARRAY['Rashi', 'Ramban'], true),
 
@@ -65,7 +65,7 @@ INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, e
 ('Mindful Eating', 'אכילה במודעות', 'talmud', 'berakhot', 'Berakhot 35a', 'Berakhot 35a', 'https://www.sefaria.org/Berakhot.35a', 'It is forbidden to enjoy anything in this world without a blessing.', 'אסור לאדם שיהנה מן העולם הזה בלא ברכה.', 'How do blessings transform ordinary eating into spiritual practice?', 'כיצד ברכות הופכות אכילה רגילה לתרגול רוחני?', 15, 10, 25, 'intermediate', 'practical_halacha', ARRAY['Understanding blessing obligations', 'Developing mindfulness'], ARRAY['Basic Talmud study'], ARRAY['Rashi', 'Tosafot'], true);
 
 -- Spiritual Sources (40 total)
--- Mussar sources (20)
+-- mussar sources (20)
 INSERT INTO public.sources (title, title_he, category, subcategory, start_ref, end_ref, sefaria_link, text_excerpt, text_excerpt_he, reflection_prompt, reflection_prompt_he, estimated_time, min_time, max_time, difficulty_level, source_type, learning_objectives, prerequisites, commentaries, published) VALUES
 ('Soul Accounting', 'חשבון הנפש', 'spiritual', 'mussar', 'Orchot Tzadikim, Gate of Repentance', 'Orchot Tzadikim, Gate of Repentance', 'https://www.sefaria.org/Orchot_Tzadikim%2C_The_Gate_of_Repentance', 'Daily self-examination leads to spiritual growth and character refinement.', 'בדיקה עצמית יומיומית מובילה לצמיחה רוחנית ושיפור אופי.', 'What patterns do you notice when examining your daily actions and thoughts?', 'אילו דפוסים אתה מבחין בהם כשאתה בודק את המעשים והמחשבות היומיות שלך?', 20, 15, 35, 'intermediate', 'philosophical', ARRAY['Learning self-reflection', 'Developing spiritual discipline'], ARRAY['Basic mussar concepts'], ARRAY['Mesillat Yesharim', 'Cheshbon HaNefesh'], true);
 

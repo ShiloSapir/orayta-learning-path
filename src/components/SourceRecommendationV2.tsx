@@ -24,7 +24,8 @@ import {
   SkipForward,
   CheckCircle,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles
 } from "lucide-react";
 
 interface SourceRecommendationProps {
@@ -41,6 +42,7 @@ const content = {
     subtitle: "Selected for your spiritual journey",
     backButton: "Back",
     skipButton: "Skip This Source",
+    generateButton: "Generate AI Source",
     saveButton: "Save for Later",
     learnedButton: "Mark as Learned",
     calendarButton: "Add to Calendar",
@@ -59,6 +61,7 @@ const content = {
     subtitle: "נבחר למסע הרוחני שלך",
     backButton: "חזור",
     skipButton: "דלג על המקור הזה",
+    generateButton: "צור מקור AI",
     saveButton: "שמור למועד מאוחר",
     learnedButton: "סמן כנלמד",
     calendarButton: "הוסף ליומן",
@@ -177,6 +180,7 @@ export const SourceRecommendationV2 = ({
           difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
           source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
           language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
+          ai_generated: true,
         };
         setCurrentSource(convertedSource);
         createSessionForSource(convertedSource);
@@ -239,6 +243,29 @@ export const SourceRecommendationV2 = ({
     setLoading(false);
   };
 
+  const handleGenerateAI = async () => {
+    setLoading(true);
+    try {
+      const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
+      if (aiSource) {
+        const converted: Source = {
+          ...aiSource,
+          id: aiSource.id || crypto.randomUUID(),
+          published: true,
+          difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
+          source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
+          language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
+          ai_generated: true
+        };
+        setCurrentSource(converted);
+        createSessionForSource(converted);
+        announce(`Generated AI source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!currentSessionId || !currentSource) return;
     
@@ -281,9 +308,18 @@ export const SourceRecommendationV2 = ({
 
   if (dataLoading) {
     return (
-      <SourceLoadingState 
+      <SourceLoadingState
         message={content[language].loading}
         variant="detailed"
+      />
+    );
+  }
+
+  if (isGenerating) {
+    return (
+      <SourceLoadingState
+        message="Generating new source..."
+        variant="minimal"
       />
     );
   }
@@ -372,13 +408,22 @@ export const SourceRecommendationV2 = ({
         {/* Action Buttons */}
         <Card className="p-6 space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Button 
-              onClick={handleSkip} 
+            <Button
+              onClick={handleSkip}
               variant="outline"
               disabled={loading}
             >
               <SkipForward className="h-4 w-4 mr-2" />
               {content[language].skipButton}
+            </Button>
+
+            <Button
+              onClick={handleGenerateAI}
+              variant="outline"
+              disabled={loading || isGenerating}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {content[language].generateButton}
             </Button>
             
             <Button 

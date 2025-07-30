@@ -123,7 +123,7 @@ INSERT INTO public.sources (
   'https://www.sefaria.org/Berakhot.17a',
   true
 ),
--- Spiritual/Mussar sources
+-- Spiritual/mussar sources
 (
   'Mesillat Yesharim Chapter 1 – The Purpose of Life',
   'מסילת ישרים פרק א – תכלית האדם',
