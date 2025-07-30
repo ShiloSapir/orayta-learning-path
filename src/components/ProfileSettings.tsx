@@ -7,6 +7,7 @@ import { LanguageToggle, Language } from "./LanguageToggle";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { ArrowLeft, User, LogOut, Sparkles } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useState } from "react";
 

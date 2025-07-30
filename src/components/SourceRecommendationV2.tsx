@@ -276,25 +276,20 @@ export const SourceRecommendationV2 = ({
   };
 
   const handleReflection = () => {
- if (dataLoading) {
+    if (!currentSessionId) return;
+    onReflection(currentSessionId);
+  };
+
+  if (dataLoading) {
     return (
       <SourceLoadingState
-        message={content[language].loading}
-        variant="detailed"
-      />
-    );
-  }
-      <SourceLoadingState
-    return (
-      <SourceLoadingState
- 
         message={content[language].loading}
         variant="detailed"
       />
     );
   }
 
-    if (isGenerating) {
+  if (isGenerating) {
     return (
       <SourceLoadingState
         message="Generating new source..."
