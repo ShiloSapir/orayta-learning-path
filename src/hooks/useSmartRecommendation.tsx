@@ -76,8 +76,12 @@ export const useSmartRecommendation = (
     
     // Primary filter: exact topic match + optimal time + type compatibility + quality validation
     const primaryFilter = sources.filter(source => {
-      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
-                          normalizeTopic(source.subcategory || '') === normalizedTopic;
+      const normalizedCategory = normalizeTopic(source.category);
+      const normalizedSub = normalizeTopic(source.subcategory || '');
+      const matchesTopic = normalizedCategory === normalizedTopic ||
+                          normalizedSub === normalizedTopic ||
+                          normalizedCategory.includes(normalizedTopic) ||
+                          normalizedSub.includes(normalizedTopic);
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
       const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
@@ -103,8 +107,12 @@ export const useSmartRecommendation = (
 
     // Secondary filter: expand time range but keep topic match
     const secondaryFilter = sources.filter(source => {
-      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
-                          normalizeTopic(source.subcategory || '') === normalizedTopic;
+      const normalizedCategory = normalizeTopic(source.category);
+      const normalizedSub = normalizeTopic(source.subcategory || '');
+      const matchesTopic = normalizedCategory === normalizedTopic ||
+                          normalizedSub === normalizedTopic ||
+                          normalizedCategory.includes(normalizedTopic) ||
+                          normalizedSub.includes(normalizedTopic);
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -121,8 +129,10 @@ export const useSmartRecommendation = (
     // Tertiary filter: related topics with time compatibility
     const relatedTopics = getRelatedTopics(normalizedTopic);
     const tertiaryFilter = sources.filter(source => {
-      const matchesRelated = relatedTopics.includes(source.category.toLowerCase()) ||
-                            relatedTopics.includes(source.subcategory?.toLowerCase() || '');
+      const normalizedCategory = normalizeTopic(source.category);
+      const normalizedSub = normalizeTopic(source.subcategory || '');
+      const matchesRelated = relatedTopics.includes(normalizedCategory) ||
+                            relatedTopics.includes(normalizedSub);
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
@@ -136,8 +146,25 @@ export const useSmartRecommendation = (
       return tertiaryFilter;
     }
 
-    // Quaternary filter: closest time match across all topics
-    const allSources = sources.filter(source => 
+    // Quaternary filter: related topics ignoring time for better fallback
+    const moreRelated = sources.filter(source => {
+      const normalizedCategory = normalizeTopic(source.category);
+      const normalizedSub = normalizeTopic(source.subcategory || '');
+      const matchesRelated = relatedTopics.includes(normalizedCategory) ||
+                            relatedTopics.includes(normalizedSub);
+      const notInHistory = !sourceHistory.includes(source.id);
+      const languageMatch = source.language_preference === 'both' ||
+                           source.language_preference === (config.language === 'he' ? 'hebrew' : 'english');
+
+      return matchesRelated && notInHistory && source.published && languageMatch;
+    });
+
+    if (moreRelated.length > 0) {
+      return moreRelated.slice(0, 5);
+    }
+
+    // Final fallback: closest time match across all topics
+    const allSources = sources.filter(source =>
       !sourceHistory.includes(source.id) && source.published
     );
     
