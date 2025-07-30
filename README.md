@@ -74,16 +74,12 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 ## Environment Variables
 
-Some features rely on external services. To enable AI source generation you must
-set an `AIzaSyCMS2jvyLPwMmdVuR360XNXwar4wz2P5kY'
-
-` environment variable in your Supabase function or local
-environment. Without this key the `ai-source-generator` function will fail.
+Some features rely on external services. To enable AI source generation you need
+ to provide an `OPENAI_API_KEY` environment variable in your Supabase function or local environment. Without this key the `ai-source-generator` function will fail.
 
 Example `.env` entry:
 
 ```bash
-AIzaSyCMS2jvyLPwMmdVuR360XNXwar4wz2P5kY
-=your-openai-api-key
+OPENAI_API_KEY=your-openai-api-key
 ```
 

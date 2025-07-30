@@ -73,8 +73,13 @@ export const useSmartRecommendation = (
     
     // Primary filter: exact topic match + optimal time + type compatibility + quality validation
     const primaryFilter = sources.filter(source => {
-      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
-                          normalizeTopic(source.subcategory || '') === normalizedTopic;
+      const categorySlug = normalizeTopic(source.category);
+      const subSlug = normalizeTopic(source.subcategory || '');
+      const matchesTopic =
+        categorySlug === normalizedTopic ||
+        subSlug === normalizedTopic ||
+        categorySlug.includes(normalizedTopic) ||
+        subSlug.includes(normalizedTopic);
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 5) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 5);
       const typeMatch = !timeFilter.types.length || timeFilter.types.includes(source.source_type || 'text_study');
@@ -100,8 +105,13 @@ export const useSmartRecommendation = (
 
     // Secondary filter: expand time range but keep topic match
     const secondaryFilter = sources.filter(source => {
-      const matchesTopic = normalizeTopic(source.category) === normalizedTopic ||
-                          normalizeTopic(source.subcategory || '') === normalizedTopic;
+      const categorySlug = normalizeTopic(source.category);
+      const subSlug = normalizeTopic(source.subcategory || '');
+      const matchesTopic =
+        categorySlug === normalizedTopic ||
+        subSlug === normalizedTopic ||
+        categorySlug.includes(normalizedTopic) ||
+        subSlug.includes(normalizedTopic);
       const timeMatch = config.timeSelected >= (source.min_time || source.estimated_time - 10) && 
                        config.timeSelected <= (source.max_time || source.estimated_time + 15);
       const notInHistory = !sourceHistory.includes(source.id);
