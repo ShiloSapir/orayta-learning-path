@@ -74,6 +74,16 @@ export const useAISourceGenerator = () => {
       }
 
       const source = data.sources;
+
+      if (!source.title || !source.title_he || !source.sefaria_link) {
+        toast({
+          title: "Generation Failed",
+          description: "AI response was missing required fields.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
       setLastGenerated(source);
       
       toast({

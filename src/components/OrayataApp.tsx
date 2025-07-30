@@ -82,6 +82,10 @@ export const OrayataApp = () => {
     actions.setStep('search');
   };
 
+  const handleAdmin = () => {
+    window.location.assign('/admin');
+  };
+
   const handleSaveReflection = () => {
     // Reset session and go to welcome
     actions.resetSession();
@@ -187,6 +191,7 @@ export const OrayataApp = () => {
         onProfile={handleOpenProfile}
         onAnalytics={handleAnalytics}
         onSearch={handleSearch}
+        onAdmin={profile?.role === 'admin' ? handleAdmin : undefined}
       />
 
       {/* Offline Support */}
