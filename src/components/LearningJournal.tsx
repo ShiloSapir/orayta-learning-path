@@ -133,13 +133,13 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
           id: session.id,
           title: source ? (language === 'he' ? source.title_he : source.title) : session.topic_selected,
           topic: session.topic_selected,
-          date: session.created_at,
+          date: session.created_at || new Date().toISOString(),
           duration: session.time_selected,
           status,
           reflection: sessionReflections[0]?.note,
           tags: sessionReflections[0]?.tags || [],
           sefariaLink: source?.sefaria_link || '',
-          sourceId: session.source_id
+          sourceId: session.source_id || undefined
         };
       });
       

@@ -1,10 +1,9 @@
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Language } from "./LanguageToggle";
 import { Source } from "@/hooks/useSupabaseData";
 

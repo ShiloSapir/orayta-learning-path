@@ -9,3 +9,6 @@ max_rows = 1000
 
 [functions.ai-source-generator]
 verify_jwt = false
+
+[functions.gemini-source-agent]
+verify_jwt = false
