@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Language } from "./LanguageToggle";
-import { useSupabaseData, type Source, type LearningSession as DBLearningSession, type Reflection } from "@/hooks/useSupabaseData";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,12 +14,10 @@ import {
   BookOpen, 
   Heart, 
   PenTool, 
-  Calendar,
   ExternalLink,
   Trash2,
   RotateCcw,
-  Share,
-  Loader2
+  Share
 } from "lucide-react";
 
 interface LearningJournalProps {

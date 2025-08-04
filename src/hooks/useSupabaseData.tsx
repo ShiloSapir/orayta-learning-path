@@ -5,33 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
 // Validation schemas
-const SourceSchema = z.object({
-  id: z.string().uuid(),
-  title: z.string().min(1, "Title is required"),
-  title_he: z.string().min(1, "Hebrew title is required"),
-  category: z.string().min(1, "Category is required"),
-  subcategory: z.string().optional(),
-  estimated_time: z.number().min(1, "Estimated time must be positive"),
-  sefaria_link: z.string().url("Invalid URL"),
-  text_excerpt: z.string().optional(),
-  text_excerpt_he: z.string().optional(),
-  reflection_prompt: z.string().min(1, "Reflection prompt is required"),
-  reflection_prompt_he: z.string().min(1, "Hebrew reflection prompt is required"),
-  published: z.boolean(),
-  start_ref: z.string().min(1, "Start reference is required"),
-  end_ref: z.string().min(1, "End reference is required"),
-  commentaries: z.array(z.string()).optional(),
-  // Enhanced fields
-  difficulty_level: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  source_type: z.enum(['text_study', 'practical_halacha', 'philosophical', 'historical', 'mystical']).optional(),
-  language_preference: z.enum(['english', 'hebrew', 'both']).optional(),
-  min_time: z.number().min(5).optional(),
-  max_time: z.number().max(60).optional(),
-  learning_objectives: z.array(z.string()).optional(),
-  prerequisites: z.array(z.string()).optional(),
-  ai_generated: z.boolean().optional()
-});
-
 const SessionSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid().nullable(),

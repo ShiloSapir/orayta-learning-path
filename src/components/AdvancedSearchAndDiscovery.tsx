@@ -6,15 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, 
-  Filter, 
   Clock, 
   BookOpen, 
   Star,
   TrendingUp,
-  Calendar,
   Tag,
-  User,
-  FileText,
   Sparkles,
   Brain,
   Heart
@@ -108,7 +104,7 @@ const content = {
 
 export function AdvancedSearchAndDiscovery({ language, onSourceSelect, onBack }: AdvancedSearchAndDiscoveryProps) {
   const { user } = useAuth();
-  const { sources, loading } = useSupabaseData();
+  const { sources } = useSupabaseData();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
@@ -580,7 +576,7 @@ export function AdvancedSearchAndDiscovery({ language, onSourceSelect, onBack }:
                 {searchResults.length} {t.results} for "{searchQuery}"
               </p>
               <div className="space-y-4">
-                {searchResults.map((result, index) => (
+                {searchResults.map((result) => (
                   <SearchResultCard key={result.source.id} result={result} />
                 ))}
               </div>

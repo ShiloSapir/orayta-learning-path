@@ -16,8 +16,6 @@ import {
   BarChart3,
   Activity,
   Zap,
-  CheckCircle,
-  Users,
   MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -181,11 +179,6 @@ export function EnhancedLearningDashboard({ language, onBack }: EnhancedLearning
     return 'text-red-600 dark:text-red-400';
   };
 
-  const getScoreLabel = (score: number) => {
-    if (score >= 80) return t.excellent;
-    if (score >= 60) return t.good;
-    return t.fair;
-  };
 
   const StatCard = ({ icon: Icon, title, value, unit, subtitle, color = 'text-primary' }: any) => (
     <Card className="p-4">

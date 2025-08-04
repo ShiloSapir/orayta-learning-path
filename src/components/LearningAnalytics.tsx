@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LearningStats } from './LearningStats';
-import { AdvancedSearch } from './AdvancedSearch';
 import { 
   BarChart, 
   Calendar, 
@@ -11,8 +9,7 @@ import {
   Target,
   Clock,
   BookOpen,
-  Star,
-  Filter
+  Star
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { Language } from './LanguageToggle';
@@ -77,7 +74,7 @@ const content = {
 export function LearningAnalytics({ language }: LearningAnalyticsProps) {
   const { state } = useAppContext();
   const { sessions } = state;
-  const [searchResults, setSearchResults] = useState(sessions);
+  const [searchResults] = useState(sessions);
   const t = content[language];
   const isHebrew = language === 'he';
 
