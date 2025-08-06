@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -16,6 +16,7 @@ import { SourceLoadingState } from "./SourceLoadingState";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAppToast } from "@/hooks/useToast";
 
 export const OrayataApp = () => {
   const { user, loading: authLoading } = useAuth();
@@ -23,10 +24,8 @@ export const OrayataApp = () => {
   const { state, actions } = useAppContext();
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
-  // Show skeleton while checking authentication
-  if (authLoading) {
-    return <SourceLoadingState variant="minimal" />;
-  }
+  const [makeResponse, setMakeResponse] = useState<unknown>(null);
+  const { info, error: showError } = useAppToast();
 
   // Load persisted settings on mount
   useEffect(() => {
@@ -39,7 +38,7 @@ export const OrayataApp = () => {
         actions.setLanguage(storedLang);
       }
     }
-  }, [profile]);
+  }, [profile, actions]);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', selectedLanguage);
@@ -57,9 +56,9 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
-  const sendToMake = async (timeSelected: number, topicSelected: string, languageSelected: string) => {
+  const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
     try {
-      await fetch('https://hook.eu2.make.com/dv77hcqg67fn9hj4phbias2q7oj3btk2', {
+      const response = await fetch('https://hook.eu2.make.com/dv77hcqg67fn9hj4phbias2q7oj3btk2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,10 +71,28 @@ export const OrayataApp = () => {
           timestamp: new Date().toISOString()
         }),
       });
+
+      const data = await response.json().catch(() => null);
+      setMakeResponse(data);
+      info('Received response from Make', {
+        description: data ? JSON.stringify(data) : undefined
+      });
     } catch (error) {
       console.error('Failed to send data to Make:', error);
+      showError('Failed to get response from Make');
     }
-  };
+  }, [user, info, showError]);
+
+  useEffect(() => {
+    if (currentStep === 'source' && selectedTime && selectedTopic) {
+      sendToMake(selectedTime, selectedTopic, selectedLanguage);
+    }
+  }, [currentStep, selectedTime, selectedTopic, selectedLanguage, sendToMake]);
+
+  // Show skeleton while checking authentication
+  if (authLoading) {
+    return <SourceLoadingState variant="minimal" />;
+  }
 
   const handleReflection = (sessionId: string) => {
     actions.setSource(sessionId);
@@ -161,12 +178,15 @@ export const OrayataApp = () => {
           />
         )}
 
-        {/* Send data to Make when both time and topic are selected and we reach source step */}
-        {currentStep === 'source' && selectedTime && selectedTopic && (
-          (() => {
-            sendToMake(selectedTime, selectedTopic, selectedLanguage);
-            return null;
-          })()
+        {/* Display webhook response if available */}
+        {currentStep === 'source' && makeResponse && (
+          <div className="max-w-4xl mx-auto mt-4 p-4 bg-muted rounded">
+            <pre className="whitespace-pre-wrap break-all text-sm">
+              {typeof makeResponse === 'string'
+                ? makeResponse
+                : JSON.stringify(makeResponse, null, 2)}
+            </pre>
+          </div>
         )}
 
         {currentStep === 'reflection' && currentSource && (
