@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -24,7 +24,6 @@ export const OrayataApp = () => {
   const { state, actions } = useAppContext();
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
-  const [makeResponse, setMakeResponse] = useState<string | null>(null);
   const sentRequestRef = useRef<string | null>(null);
 
   // Load persisted settings on mount
@@ -85,14 +84,10 @@ export const OrayataApp = () => {
         }
       );
 
-      // With no-cors mode, we always get an opaque response
-      const message = 'Request sent to Make. Response unavailable due to CORS restrictions.';
-      setMakeResponse(message);
+      // Silently send request - no user notification needed
 
     } catch (error) {
-      // Silently handle fetch errors as they're expected with no-cors
-      const message = 'Request sent to Make (no response available due to CORS)';
-      setMakeResponse(message);
+      // Silently handle fetch errors - no user notification needed
     }
   }, [user]);
 
@@ -191,16 +186,6 @@ export const OrayataApp = () => {
           />
         )}
 
-        {/* Display webhook response if available */}
-        {currentStep === 'source' && makeResponse && (
-          <div className="max-w-4xl mx-auto mt-4 p-4 bg-muted rounded">
-            <pre className="whitespace-pre-wrap break-all text-sm">
-              {typeof makeResponse === 'string'
-                ? makeResponse
-                : JSON.stringify(makeResponse, null, 2)}
-            </pre>
-          </div>
-        )}
 
         {currentStep === 'reflection' && currentSource && (
           <ReflectionFormV2

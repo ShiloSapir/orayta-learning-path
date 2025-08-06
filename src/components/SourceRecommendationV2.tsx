@@ -27,7 +27,7 @@ import {
   SkipForward,
   CheckCircle,
   AlertTriangle,
-  Sparkles
+  
 } from "lucide-react";
 
 interface SourceRecommendationProps {
@@ -44,7 +44,7 @@ const content = {
     subtitle: "Selected for your spiritual journey",
     backButton: "Back",
     skipButton: "Skip This Source",
-    generateButton: "Generate AI Source",
+    
     saveButton: "Save for Later",
     learnedButton: "Mark as Learned",
     calendarButton: "Add to Calendar",
@@ -63,7 +63,7 @@ const content = {
     subtitle: "נבחר למסע הרוחני שלך",
     backButton: "חזור",
     skipButton: "דלג על המקור הזה",
-    generateButton: "צור מקור AI",
+    
     saveButton: "שמור למועד מאוחר",
     learnedButton: "סמן כנלמד",
     calendarButton: "הוסף ליומן",
@@ -314,29 +314,6 @@ export const SourceRecommendationV2 = ({
     }
   };
 
-  const handleGenerateAI = async () => {
-    setLoading(true);
-    try {
-      const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
-      if (aiSource) {
-        const converted: Source = {
-          ...aiSource,
-          id: aiSource.id || crypto.randomUUID(),
-          published: true,
-          difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
-          source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
-          language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
-          ai_generated: true
-        };
-        setCurrentSource(converted);
-        setMatchType('related');
-        createSessionForSource(converted);
-        announce(`Generated AI source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     if (!currentSessionId || !currentSource) return;
@@ -452,22 +429,9 @@ export const SourceRecommendationV2 = ({
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {content[language].backButton}
-          </Button>
-          
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">{content[language].title}</h1>
-            <p className="text-muted-foreground">{content[language].subtitle}</p>
-          </div>
-          
-          <div className="w-20" /> {/* Spacer for centering */}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">{content[language].title}</h1>
+          <p className="text-muted-foreground">{content[language].subtitle}</p>
         </div>
 
         {/* Quality Warnings */}
@@ -505,7 +469,7 @@ export const SourceRecommendationV2 = ({
 
         {/* Action Buttons */}
         <Card className="p-6 space-y-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <Button
               onClick={handleSkip}
               variant="outline"
@@ -515,14 +479,6 @@ export const SourceRecommendationV2 = ({
               {content[language].skipButton}
             </Button>
 
-            <Button
-              onClick={handleGenerateAI}
-              variant="outline"
-              disabled={loading || isGenerating}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              {content[language].generateButton}
-            </Button>
             
             <Button 
               onClick={handleSave} 
