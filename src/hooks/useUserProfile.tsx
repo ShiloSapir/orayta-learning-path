@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +8,7 @@ export interface UserProfile {
   name: string | null;
   email: string | null;
   avatar_url: string | null;
-  learning_preferences: any; // JSONB field
+  learning_preferences: Record<string, unknown>; // JSONB field
   daily_goal: number | null;
   preferred_language: string | null;
   role: string | null;
@@ -24,15 +24,7 @@ export const useUserProfile = (user: User | null) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else {
-      setProfile(null);
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -64,9 +56,17 @@ export const useUserProfile = (user: User | null) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const updateProfile = async (updates: any) => {
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [user, fetchProfile]);
+
+  const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return false;
 
     try {
@@ -86,13 +86,13 @@ export const useUserProfile = (user: User | null) => {
       }
 
       // Update local state
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
-      
+      setProfile(prev => (prev ? { ...prev, ...updates } : null));
+
       toast({
         title: "Success",
         description: "Profile updated successfully",
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);

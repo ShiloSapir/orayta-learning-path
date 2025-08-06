@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface WebhookSource {
   title: string;
@@ -18,44 +18,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchWebhookSource = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          time_selected: timeSelected,
-          topic_selected: topicSelected,
-          language_selected: language,
-          user_id: crypto.randomUUID(), // Generate a random ID for webhook tracking
-          timestamp: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch source from webhook');
-      }
-
-      const responseText = await response.text();
-      
-      // Parse the formatted response from Make
-      const parsedSource = parseWebhookResponse(responseText);
-      setSource(parsedSource);
-      
-    } catch (err) {
-      console.error('Webhook fetch error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const parseWebhookResponse = (responseText: string): WebhookSource => {
+  const parseWebhookResponse = useCallback((responseText: string): WebhookSource => {
     // Extract information from the formatted Make response
     const titleMatch = responseText.match(/\*\*English:\*\*\s*(.+?)(?:\n|$)/);
     const titleHeMatch = responseText.match(/\*\*Hebrew:\*\*\s*(.+?)(?:\n|$)/);
@@ -84,13 +47,50 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
       sefaria_link: linkMatch?.[0] || '',
     };
-  };
+  }, [timeSelected]);
+
+  const fetchWebhookSource = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          time_selected: timeSelected,
+          topic_selected: topicSelected,
+          language_selected: language,
+          user_id: crypto.randomUUID(), // Generate a random ID for webhook tracking
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch source from webhook');
+      }
+
+      const responseText = await response.text();
+
+      // Parse the formatted response from Make
+      const parsedSource = parseWebhookResponse(responseText);
+      setSource(parsedSource);
+
+    } catch (err) {
+      console.error('Webhook fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, [timeSelected, topicSelected, language, parseWebhookResponse]);
 
   useEffect(() => {
     if (timeSelected && topicSelected && language) {
       fetchWebhookSource();
     }
-  }, [timeSelected, topicSelected, language]);
+  }, [timeSelected, topicSelected, language, fetchWebhookSource]);
 
   return {
     source,

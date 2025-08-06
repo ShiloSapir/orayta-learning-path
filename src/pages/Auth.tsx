@@ -36,7 +36,10 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { } = await signUp(email, password, name);
+    const { error } = await signUp(email, password, name);
+    if (!error) {
+      navigate("/");
+    }
     setIsLoading(false);
   };
 
