@@ -62,7 +62,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
         {/* Header with Language Toggle */}
         <div className="flex justify-between items-center">
           <div className="w-20"></div> {/* Spacer */}
-          <div className="text-sm text-muted-foreground font-medium translate-x-8">
+          <div className="text-sm text-muted-foreground font-medium translate-x-16">
             {t.greeting}
           </div>
           <div className="flex items-center gap-2">
