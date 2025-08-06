@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
-import { useSupabaseData, Source } from "@/hooks/useSupabaseData";
-import { useSmartRecommendation } from "@/hooks/useSmartRecommendation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAppToast } from "@/hooks/useToast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
@@ -11,12 +9,7 @@ import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
 import { SourceLoadingState } from "./SourceLoadingState";
 import { useMinimumLoading } from "@/hooks/useMinimumLoading";
-import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
-import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
-import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
-import { useAISourceGenerator } from "@/hooks/useAISourceGenerator";
-import { normalizeTopic } from "@/utils/normalizeTopic";
-import { getRelatedTopics } from "@/utils/topicRelations";
+import { useWebhookSource, WebhookSource } from "@/hooks/useWebhookSource";
 import { 
   ExternalLink, 
   BookOpen, 
@@ -24,7 +17,6 @@ import {
   Calendar,
   SkipForward,
   CheckCircle,
-  AlertTriangle,
   
 } from "lucide-react";
 
@@ -85,259 +77,98 @@ export const SourceRecommendationV2 = ({
   onReflection 
 }: SourceRecommendationProps) => {
   const { user } = useAuth();
-  const { sources, loading: dataLoading, createSession, updateSessionStatus } = useSupabaseData();
-  const { success, error } = useAppToast();
-  const [currentSource, setCurrentSource] = useState<Source | null>(null);
+  const { success } = useAppToast();
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [matchType, setMatchType] = useState<'exact' | 'related' | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
-  const [qualityWarnings, setQualityWarnings] = useState<string[]>([]);
   
-  // Enhanced smart recommendation system with personalization
-  const {
-    getRecommendedSource,
-    addToHistory,
-    updateUserHistory,
-    sourceHistory,
-    getFilteredSources
-  } = useSmartRecommendation(sources, {
-    timeSelected,
-    topicSelected,
+  // Use webhook source instead of Supabase
+  const { source: webhookSource, loading: webhookLoading, error: webhookError, refetch } = useWebhookSource(
+    timeSelected, 
+    topicSelected, 
     language
-  });
+  );
 
-  // Personalization engine
-  const { 
-    getPersonalizedRecommendations, 
-    updateLearningPattern 
-  } = usePersonalizationEngine();
-
-  // Content quality assurance
-  const { 
-    assessSourceQuality, 
-    validateTorahReferences 
-  } = useContentQualityAssurance();
-
-  // AI Source Generator for fallback
-  const { generateFallbackSource, isGenerating } = useAISourceGenerator();
-  const showDataLoading = useMinimumLoading(dataLoading);
-  const showAIGenerating = useMinimumLoading(isGenerating);
-
+  const showLoading = useMinimumLoading(webhookLoading);
   const { announce } = useAccessibilityAnnouncements();
 
-  const determineMatchType = (source: Source): 'exact' | 'related' => {
-    const normalized = normalizeTopic(topicSelected);
-    const cat = normalizeTopic(source.category);
-    const sub = normalizeTopic(source.subcategory || '');
-    if (cat === normalized || sub === normalized) return 'exact';
-    const related = getRelatedTopics(normalized);
-    return related.includes(cat) || related.includes(sub) ? 'related' : 'related';
-  };
-  
   // Set up keyboard navigation
   useKeyboardNavigation({
     shortcuts: [
       { key: 'ArrowLeft', action: onBack, description: 'Go back' },
-      { key: 'Enter', action: () => currentSource && handleReflection(), description: 'Write reflection' },
-      { key: 's', action: () => currentSource && handleSave(), description: 'Save source' },
-      { key: 'l', action: () => currentSource && handleMarkLearned(), description: 'Mark as learned' },
-      { key: 'n', action: () => currentSource && handleSkip(), description: 'Skip source' }
+      { key: 'Enter', action: () => webhookSource && handleReflection(), description: 'Write reflection' },
+      { key: 's', action: () => webhookSource && handleSave(), description: 'Save source' },
+      { key: 'l', action: () => webhookSource && handleMarkLearned(), description: 'Mark as learned' },
+      { key: 'n', action: () => webhookSource && handleSkip(), description: 'Skip source' }
     ]
   });
 
-  // Load new source using enhanced smart recommendation with minimal quality checks
-  const loadNewSource = async () => {
-    console.log('🔄 Loading new source...');
-    
-    // Try smart recommendation first (primary method)
-    let selectedSource = getRecommendedSource();
-    
-    if (selectedSource) {
-      console.log('✅ Found source via smart recommendation:', selectedSource.title);
-      
-      // Minimal quality validation (just warnings, don't block)
-      try {
-        const qualityMetrics = await assessSourceQuality(selectedSource);
-        const torahValidation = validateTorahReferences(selectedSource);
-        
-        const warnings = [
-          ...torahValidation.warnings,
-          ...torahValidation.suggestions,
-          ...(qualityMetrics.score < 60 ? [`Source quality score: ${qualityMetrics.score}%`] : [])
-        ];
-        
-        setQualityWarnings(warnings);
-      } catch (error) {
-        console.warn('Quality check failed, proceeding anyway:', error);
-        setQualityWarnings([]);
-      }
-      
-      setCurrentSource(selectedSource);
-      setMatchType(determineMatchType(selectedSource));
-      createSessionForSource(selectedSource);
-      setShowFallback(false);
-      return selectedSource;
-    }
-    
-    console.log('❌ No source found via smart recommendation, trying personalized...');
-    
-    // Try personalized recommendations as backup
-    try {
-      const personalizedSources = getPersonalizedRecommendations(sources, {
-        timeSelected,
-        topicSelected,
-        language
-      });
-
-      if (personalizedSources.length > 0) {
-        selectedSource = personalizedSources[0];
-        console.log('✅ Found source via personalization:', selectedSource.title);
-        setCurrentSource(selectedSource);
-        setMatchType(determineMatchType(selectedSource));
-        createSessionForSource(selectedSource);
-        setShowFallback(false);
-        setQualityWarnings([]);
-        return selectedSource;
-      }
-    } catch (error) {
-      console.warn('Personalization failed:', error);
-    }
-    
-    console.log('❌ No personalized sources, checking if any sources exist at all...');
-    
-    // Check if we have ANY published sources
-    const anyPublishedSources = sources.filter(s => s.published && !sourceHistory.includes(s.id));
-    
-    if (anyPublishedSources.length === 0) {
-      console.log('❌ No published sources available, trying AI generation...');
-      
-      // Try AI fallback generation only if truly no sources exist
-      try {
-        const aiSource = await generateFallbackSource(topicSelected, timeSelected, 'beginner');
-        if (aiSource) {
-          const convertedSource: Source = {
-            ...aiSource,
-            id: aiSource.id || crypto.randomUUID(),
-            published: aiSource.published || true,
-            difficulty_level: aiSource.difficulty_level as 'beginner' | 'intermediate' | 'advanced',
-            source_type: aiSource.source_type as 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical',
-            language_preference: aiSource.language_preference as 'english' | 'hebrew' | 'both',
-            ai_generated: true,
-          };
-          setCurrentSource(convertedSource);
-          setMatchType('related');
-          createSessionForSource(convertedSource);
-          setShowFallback(false);
-          setQualityWarnings([]);
-          announce(`Generated new source: ${language === 'he' ? aiSource.title_he : aiSource.title}`);
-          return convertedSource;
-        }
-      } catch (error) {
-        console.error('AI fallback generation failed:', error);
-      }
-      
-      // Last resort: show fallback mechanisms
-      console.log('❌ All methods failed, showing fallback UI');
-      setShowFallback(true);
-      return null;
-    }
-    
-    // If we have sources but filtering is too strict, grab a random one
-    console.log('🎲 Fallback to random source from', anyPublishedSources.length, 'available');
-    selectedSource = anyPublishedSources[Math.floor(Math.random() * anyPublishedSources.length)];
-    setCurrentSource(selectedSource);
-    setMatchType('related');
-    createSessionForSource(selectedSource);
-    setShowFallback(false);
-    setQualityWarnings(['This source may not perfectly match your criteria, but it\'s a good learning opportunity!']);
-    return selectedSource;
-  };
-
-  // Load initial source with enhanced error handling
+  // Create a session when source is loaded
   useEffect(() => {
-    if (sources.length > 0 && !currentSource && !showFallback) {
-      loadNewSource().then(source => {
-        if (!source) {
-          const filteredSources = getFilteredSources();
-          if (filteredSources.length === 0) {
-            setShowFallback(true);
-          } else {
-            error(content[language].noSources);
-          }
-        }
-      });
+    if (webhookSource && user && !currentSessionId) {
+      createSessionForWebhookSource(webhookSource);
     }
-  }, [sources, currentSource, showFallback]);
+  }, [webhookSource, user, currentSessionId]);
 
-  const createSessionForSource = async (source: Source) => {
+  const createSessionForWebhookSource = async (source: WebhookSource) => {
     if (!user) return;
     
-    const session = await createSession(topicSelected, timeSelected, source.id);
-    if (session) {
-      setCurrentSessionId(session.id);
-    }
+    // Create a simple session tracking for webhook sources
+    const sessionId = crypto.randomUUID();
+    setCurrentSessionId(sessionId);
+    
+    // Store session data in localStorage for now
+    const sessionData = {
+      id: sessionId,
+      user_id: user.id,
+      topic_selected: topicSelected,
+      time_selected: timeSelected,
+      source_title: source.title,
+      status: 'recommended',
+      created_at: new Date().toISOString()
+    };
+    
+    localStorage.setItem(`webhook_session_${sessionId}`, JSON.stringify(sessionData));
   };
 
   const handleSkip = async () => {
-    if (!currentSource) return;
+    if (!webhookSource) return;
     
-    console.log('⏭️ Skipping source:', currentSource.title);
-    setLoading(true);
+    console.log('⏭️ Skipping webhook source:', webhookSource.title);
+    announce(`Skipping to new source`);
     
-    try {
-      // Update user learning patterns and history
-      addToHistory(currentSource.id);
-      updateUserHistory(currentSource, 'skipped');
-      updateLearningPattern(currentSource, 'skipped');
-      
-      // Clear current source before loading new one
-      setCurrentSource(null);
-      setQualityWarnings([]);
-      
-      // Get new source using enhanced recommendation
-      const newSource = await loadNewSource();
-      if (newSource) {
-        console.log('✅ Successfully skipped to new source:', newSource.title);
-        announce(`Skipped to new source: ${language === 'he' ? newSource.title_he : newSource.title}`);
-      } else {
-        console.log('❌ No new source found after skip');
-        error('No more sources available. Try adjusting your time or topic selection.');
-      }
-    } catch (skipError) {
-      console.error('Error during skip:', skipError);
-      error('Failed to skip source. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Generate new source
+    refetch();
   };
 
-
   const handleSave = async () => {
-    if (!currentSessionId || !currentSource) return;
+    if (!currentSessionId || !webhookSource) return;
     
-    setLoading(true);
-    await updateSessionStatus(currentSessionId, 'saved');
-    updateUserHistory(currentSource, 'saved');
+    // Update session status in localStorage
+    const sessionKey = `webhook_session_${currentSessionId}`;
+    const sessionData = JSON.parse(localStorage.getItem(sessionKey) || '{}');
+    sessionData.status = 'saved';
+    sessionData.updated_at = new Date().toISOString();
+    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+    
     success(content[language].saveButton);
-    setLoading(false);
   };
 
   const handleMarkLearned = async () => {
-    if (!currentSessionId || !currentSource) return;
+    if (!currentSessionId || !webhookSource) return;
     
-    setLoading(true);
-    await updateSessionStatus(currentSessionId, 'learned');
-    updateUserHistory(currentSource, 'completed');
-    updateLearningPattern(currentSource, 'completed');
+    // Update session status in localStorage
+    const sessionKey = `webhook_session_${currentSessionId}`;
+    const sessionData = JSON.parse(localStorage.getItem(sessionKey) || '{}');
+    sessionData.status = 'learned';
+    sessionData.updated_at = new Date().toISOString();
+    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+    
     success(content[language].learnedButton);
-    setLoading(false);
   };
 
   const handleCalendar = () => {
-    if (!currentSource) return;
+    if (!webhookSource) return;
     
-    const title = language === 'he' ? currentSource.title_he : currentSource.title;
+    const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
     const startDate = new Date();
     const endDate = new Date(startDate.getTime() + timeSelected * 60000);
     
@@ -353,7 +184,7 @@ export const SourceRecommendationV2 = ({
     }
   };
 
-  if (showDataLoading) {
+  if (showLoading) {
     return (
       <SourceLoadingState
         message={content[language].loading}
@@ -362,17 +193,23 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  if (showAIGenerating) {
+  if (webhookError) {
     return (
-      <SourceLoadingState
-        message="Generating new source..."
-        variant="minimal"
-      />
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
+        <Card className="p-6 max-w-md text-center">
+          <h2 className="text-xl font-semibold mb-4">Error Loading Source</h2>
+          <p className="text-muted-foreground mb-4">
+            Failed to load your Torah source. Please try again.
+          </p>
+          <Button onClick={refetch} variant="outline">
+            Try Again
+          </Button>
+        </Card>
+      </div>
     );
   }
 
-  // Show loading state while waiting for webhook response or processing
-  if (!currentSource && !loading && !showDataLoading) {
+  if (!webhookSource) {
     return (
       <SourceLoadingState
         message={content[language].loading}
@@ -381,14 +218,9 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  // Add null safety checks
-  if (!currentSource) {
-    return null;
-  }
-
-  const title = language === 'he' ? currentSource.title_he : currentSource.title;
-  const textExcerpt = language === 'he' ? currentSource.text_excerpt_he : currentSource.text_excerpt;
-  const reflectionPrompt = language === 'he' ? currentSource.reflection_prompt_he : currentSource.reflection_prompt;
+  const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
+  const excerpt = webhookSource.excerpt;
+  const reflectionPrompt = webhookSource.reflection_prompt;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4">
@@ -399,32 +231,46 @@ export const SourceRecommendationV2 = ({
           <p className="text-muted-foreground">{content[language].subtitle}</p>
         </div>
 
-        {/* Quality Warnings */}
-        {qualityWarnings.length > 0 && (
-          <Card className="p-4 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                  Content Quality Notes
-                </h4>
-                <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-0.5">
-                  {qualityWarnings.map((warning, index) => (
-                    <li key={index}>• {warning}</li>
-                  ))}
-                </ul>
-              </div>
+        {/* Webhook Source Display */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">{title}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{webhookSource.source_range}</p>
             </div>
-          </Card>
-        )}
-
-        {/* Enhanced Source Display */}
-        <EnhancedSourceDisplay
-          source={currentSource}
-          language={language}
-          onSefariaClick={() => currentSource && window.open(currentSource.sefaria_link, '_blank')}
-          matchType={matchType || undefined}
-        />
+            
+            {excerpt && (
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm leading-relaxed">{excerpt}</p>
+              </div>
+            )}
+            
+            {webhookSource.commentaries.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">{content[language].commentariesLabel}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {webhookSource.commentaries.map((commentary, index) => (
+                    <span key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      {commentary}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {webhookSource.sefaria_link && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(webhookSource.sefaria_link, '_blank')}
+                className="w-full sm:w-auto"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                {content[language].sefariaLink}
+              </Button>
+            )}
+          </div>
+        </Card>
 
         {/* Reflection Prompt */}
         <Card className="p-6">
@@ -438,77 +284,58 @@ export const SourceRecommendationV2 = ({
             <Button
               onClick={handleSkip}
               variant="outline"
-              disabled={loading}
+              disabled={webhookLoading}
             >
               <SkipForward className="h-4 w-4 mr-2" />
               {content[language].skipButton}
             </Button>
-
             
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               variant="outline"
-              disabled={loading}
+              disabled={webhookLoading}
             >
-              <BookOpen className="h-4 w-4 mr-2" />
+              <Heart className="h-4 w-4 mr-2" />
               {content[language].saveButton}
             </Button>
             
-            <Button 
-              onClick={handleMarkLearned} 
+            <Button
+              onClick={handleMarkLearned}
               variant="outline"
-              disabled={loading}
+              disabled={webhookLoading}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
               {content[language].learnedButton}
             </Button>
             
-            <Button 
-              onClick={handleCalendar} 
+            <Button
+              onClick={handleCalendar}
               variant="outline"
-              disabled={loading}
             >
               <Calendar className="h-4 w-4 mr-2" />
               {content[language].calendarButton}
             </Button>
           </div>
 
-          {/* Primary Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              onClick={handleReflection} 
-              className="flex-1"
-              disabled={loading}
-            >
-              <Heart className="h-4 w-4 mr-2" />
-              {content[language].reflectionButton}
-            </Button>
-            
-            <Button 
-              onClick={() => currentSource && window.open(currentSource.sefaria_link, '_blank')} 
-              variant="outline"
-              className="flex-1"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              {content[language].sefariaLink}
-            </Button>
-          </div>
-
-          {/* Social Sharing */}
-          <SocialSharing 
-            language={language}
-            source={{
-              title,
-              text: textExcerpt || '',
-              sefariaLink: currentSource?.sefaria_link || ''
-            }}
-          />
+          <Button
+            onClick={handleReflection}
+            className="w-full"
+            disabled={webhookLoading}
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            {content[language].reflectionButton}
+          </Button>
         </Card>
 
-        {/* Estimated Time */}
-        <div className="text-center text-sm text-muted-foreground">
-          Estimated time: {currentSource?.estimated_time || 15} minutes
-        </div>
+        {/* Social Sharing */}
+        <SocialSharing
+          language={language}
+          source={{
+            title: title,
+            text: excerpt || '',
+            sefariaLink: webhookSource.sefaria_link
+          }}
+        />
       </div>
     </div>
   );

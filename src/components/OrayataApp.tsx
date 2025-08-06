@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -24,7 +24,7 @@ export const OrayataApp = () => {
   const { state, actions } = useAppContext();
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
-  const sentRequestRef = useRef<string | null>(null);
+  
 
   // Load persisted settings on mount
   useEffect(() => {
@@ -55,55 +55,7 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
-  const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string, selectedSource?: string) => {
-    const requestKey = `${timeSelected}-${topicSelected}-${languageSelected}`;
-    
-    // Prevent duplicate requests
-    if (sentRequestRef.current === requestKey) {
-      return;
-    }
-    
-    sentRequestRef.current = requestKey;
-    
-    try {
-      await fetch(
-        'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            time_selected: timeSelected,
-            topic_selected: topicSelected,
-            language_selected: languageSelected,
-            selected_source: selectedSource,
-            user_id: user?.id,
-            timestamp: new Date().toISOString(),
-          }),
-        }
-      );
-
-      // Store webhook request info for tracking
-      localStorage.setItem('webhook_request', JSON.stringify({
-        timeSelected,
-        topicSelected,
-        languageSelected,
-        selectedSource,
-        timestamp: new Date().toISOString(),
-        sent: true
-      }));
-
-    } catch (error) {
-      console.error('Webhook request failed:', error);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (currentStep === 'source' && selectedTime && selectedTopic && currentSource) {
-      sendToMake(selectedTime, selectedTopic, selectedLanguage, currentSource);
-    }
-  }, [currentStep, selectedTime, selectedTopic, selectedLanguage, currentSource, sendToMake]);
+  // Removed old webhook logic - now handled directly in SourceRecommendationV2
 
   // Show skeleton while checking authentication
   if (authLoading) {
