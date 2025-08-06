@@ -57,32 +57,39 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
   const parseWebhookResponse = (responseText: string): WebhookSource => {
     // Extract information from the formatted Make response
-    const titleMatch = responseText.match(/\*\*English:\*\*\s*(.+?)(?:\n|$)/);
-    const titleHeMatch = responseText.match(/\*\*Hebrew:\*\*\s*(.+?)(?:\n|$)/);
+    const titleEnglishMatch = responseText.match(/\*\s*\*\*English:\*\*\s*(.+?)(?:\n|$)/);
+    const titleHebrewMatch = responseText.match(/\*\s*\*\*Hebrew:\*\*\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const commentariesMatch = responseText.match(/\*\*2 Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
-    const linkMatch = responseText.match(/https:\/\/www\.sefaria\.org\/[^\s]+/);
+    const linkMatch = responseText.match(/\*\*Link to the source on Sefaria:\*\*\s*(https:\/\/[^\s]+)/);
 
-    // Extract commentaries
+    // Extract commentaries from numbered list
     const commentariesText = commentariesMatch?.[1] || '';
-    const commentaries = commentariesText
-      .split(/\d+\.\s*/)
-      .slice(1) // Remove first empty element
-      .map(c => c.split(':')[0].replace(/\*\*/g, '').trim())
-      .filter(c => c.length > 0);
+    const commentaries: string[] = [];
+    
+    // Look for numbered commentaries (1. **Name:** description)
+    const commentaryMatches = commentariesText.matchAll(/\d+\.\s*\*\*([^:*]+):\*\*/g);
+    for (const match of commentaryMatches) {
+      if (match[1]) {
+        commentaries.push(match[1].trim());
+      }
+    }
+
+    // Clean up extracted text by removing markdown formatting
+    const cleanText = (text: string | undefined) => text?.replace(/\*\*/g, '').replace(/\*/g, '').trim() || '';
 
     return {
-      title: titleMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source',
-      title_he: titleHeMatch?.[1]?.replace(/\*/g, '').trim() || 'מקור תורני',
-      source_range: rangeMatch?.[1]?.trim() || '',
-      excerpt: excerptMatch?.[1]?.trim() || '',
+      title: cleanText(titleEnglishMatch?.[1]) || 'Torah Source',
+      title_he: cleanText(titleHebrewMatch?.[1]) || 'מקור תורני',
+      source_range: cleanText(rangeMatch?.[1]) || '',
+      excerpt: cleanText(excerptMatch?.[1]) || '',
       commentaries: commentaries.length > 0 ? commentaries : ['Rashi', 'Ramban'],
-      reflection_prompt: reflectionMatch?.[1]?.trim() || '',
+      reflection_prompt: cleanText(reflectionMatch?.[1]) || '',
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
-      sefaria_link: linkMatch?.[0] || '',
+      sefaria_link: linkMatch?.[1] || '',
     };
   };
 
