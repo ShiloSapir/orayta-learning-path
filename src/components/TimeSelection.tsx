@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Language } from "./LanguageToggle";
-import { Clock, ArrowLeft } from "lucide-react";
+import { Clock } from "lucide-react";
 
 interface TimeSelectionProps {
   language: Language;
   selectedTime: number | null;
   onTimeSelect: (minutes: number) => void;
-  onBack: () => void;
   onNext: () => void;
 }
 
@@ -33,8 +32,7 @@ export const TimeSelection = ({
   language, 
   selectedTime, 
   onTimeSelect, 
-  onBack, 
-  onNext 
+  onNext
 }: TimeSelectionProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
@@ -43,19 +41,10 @@ export const TimeSelection = ({
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-2xl mx-auto py-8 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t.backButton}
-          </Button>
+        <div className="flex items-center justify-center mb-8">
           <div className="text-center">
             <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
           </div>
-          <div className="w-16"></div> {/* Spacer */}
         </div>
 
         {/* Title */}

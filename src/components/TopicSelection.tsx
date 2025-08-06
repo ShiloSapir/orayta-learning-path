@@ -4,8 +4,7 @@ import { Language } from "./LanguageToggle";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useSmartRecommendation } from "@/hooks/useSmartRecommendation";
 import { 
-  ArrowLeft, 
-  Book, 
+  Book,
   Scale, 
   Scroll, 
   Users, 
@@ -20,7 +19,6 @@ interface TopicSelectionProps {
   selectedTopic: string | null;
   timeSelected: number;
   onTopicSelect: (topic: string) => void;
-  onBack: () => void;
   onNext: () => void;
 }
 
@@ -117,8 +115,7 @@ export const TopicSelection = ({
   selectedTopic, 
   timeSelected,
   onTopicSelect, 
-  onBack, 
-  onNext 
+  onNext
 }: TopicSelectionProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
@@ -137,19 +134,10 @@ export const TopicSelection = ({
     <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t.backButton}
-          </Button>
+        <div className="flex items-center justify-center mb-8">
           <div className="text-center">
             <Book className="h-8 w-8 text-primary mx-auto mb-2" />
           </div>
-          <div className="w-16"></div> {/* Spacer */}
         </div>
 
         {/* Title */}

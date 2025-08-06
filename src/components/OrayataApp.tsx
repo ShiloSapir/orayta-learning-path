@@ -170,7 +170,6 @@ export const OrayataApp = () => {
             language={selectedLanguage}
             selectedTime={selectedTime}
             onTimeSelect={handleTimeSelect}
-            onBack={actions.goToPreviousStep}
             onNext={actions.goToNextStep}
           />
         )}
@@ -181,7 +180,6 @@ export const OrayataApp = () => {
             selectedTopic={selectedTopic}
             timeSelected={selectedTime || 15}
             onTopicSelect={handleTopicSelect}
-            onBack={actions.goToPreviousStep}
             onNext={actions.goToNextStep}
           />
         )}
