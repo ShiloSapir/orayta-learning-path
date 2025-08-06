@@ -58,19 +58,28 @@ export const OrayataApp = () => {
 
   const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
     try {
-      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          time_selected: timeSelected,
-          topic_selected: topicSelected,
-          language_selected: languageSelected,
-          user_id: user?.id,
-          timestamp: new Date().toISOString(),
-        }),
-      });
+      const response = await fetch(
+        'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
+        {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            time_selected: timeSelected,
+            topic_selected: topicSelected,
+            language_selected: languageSelected,
+            user_id: user?.id,
+            timestamp: new Date().toISOString(),
+          }),
+        }
+      );
+
+      if (response.type === 'opaque') {
+        const message =
+          'Request sent to Make. Response unavailable due to CORS restrictions.';
+        setMakeResponse(message);
+        info('Sent request to Make', { description: message });
+        return;
+      }
 
       // Try to parse the response body but gracefully handle non-JSON payloads
       const raw = await response.text().catch(() => null);
