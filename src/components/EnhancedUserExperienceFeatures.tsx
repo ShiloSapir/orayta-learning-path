@@ -10,7 +10,6 @@ import {
   BookmarkPlus, 
   Share2, 
   Download, 
-  Calendar,
   Heart,
   MessageSquare,
   Wifi,
@@ -18,12 +17,11 @@ import {
   Bookmark,
   Clock,
   Target,
-  Zap,
   Settings
 } from 'lucide-react';
 import { Language } from './LanguageToggle';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+
 
 interface EnhancedUserExperienceFeaturesProps {
   language: Language;
@@ -320,7 +318,7 @@ export function EnhancedUserExperienceFeatures({ language }: EnhancedUserExperie
     success(t.copiedToClipboard);
   };
 
-  const shareProgress = async (type: 'streak' | 'reflection' | 'progress') => {
+  const shareProgress = async () => {
     const shareData = {
       title: 'My Torah Learning Journey',
       text: 'Check out my progress in Torah learning!',
@@ -510,7 +508,7 @@ export function EnhancedUserExperienceFeatures({ language }: EnhancedUserExperie
               <Button 
                 variant="outline" 
                 className="h-20 flex-col"
-                onClick={() => shareProgress('streak')}
+                onClick={shareProgress}
               >
                 <Target className="h-6 w-6 mb-2" />
                 {t.shareStreak}
@@ -519,7 +517,7 @@ export function EnhancedUserExperienceFeatures({ language }: EnhancedUserExperie
               <Button 
                 variant="outline" 
                 className="h-20 flex-col"
-                onClick={() => shareProgress('reflection')}
+                onClick={shareProgress}
               >
                 <MessageSquare className="h-6 w-6 mb-2" />
                 {t.shareReflection}
@@ -528,7 +526,7 @@ export function EnhancedUserExperienceFeatures({ language }: EnhancedUserExperie
               <Button 
                 variant="outline" 
                 className="h-20 flex-col"
-                onClick={() => shareProgress('progress')}
+                onClick={shareProgress}
               >
                 <Heart className="h-6 w-6 mb-2" />
                 {t.shareProgress.split(' ')[1]}

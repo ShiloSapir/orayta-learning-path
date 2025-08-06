@@ -6,7 +6,7 @@ import { SourceRecommendationV2 } from "./SourceRecommendationV2";
 import { ReflectionFormV2 } from "./ReflectionFormV2";
 import { LearningJournal } from "./LearningJournal";
 import { ProfileSettings } from "./ProfileSettings";
-import { LanguageToggle } from "./LanguageToggle";
+
 import { EnhancedLearningDashboard } from "./EnhancedLearningDashboard";
 import { AdvancedSearchAndDiscovery } from "./AdvancedSearchAndDiscovery";
 import { NavigationHeader } from "./NavigationHeader";

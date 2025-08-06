@@ -29,7 +29,7 @@ export const useContentQualityAssurance = () => {
       if (!urlPattern.test(url)) return false;
 
       // Check if link is accessible (simplified check)
-      const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      await fetch(url, { method: 'HEAD', mode: 'no-cors' });
       return true; // If no error thrown, assume accessible
     } catch {
       return false;
@@ -117,7 +117,6 @@ export const useContentQualityAssurance = () => {
 
     const total = timeCompatibleSources.length;
     const beginnerPercent = (difficultyCount.beginner || 0) / total;
-    const intermediatePercent = (difficultyCount.intermediate || 0) / total;
     const advancedPercent = (difficultyCount.advanced || 0) / total;
 
     // Ideal distribution: 50% beginner, 30% intermediate, 20% advanced

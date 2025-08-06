@@ -6,8 +6,6 @@ import {
   Wifi, 
   WifiOff, 
   Download, 
-  CheckCircle, 
-  AlertCircle,
   Clock
 } from 'lucide-react';
 
