@@ -59,7 +59,7 @@ export const OrayataApp = () => {
 
   const sendToMake = async (timeSelected: number, topicSelected: string) => {
     try {
-      await fetch('https://hook.eu2.make.com/rbhoozx2wxh2jp6bd3pmefcpn748ya3k', {
+      await fetch('https://hook.eu2.make.com/m7l50w2vg3vpr3aelf60kadnwjhzklkh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
