@@ -91,6 +91,13 @@ export const OrayataApp = () => {
       } else {
         showError(`Make responded with ${response.status}`);
       }
+=======
+      const data = await response.json().catch(() => null);
+      setMakeResponse(data);
+      info('Received response from Make', {
+        description: data ? JSON.stringify(data) : undefined
+      });
+
     } catch (error) {
       console.error('Failed to send data to Make:', error);
       showError('Failed to get response from Make');
