@@ -72,6 +72,7 @@ export const OrayataApp = () => {
         }),
       });
 
+      // Try to parse the response body but gracefully handle non-JSON payloads
       const raw = await response.text().catch(() => null);
       let data: unknown = null;
       if (raw) {
@@ -82,19 +83,26 @@ export const OrayataApp = () => {
         }
       }
 
+      // Format the response for display
+      const message =
+        typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+
       if (!response.ok) {
-        setMakeResponse(typeof data === 'string' ? data : JSON.stringify(data));
+        setMakeResponse(message);
         showError(`Make responded with ${response.status}`);
         return;
       }
 
-      setMakeResponse(typeof data === 'string' ? data : JSON.stringify(data));
+      setMakeResponse(message);
       info('Received response from Make', {
-        description: typeof data === 'string' ? data : JSON.stringify(data),
+        description: message,
       });
 
     } catch (error) {
       console.error('Failed to send data to Make:', error);
+      const message =
+        error instanceof Error ? error.message : String(error);
+      setMakeResponse(message);
       showError('Failed to get response from Make');
     }
   }, [user, info, showError]);
