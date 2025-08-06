@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -16,7 +16,7 @@ import { SourceLoadingState } from "./SourceLoadingState";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useAppToast } from "@/hooks/useToast";
+
 
 export const OrayataApp = () => {
   const { user, loading: authLoading } = useAuth();
@@ -25,7 +25,7 @@ export const OrayataApp = () => {
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
   const [makeResponse, setMakeResponse] = useState<string | null>(null);
-  const { info } = useAppToast();
+  const sentRequestRef = useRef<string | null>(null);
 
   // Load persisted settings on mount
   useEffect(() => {
@@ -57,6 +57,15 @@ export const OrayataApp = () => {
   };
 
   const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
+    const requestKey = `${timeSelected}-${topicSelected}-${languageSelected}`;
+    
+    // Prevent duplicate requests
+    if (sentRequestRef.current === requestKey) {
+      return;
+    }
+    
+    sentRequestRef.current = requestKey;
+    
     try {
       await fetch(
         'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
@@ -79,15 +88,13 @@ export const OrayataApp = () => {
       // With no-cors mode, we always get an opaque response
       const message = 'Request sent to Make. Response unavailable due to CORS restrictions.';
       setMakeResponse(message);
-      info('Sent request to Make', { description: message });
 
     } catch (error) {
       // Silently handle fetch errors as they're expected with no-cors
       const message = 'Request sent to Make (no response available due to CORS)';
       setMakeResponse(message);
-      info('Sent request to Make');
     }
-  }, [user, info]);
+  }, [user]);
 
   useEffect(() => {
     if (currentStep === 'source' && selectedTime && selectedTopic) {
