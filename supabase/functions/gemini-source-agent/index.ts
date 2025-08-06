@@ -14,7 +14,7 @@ interface GenerationRequest {
   userContext?: {
     name?: string;
     learningHistory?: string[];
-    preferences?: any;
+    preferences?: Record<string, unknown>;
     difficulty?: string;
   };
 }
