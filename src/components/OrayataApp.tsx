@@ -24,7 +24,7 @@ export const OrayataApp = () => {
   const { state, actions } = useAppContext();
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
-  const [makeResponse, setMakeResponse] = useState<unknown>(null);
+  const [makeResponse, setMakeResponse] = useState<string | null>(null);
   const { info, error: showError } = useAppToast();
 
   // Load persisted settings on mount
@@ -58,7 +58,7 @@ export const OrayataApp = () => {
 
   const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
     try {
-      const response = await fetch('https://hook.eu2.make.com/dv77hcqg67fn9hj4phbias2q7oj3btk2', {
+      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,34 +82,16 @@ export const OrayataApp = () => {
         }
       }
 
-
       if (!response.ok) {
-        setMakeResponse(data);
+        setMakeResponse(typeof data === 'string' ? data : JSON.stringify(data));
         showError(`Make responded with ${response.status}`);
         return;
       }
 
-      setMakeResponse(data);
+      setMakeResponse(typeof data === 'string' ? data : JSON.stringify(data));
       info('Received response from Make', {
         description: typeof data === 'string' ? data : JSON.stringify(data),
       });
-=======
-      setMakeResponse(data);
-
-      if (response.ok) {
-        info('Received response from Make', {
-          description: typeof data === 'string' ? data : JSON.stringify(data),
-        });
-      } else {
-        showError(`Make responded with ${response.status}`);
-      }
-=======
-      const data = await response.json().catch(() => null);
-      setMakeResponse(data);
-      info('Received response from Make', {
-        description: data ? JSON.stringify(data) : undefined
-      });
-
 
     } catch (error) {
       console.error('Failed to send data to Make:', error);
