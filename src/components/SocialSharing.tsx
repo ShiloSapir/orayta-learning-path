@@ -9,7 +9,6 @@ import {
   Mail, 
   MessageCircle,
   Download,
-  ExternalLink,
   Heart,
   BookOpen,
   Quote
@@ -194,15 +193,6 @@ Downloaded from Orayata Learning App
           WhatsApp
         </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.open(source.sefariaLink, '_blank')}
-          className="flex items-center gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Sefaria
-        </Button>
       </div>
 
       {isExpanded && (
