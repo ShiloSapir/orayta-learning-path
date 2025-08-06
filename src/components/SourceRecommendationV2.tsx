@@ -11,7 +11,6 @@ import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
 import { SourceLoadingState } from "./SourceLoadingState";
 import { useMinimumLoading } from "@/hooks/useMinimumLoading";
-import { FallbackMechanisms } from "./FallbackMechanisms";
 import { EnhancedSourceDisplay } from "./EnhancedSourceDisplay";
 import { usePersonalizationEngine } from "@/hooks/usePersonalizationEngine";
 import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
@@ -19,7 +18,6 @@ import { useAISourceGenerator } from "@/hooks/useAISourceGenerator";
 import { normalizeTopic } from "@/utils/normalizeTopic";
 import { getRelatedTopics } from "@/utils/topicRelations";
 import { 
-  ArrowLeft, 
   ExternalLink, 
   BookOpen, 
   Heart, 
@@ -373,46 +371,13 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  // Only show fallback mechanisms when we truly have no sources AND have tried everything
-  if (showFallback && !currentSource && sources.length > 0) {
-    return (
-      <FallbackMechanisms
-        language={language}
-        timeSelected={timeSelected}
-        topicSelected={topicSelected}
-        availableSources={sources}
-        onTopicChange={() => {
-          // Update topic and try to load new source
-          setShowFallback(false);
-          setCurrentSource(null);
-          setMatchType(null);
-        }}
-        onTimeChange={() => {
-          // Update time and try to load new source
-          setShowFallback(false);
-          setCurrentSource(null);
-          setMatchType(null);
-        }}
-        onBack={onBack}
-      />
-    );
-  }
-
-  // If no source is available and we're not loading, show simple error
+  // Show loading state while waiting for webhook response or processing
   if (!currentSource && !loading && !showDataLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
-        <Card className="p-6 max-w-md text-center">
-          <h2 className="text-xl font-semibold mb-4">No Sources Available</h2>
-          <p className="text-muted-foreground mb-4">
-            We couldn't find any Torah sources matching your preferences.
-          </p>
-          <Button onClick={onBack} variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {content[language].backButton}
-          </Button>
-        </Card>
-      </div>
+      <SourceLoadingState
+        message={content[language].loading}
+        variant="detailed"
+      />
     );
   }
 

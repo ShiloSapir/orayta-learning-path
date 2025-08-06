@@ -66,11 +66,10 @@ export const OrayataApp = () => {
     sentRequestRef.current = requestKey;
     
     try {
-      const response = await fetch(
+      await fetch(
         'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
         {
           method: 'POST',
-          mode: 'no-cors',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -85,19 +84,18 @@ export const OrayataApp = () => {
         }
       );
 
-      // Store the webhook response to override Supabase data when processed
-      if (response.ok) {
-        localStorage.setItem('webhook_processed_source', JSON.stringify({
-          timeSelected,
-          topicSelected,
-          languageSelected,
-          selectedSource,
-          timestamp: new Date().toISOString()
-        }));
-      }
+      // Store webhook request info for tracking
+      localStorage.setItem('webhook_request', JSON.stringify({
+        timeSelected,
+        topicSelected,
+        languageSelected,
+        selectedSource,
+        timestamp: new Date().toISOString(),
+        sent: true
+      }));
 
     } catch (error) {
-      // Silently handle fetch errors - no user notification needed
+      console.error('Webhook request failed:', error);
     }
   }, [user]);
 
