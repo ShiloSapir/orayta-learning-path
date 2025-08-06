@@ -63,11 +63,11 @@ export function NavigationHeader() {
     }
   }, [currentStepIndex]);
 
-  const canGoBack = currentStepIndex > 0 || ['journal', 'profile'].includes(currentStep);
-  const canGoForward = currentStepIndex >= 0 && currentStepIndex < learningSteps.length - 1;
+  const canGoBack = currentStepIndex > 0 || ['journal', 'profile', 'analytics', 'search'].includes(currentStep);
+  const canGoForward = currentStepIndex >= 0 && currentStepIndex < learningSteps.length - 1 && currentStep !== 'source';
 
   const handleBack = () => {
-    if (currentStep === 'journal' || currentStep === 'profile') {
+    if (['journal', 'profile', 'analytics', 'search'].includes(currentStep)) {
       actions.setStep('welcome');
     } else {
       actions.goToPreviousStep();

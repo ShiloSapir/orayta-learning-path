@@ -55,7 +55,7 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
-  const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
+  const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string, selectedSource?: string) => {
     const requestKey = `${timeSelected}-${topicSelected}-${languageSelected}`;
     
     // Prevent duplicate requests
@@ -66,7 +66,7 @@ export const OrayataApp = () => {
     sentRequestRef.current = requestKey;
     
     try {
-      await fetch(
+      const response = await fetch(
         'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
         {
           method: 'POST',
@@ -78,13 +78,23 @@ export const OrayataApp = () => {
             time_selected: timeSelected,
             topic_selected: topicSelected,
             language_selected: languageSelected,
+            selected_source: selectedSource,
             user_id: user?.id,
             timestamp: new Date().toISOString(),
           }),
         }
       );
 
-      // Silently send request - no user notification needed
+      // Store the webhook response to override Supabase data when processed
+      if (response.ok) {
+        localStorage.setItem('webhook_processed_source', JSON.stringify({
+          timeSelected,
+          topicSelected,
+          languageSelected,
+          selectedSource,
+          timestamp: new Date().toISOString()
+        }));
+      }
 
     } catch (error) {
       // Silently handle fetch errors - no user notification needed
@@ -92,10 +102,10 @@ export const OrayataApp = () => {
   }, [user]);
 
   useEffect(() => {
-    if (currentStep === 'source' && selectedTime && selectedTopic) {
-      sendToMake(selectedTime, selectedTopic, selectedLanguage);
+    if (currentStep === 'source' && selectedTime && selectedTopic && currentSource) {
+      sendToMake(selectedTime, selectedTopic, selectedLanguage, currentSource);
     }
-  }, [currentStep, selectedTime, selectedTopic, selectedLanguage, sendToMake]);
+  }, [currentStep, selectedTime, selectedTopic, selectedLanguage, currentSource, sendToMake]);
 
   // Show skeleton while checking authentication
   if (authLoading) {
