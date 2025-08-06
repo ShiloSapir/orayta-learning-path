@@ -21,7 +21,7 @@ export const OrayataApp = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile } = useUserProfile(user);
   const { state, actions } = useAppContext();
-  const { currentStep, language, selectedTime, selectedTopic, currentSource } = state;
+  const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
   // Show skeleton while checking authentication
   if (authLoading) {
@@ -42,8 +42,8 @@ export const OrayataApp = () => {
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem('orayta_lang', language);
-  }, [language]);
+    localStorage.setItem('orayta_lang', selectedLanguage);
+  }, [selectedLanguage]);
 
   const handleStartLearning = () => {
     actions.setStep('time');
@@ -107,7 +107,7 @@ export const OrayataApp = () => {
   };
 
   // Apply RTL direction to the entire app when Hebrew is selected
-  const appDirection = language === 'he' ? 'rtl' : 'ltr';
+  const appDirection = selectedLanguage === 'he' ? 'rtl' : 'ltr';
 
   return (
     <div dir={appDirection} className="font-inter min-h-screen bg-background">
@@ -119,7 +119,7 @@ export const OrayataApp = () => {
       <main className="flex-1">
         {currentStep === 'welcome' && (
             <WelcomeScreen
-              language={language}
+              language={selectedLanguage}
               onLanguageChange={actions.setLanguage}
               onStartLearning={handleStartLearning}
               onJournal={handleJournal}
@@ -131,7 +131,7 @@ export const OrayataApp = () => {
 
         {currentStep === 'time' && (
           <TimeSelection
-            language={language}
+            language={selectedLanguage}
             selectedTime={selectedTime}
             onTimeSelect={handleTimeSelect}
             onBack={actions.goToPreviousStep}
@@ -141,7 +141,7 @@ export const OrayataApp = () => {
 
         {currentStep === 'topic' && (
           <TopicSelection
-            language={language}
+            language={selectedLanguage}
             selectedTopic={selectedTopic}
             timeSelected={selectedTime || 15}
             onTopicSelect={handleTopicSelect}
@@ -152,7 +152,7 @@ export const OrayataApp = () => {
 
         {currentStep === 'source' && selectedTime && selectedTopic && (
           <SourceRecommendationV2
-            language={language}
+            language={selectedLanguage}
             timeSelected={selectedTime}
             topicSelected={selectedTopic}
             onBack={actions.goToPreviousStep}
@@ -170,7 +170,7 @@ export const OrayataApp = () => {
 
         {currentStep === 'reflection' && currentSource && (
           <ReflectionFormV2
-            language={language}
+            language={selectedLanguage}
             sessionId={currentSource}
             onBack={actions.goToPreviousStep}
             onSave={handleSaveReflection}
@@ -179,14 +179,14 @@ export const OrayataApp = () => {
 
         {currentStep === 'journal' && (
           <LearningJournal
-            language={language}
+            language={selectedLanguage}
             onBack={() => actions.setStep('welcome')}
           />
         )}
 
         {currentStep === 'profile' && (
           <ProfileSettings
-            language={language}
+            language={selectedLanguage}
             onLanguageChange={actions.setLanguage}
             onBack={() => actions.setStep('welcome')}
           />
@@ -194,14 +194,14 @@ export const OrayataApp = () => {
 
         {currentStep === 'analytics' && (
           <EnhancedLearningDashboard
-            language={language}
+            language={selectedLanguage}
             onBack={() => actions.setStep('welcome')}
           />
         )}
 
         {currentStep === 'search' && (
           <AdvancedSearchAndDiscovery
-            language={language}
+            language={selectedLanguage}
             onBack={() => actions.setStep('welcome')}
           />
         )}
