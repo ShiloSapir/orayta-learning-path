@@ -57,9 +57,9 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
-  const sendToMake = async (timeSelected: number, topicSelected: string) => {
+  const sendToMake = async (timeSelected: number, topicSelected: string, languageSelected: string) => {
     try {
-      await fetch('https://hook.eu2.make.com/m7l50w2vg3vpr3aelf60kadnwjhzklkh', {
+      await fetch('https://hook.eu2.make.com/dv77hcqg67fn9hj4phbias2q7oj3btk2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,6 +67,7 @@ export const OrayataApp = () => {
         body: JSON.stringify({
           time_selected: timeSelected,
           topic_selected: topicSelected,
+          language_selected: languageSelected,
           user_id: user?.id,
           timestamp: new Date().toISOString()
         }),
@@ -163,7 +164,7 @@ export const OrayataApp = () => {
         {/* Send data to Make when both time and topic are selected and we reach source step */}
         {currentStep === 'source' && selectedTime && selectedTopic && (
           (() => {
-            sendToMake(selectedTime, selectedTopic);
+            sendToMake(selectedTime, selectedTopic, selectedLanguage);
             return null;
           })()
         )}
