@@ -11,7 +11,6 @@ import {
   Download,
   ExternalLink,
   Heart,
-  BookOpen,
   Quote
 } from 'lucide-react';
 import { useAppToast } from '@/hooks/useToast';
@@ -244,15 +243,6 @@ Downloaded from Orayata Learning App
               {t.addToFavorites}
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(source.sefariaLink, '_blank')}
-              className="flex items-center gap-2"
-            >
-              <BookOpen className="h-4 w-4" />
-              {t.openInSefaria}
-            </Button>
           </div>
 
           {/* Preview */}
