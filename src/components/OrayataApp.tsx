@@ -68,15 +68,36 @@ export const OrayataApp = () => {
           topic_selected: topicSelected,
           language_selected: languageSelected,
           user_id: user?.id,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
       });
 
+      const raw = await response.text().catch(() => null);
+      let data: unknown = null;
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          data = raw;
+        }
+      }
+
+      setMakeResponse(data);
+
+      if (response.ok) {
+        info('Received response from Make', {
+          description: typeof data === 'string' ? data : JSON.stringify(data),
+        });
+      } else {
+        showError(`Make responded with ${response.status}`);
+      }
+=======
       const data = await response.json().catch(() => null);
       setMakeResponse(data);
       info('Received response from Make', {
         description: data ? JSON.stringify(data) : undefined
       });
+
     } catch (error) {
       console.error('Failed to send data to Make:', error);
       showError('Failed to get response from Make');
