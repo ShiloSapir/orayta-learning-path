@@ -45,7 +45,12 @@ export const useUserProfile = (user: User | null) => {
         return;
       }
 
-      setProfile(data);
+      setProfile(data ? {
+        ...data,
+        learning_preferences: (data.learning_preferences && typeof data.learning_preferences === 'object' && !Array.isArray(data.learning_preferences)) 
+          ? data.learning_preferences as Record<string, unknown>
+          : {}
+      } : null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -70,9 +75,15 @@ export const useUserProfile = (user: User | null) => {
     if (!user) return false;
 
     try {
+      // Clean updates to match database schema
+      const cleanUpdates: any = { ...updates };
+      if (cleanUpdates.email === null) {
+        delete cleanUpdates.email;
+      }
+      
       const { error } = await supabase
         .from('users')
-        .update(updates)
+        .update(cleanUpdates)
         .eq('id', user.id);
 
       if (error) {

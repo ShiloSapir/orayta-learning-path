@@ -20,14 +20,37 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
   const parseWebhookResponse = useCallback((responseText: string): WebhookSource => {
     // Extract information from the formatted Make response
-    const titleMatch = responseText.match(/\*\*English:\*\*\s*(.+?)(?:\n|$)/);
-    const titleHeMatch = responseText.match(/\*\*Hebrew:\*\*\s*(.+?)(?:\n|$)/);
+    // Handle both old and new formats
+    const titleEngMatch = responseText.match(/English:\s*(.+?)(?:\n|$)/);
+    const titleHebrewMatch = responseText.match(/Hebrew:\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const commentariesMatch = responseText.match(/\*\*2 Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
-    const linkMatch = responseText.match(/https:\/\/www\.sefaria\.org\/[^\s]+/);
+    
+    // Look for Sefaria links - handle multiple formats
+    const markdownLinkMatch = responseText.match(/\[.*?\]\((https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^)]+)\)/);
+    const plainLinkMatch = responseText.match(/(https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^\s\)]+)/);
+    const workingLinkMatch = responseText.match(/\*\*Working Link[^:]*:\*\*\s*(?:\[.*?\]\()?(https:\/\/[^\s\)]+)/);
+    
+    let extractedLink = markdownLinkMatch?.[1] || workingLinkMatch?.[1] || plainLinkMatch?.[1] || '';
+    
+    // Clean and fix the link
+    if (extractedLink) {
+      extractedLink = extractedLink
+        .replace(/\)$/, '') // Remove trailing parenthesis
+        .replace(/sefarialibrary\.org/, 'sefaria.org') // Fix domain
+        .replace(/%2C/g, ',') // Fix URL encoding
+        .replace(/texts\//, '') // Remove 'texts/' path if present
+        .replace(/MishnahPirkeiAvot/, 'Mishnah_Peah') // Fix path issues
+        .trim();
+        
+      // Ensure proper Sefaria URL format
+      if (!extractedLink.includes('sefaria.org')) {
+        extractedLink = '';
+      }
+    }
 
     // Extract commentaries
     const commentariesText = commentariesMatch?.[1] || '';
@@ -38,14 +61,14 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       .filter(c => c.length > 0);
 
     return {
-      title: titleMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source',
-      title_he: titleHeMatch?.[1]?.replace(/\*/g, '').trim() || 'מקור תורני',
+      title: titleEngMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source',
+      title_he: titleHebrewMatch?.[1]?.replace(/\*/g, '').trim() || 'מקור תורני',
       source_range: rangeMatch?.[1]?.trim() || '',
       excerpt: excerptMatch?.[1]?.trim() || '',
       commentaries: commentaries.length > 0 ? commentaries : ['Rashi', 'Ramban'],
       reflection_prompt: reflectionMatch?.[1]?.trim() || '',
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
-      sefaria_link: linkMatch?.[0] || '',
+      sefaria_link: extractedLink,
     };
   }, [timeSelected]);
 
