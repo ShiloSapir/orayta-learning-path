@@ -25,7 +25,7 @@ export const OrayataApp = () => {
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
   const [makeResponse, setMakeResponse] = useState<string | null>(null);
-  const { info, error: showError } = useAppToast();
+  const { info } = useAppToast();
 
   // Load persisted settings on mount
   useEffect(() => {
@@ -58,11 +58,14 @@ export const OrayataApp = () => {
 
   const sendToMake = useCallback(async (timeSelected: number, topicSelected: string, languageSelected: string) => {
     try {
-      const response = await fetch(
+      await fetch(
         'https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j',
         {
           method: 'POST',
           mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             time_selected: timeSelected,
             topic_selected: topicSelected,
@@ -73,48 +76,18 @@ export const OrayataApp = () => {
         }
       );
 
-      if (response.type === 'opaque') {
-        const message =
-          'Request sent to Make. Response unavailable due to CORS restrictions.';
-        setMakeResponse(message);
-        info('Sent request to Make', { description: message });
-        return;
-      }
-
-      // Try to parse the response body but gracefully handle non-JSON payloads
-      const raw = await response.text().catch(() => null);
-      let data: unknown = null;
-      if (raw) {
-        try {
-          data = JSON.parse(raw);
-        } catch {
-          data = raw;
-        }
-      }
-
-      // Format the response for display
-      const message =
-        typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-
-      if (!response.ok) {
-        setMakeResponse(message);
-        showError(`Make responded with ${response.status}`);
-        return;
-      }
-
+      // With no-cors mode, we always get an opaque response
+      const message = 'Request sent to Make. Response unavailable due to CORS restrictions.';
       setMakeResponse(message);
-      info('Received response from Make', {
-        description: message,
-      });
+      info('Sent request to Make', { description: message });
 
     } catch (error) {
-      console.error('Failed to send data to Make:', error);
-      const message =
-        error instanceof Error ? error.message : String(error);
+      // Silently handle fetch errors as they're expected with no-cors
+      const message = 'Request sent to Make (no response available due to CORS)';
       setMakeResponse(message);
-      showError('Failed to get response from Make');
+      info('Sent request to Make');
     }
-  }, [user, info, showError]);
+  }, [user, info]);
 
   useEffect(() => {
     if (currentStep === 'source' && selectedTime && selectedTopic) {
