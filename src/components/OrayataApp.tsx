@@ -57,6 +57,25 @@ export const OrayataApp = () => {
     actions.setTopic(topic);
   };
 
+  const sendToMake = async (timeSelected: number, topicSelected: string) => {
+    try {
+      await fetch('https://hook.eu2.make.com/rbhoozx2wxh2jp6bd3pmefcpn748ya3k', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          time_selected: timeSelected,
+          topic_selected: topicSelected,
+          user_id: user?.id,
+          timestamp: new Date().toISOString()
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to send data to Make:', error);
+    }
+  };
+
   const handleReflection = (sessionId: string) => {
     actions.setSource(sessionId);
     actions.setStep('reflection');
@@ -139,6 +158,14 @@ export const OrayataApp = () => {
             onBack={actions.goToPreviousStep}
             onReflection={handleReflection}
           />
+        )}
+
+        {/* Send data to Make when both time and topic are selected and we reach source step */}
+        {currentStep === 'source' && selectedTime && selectedTopic && (
+          (() => {
+            sendToMake(selectedTime, selectedTopic);
+            return null;
+          })()
         )}
 
         {currentStep === 'reflection' && currentSource && (
