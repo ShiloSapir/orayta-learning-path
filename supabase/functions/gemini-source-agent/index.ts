@@ -1,7 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.1';
-import { selectCommentaries } from '../commentary-selector/index.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +33,98 @@ interface GeneratedSource {
   learning_objectives: string[];
   topic: string;
   language: string;
+}
+
+const TORAH_AGENT_PROMPT = `You are a specialized Torah learning agent with deep knowledge of Jewish texts, traditions, and learning methodologies. Your role is to create personalized Torah learning experiences that are authentic, engaging, and appropriate for the user's time constraints and learning level.
+
+// Commentary selection utility embedded in edge function
+interface CommentaryConfig {
+  topicSelected: string;
+  sourceTitle: string;
+  sourceRange: string;
+  excerpt: string;
+}
+
+// Commentary mappings for each source type
+const COMMENTARY_MAPPINGS = {
+  tanach: ['Rashi', 'Ibn Ezra', 'Ramban', 'Radak', 'Sforno'],
+  talmud: ['Rashi', 'Tosafot', 'Maharsha', 'Ritva'],
+  rambam: ['Kesef Mishneh', 'Maggid Mishneh', 'Lechem Mishneh'],
+  shulchan_aruch: ['Mishnah Berurah', 'Shach', 'Taz', 'Aruch HaShulchan']
+} as const;
+
+// Keywords to identify source types from titles and content
+const SOURCE_TYPE_IDENTIFIERS = {
+  tanach: [
+    'bereishit', 'genesis', 'שמות', 'exodus', 'vayikra', 'leviticus', 
+    'bamidbar', 'numbers', 'devarim', 'deuteronomy',
+    'yehoshua', 'joshua', 'shoftim', 'judges', 'shmuel', 'samuel', 
+    'melachim', 'kings', 'yeshayahu', 'isaiah', 'yirmiyahu', 'jeremiah',
+    'yechezkel', 'ezekiel', 'hoshea', 'hosea', 'yoel', 'joel', 'amos',
+    'ovadiah', 'obadiah', 'yonah', 'jonah', 'michah', 'micah', 'nachum', 'nahum',
+    'chavakuk', 'habakkuk', 'tzefaniah', 'zephaniah', 'chaggai', 'haggai',
+    'zechariah', 'malachi', 'tehillim', 'psalms', 'mishlei', 'proverbs', 
+    'iyov', 'job', 'shir hashirim', 'song of songs', 'rut', 'ruth', 
+    'eicha', 'lamentations', 'kohelet', 'ecclesiastes', 'esther', 'daniel', 
+    'ezra', 'nechemiah', 'nehemiah', 'divrei hayamim', 'chronicles',
+    'tanach', 'tanakh', 'bible', 'biblical', 'torah', 'chumash', 'parsha', 'parashah'
+  ],
+  talmud: [
+    'talmud', 'bavli', 'yerushalmi', 'gemara', 'tractate', 'masechet', 'massekhet',
+    'berachot', 'shabbat', 'eruvin', 'pesachim', 'rosh hashanah', 'yoma', 'sukkah',
+    'beitzah', 'taanit', 'megillah', 'moed katan', 'chagigah', 'yevamot', 'ketubot',
+    'nedarim', 'nazir', 'sotah', 'gittin', 'kiddushin', 'baba kamma', 'baba metzia',
+    'baba batra', 'sanhedrin', 'makkot', 'shevuot', 'avodah zarah', 'horayot',
+    'zevachim', 'menachot', 'hullin', 'bechorot', 'arachin', 'temurah', 'keritot',
+    'meilah', 'kinnim', 'tamid', 'midot', 'niddah', 'pirkei avot', 'avot'
+  ],
+  rambam: [
+    'rambam', 'maimonides', 'mishneh torah', 'hilchot', 'halachot', 'moreh nevuchim',
+    'guide for the perplexed', 'yad hachazakah', 'sefer hamitzvot', 'commentary on mishnah'
+  ],
+  shulchan_aruch: [
+    'shulchan aruch', 'orach chaim', 'yoreh deah', 'even haezer', 'choshen mishpat',
+    'rama', 'rema', 'karo', 'beit yosef', 'tur'
+  ]
+};
+
+/**
+ * Determines the source type based on title, range, and content
+ */
+function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_MAPPINGS | null {
+  const searchText = `${config.sourceTitle} ${config.sourceRange} ${config.excerpt}`.toLowerCase();
+  
+  for (const [sourceType, identifiers] of Object.entries(SOURCE_TYPE_IDENTIFIERS)) {
+    if (identifiers.some(identifier => searchText.includes(identifier.toLowerCase()))) {
+      return sourceType as keyof typeof COMMENTARY_MAPPINGS;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Selects 2 appropriate commentaries based on the criteria
+ */
+function selectCommentaries(config: CommentaryConfig): string[] {
+  // Rule 1: Only provide commentaries if topic ≠ Spiritual Growth
+  if (config.topicSelected.toLowerCase().includes('spiritual') || 
+      config.topicSelected.toLowerCase().includes('growth')) {
+    return [];
+  }
+  
+  // Rule 2: Identify source type
+  const sourceType = identifySourceType(config);
+  
+  // Rule 3: Only provide commentaries for supported source types
+  if (!sourceType || !COMMENTARY_MAPPINGS[sourceType]) {
+    return [];
+  }
+  
+  // Rule 4: Select 2 commentaries from the appropriate type
+  const availableCommentaries = COMMENTARY_MAPPINGS[sourceType];
+  
+  return availableCommentaries.slice(0, 2);
 }
 
 const TORAH_AGENT_PROMPT = `You are a specialized Torah learning agent with deep knowledge of Jewish texts, traditions, and learning methodologies. Your role is to create personalized Torah learning experiences that are authentic, engaging, and appropriate for the user's time constraints and learning level.
