@@ -45,20 +45,26 @@ export const useEnhancedContentQualityAssurance = () => {
   // Real-time Sefaria API validation
   const validateSefariaLink = useCallback(async (url: string): Promise<boolean> => {
     try {
-      const urlPattern = /^https:\/\/(www\.)?sefaria\.org\/.+/;
+      // Support both .org and .org.il domains
+      const urlPattern = /^https:\/\/(www\.)?sefaria\.org(\.il)?\/.+/;
       if (!urlPattern.test(url)) return false;
 
+      // Normalize URL to use .org for API validation
+      const normalizedUrl = url.replace('sefaria.org.il', 'sefaria.org');
+      
       // Extract text reference from URL for API validation
-      const match = url.match(/sefaria\.org\/([^?]+)/);
+      const match = normalizedUrl.match(/sefaria\.org\/([^?]+)/);
       if (!match) return false;
 
-      const textRef = match[1];
+      const textRef = decodeURIComponent(match[1]);
       const apiUrl = `https://www.sefaria.org/api/texts/${textRef}`;
       
       const response = await fetch(apiUrl);
       return response.ok;
     } catch {
-      return false;
+      // Fallback to pattern validation if API check fails
+      const urlPattern = /^https:\/\/(www\.)?sefaria\.org(\.il)?\/.+/;
+      return urlPattern.test(url);
     }
   }, []);
 

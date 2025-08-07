@@ -6,6 +6,7 @@ import { Source } from "@/hooks/useSupabaseData";
 import { useContentQualityAssurance } from "@/hooks/useContentQualityAssurance";
 import { Language } from "./LanguageToggle";
 import { useEffect, useState } from "react";
+import { normalizeSefariaUrl, isValidSefariaUrl } from "@/utils/sefariaLinkValidator";
 import { 
   ExternalLink, 
   MapPin, 
@@ -181,7 +182,13 @@ export const EnhancedSourceDisplay = ({
                 </p>
               )}
               <Button 
-                onClick={onSefariaClick}
+                onClick={() => {
+                  if (source.sefaria_link && isValidSefariaUrl(source.sefaria_link)) {
+                    const normalizedUrl = normalizeSefariaUrl(source.sefaria_link);
+                    window.open(normalizedUrl, '_blank');
+                  }
+                  onSefariaClick();
+                }}
                 variant="outline" 
                 size="sm"
                 className="flex items-center gap-2"

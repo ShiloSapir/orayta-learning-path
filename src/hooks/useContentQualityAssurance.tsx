@@ -24,15 +24,20 @@ export const useContentQualityAssurance = () => {
   // Validate Sefaria link functionality
   const validateSefariaLink = useCallback(async (url: string): Promise<boolean> => {
     try {
-      // Basic URL validation
-      const urlPattern = /^https:\/\/(www\.)?sefaria\.org\/.+/;
+      // Basic URL validation - support both .org and .org.il domains
+      const urlPattern = /^https:\/\/(www\.)?sefaria\.org(\.il)?\/.+/;
       if (!urlPattern.test(url)) return false;
 
-      // Check if link is accessible (simplified check)
-      await fetch(url, { method: 'HEAD', mode: 'no-cors' });
-      return true; // If no error thrown, assume accessible
+      // Normalize to use .org (international version) as canonical
+      const normalizedUrl = url.replace('sefaria.org.il', 'sefaria.org');
+      
+      // Check if link is accessible
+      const response = await fetch(normalizedUrl, { method: 'HEAD', mode: 'no-cors' });
+      return response.ok;
     } catch {
-      return false;
+      // If fetch fails, try to validate URL format more strictly
+      const urlPattern = /^https:\/\/(www\.)?sefaria\.org(\.il)?\/.+/;
+      return urlPattern.test(url);
     }
   }, []);
 

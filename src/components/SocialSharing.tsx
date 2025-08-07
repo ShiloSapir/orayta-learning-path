@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAppToast } from '@/hooks/useToast';
 import { Language } from './LanguageToggle';
+import { normalizeSefariaUrl, isValidSefariaUrl } from '@/utils/sefariaLinkValidator';
 
 interface SocialSharingProps {
   language: Language;
@@ -196,7 +197,12 @@ Downloaded from Orayata Learning App
         <Button
           variant="outline"
           size="sm"
-          onClick={() => window.open(source.sefariaLink, '_blank')}
+          onClick={() => {
+            const url = isValidSefariaUrl(source.sefariaLink) 
+              ? normalizeSefariaUrl(source.sefariaLink)
+              : source.sefariaLink;
+            window.open(url, '_blank');
+          }}
           className="flex items-center gap-2"
         >
           <ExternalLink className="h-4 w-4" />
