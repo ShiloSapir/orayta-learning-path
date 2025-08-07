@@ -23,13 +23,6 @@ export default function Auth() {
     }
   }, [user, loading, navigate]);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      setEmail("shiloysapir@gmail.com");
-      setPassword("ShiloSapir");
-      signIn("shiloysapir@gmail.com", "ShiloSapir");
-    }
-  }, [loading, user, signIn]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
