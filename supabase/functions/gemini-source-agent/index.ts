@@ -35,8 +35,6 @@ interface GeneratedSource {
   language: string;
 }
 
-const TORAH_AGENT_PROMPT = `You are a specialized Torah learning agent with deep knowledge of Jewish texts, traditions, and learning methodologies. Your role is to create personalized Torah learning experiences that are authentic, engaging, and appropriate for the user's time constraints and learning level.
-
 // Commentary selection utility embedded in edge function
 interface CommentaryConfig {
   topicSelected: string;
