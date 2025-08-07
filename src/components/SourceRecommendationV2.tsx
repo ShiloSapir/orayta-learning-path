@@ -21,6 +21,10 @@ import {
   BookmarkCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { MotionWrapper, StaggeredContainer } from "@/components/MotionWrapper";
+import { ScaleOnTap } from "@/components/ui/motion";
+import { useBlessingToast } from "@/components/ui/blessing-toast";
+import { ScrollIcon } from "@/components/ui/torah-icons";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -82,6 +86,7 @@ export const SourceRecommendationV2 = ({
 }: SourceRecommendationProps) => {
   const { user } = useAuth();
   const { success } = useAppToast();
+  const { showBlessing } = useBlessingToast();
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [isTogglingSave, setIsTogglingSave] = useState<boolean>(false);
@@ -169,6 +174,7 @@ export const SourceRecommendationV2 = ({
         if (error) throw error;
         
         setIsSaved(true);
+        showBlessing(language === 'he' ? 'חזק וברוך!' : 'Chazak u\'Baruch!');
         success(content[language].saveToggle);
       } else {
         // Remove from database - find by matching content
@@ -267,17 +273,22 @@ export const SourceRecommendationV2 = ({
   const reflectionPrompt = webhookSource.reflection_prompt;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <MotionWrapper type="fadeUp" className="min-h-screen bg-gradient-parchment p-4">
+      <StaggeredContainer className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">{content[language].title}</h1>
-          <p className="text-muted-foreground">{content[language].subtitle}</p>
-        </div>
+        <MotionWrapper type="scale" delay={0.1}>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              {content[language].title}
+            </h1>
+            <p className="text-muted-foreground">{content[language].subtitle}</p>
+          </div>
+        </MotionWrapper>
 
         {/* Webhook Source Display */}
-        <Card className="p-6">
-          <div className="space-y-4">
+        <MotionWrapper type="fadeUp" delay={0.2}>
+          <Card className="p-6 shadow-divine border-border/50 bg-card/80 backdrop-blur-sm">
+            <div className="space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h2 className="text-xl font-semibold mb-2">{title}</h2>
@@ -285,13 +296,14 @@ export const SourceRecommendationV2 = ({
               </div>
               
               {/* Save Toggle Button */}
-              <Button
-                variant={isSaved ? "default" : "outline"}
-                size="sm"
-                onClick={handleToggleSave}
-                disabled={isTogglingSave}
-                className="flex items-center gap-2 min-w-[100px]"
-              >
+              <ScaleOnTap>
+                <Button
+                  variant={isSaved ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleToggleSave}
+                  disabled={isTogglingSave}
+                  className="flex items-center gap-2 min-w-[100px] transition-all duration-200"
+                >
                 {isSaved ? (
                   <>
                     <BookmarkCheck className="h-4 w-4" />
@@ -303,13 +315,17 @@ export const SourceRecommendationV2 = ({
                     {content[language].saveToggle}
                   </>
                 )}
-              </Button>
+                </Button>
+              </ScaleOnTap>
             </div>
             
             {excerpt && (
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm leading-relaxed">{excerpt}</p>
-              </div>
+              <MotionWrapper type="fadeUp" delay={0.3}>
+                <div className="bg-gradient-to-r from-secondary/20 to-accent/10 p-4 rounded-lg border-l-4 border-primary">
+                  <ScrollIcon className="h-6 w-6 text-primary mb-2" />
+                  <p className="text-sm leading-relaxed text-foreground">{excerpt}</p>
+                </div>
+              </MotionWrapper>
             )}
             
             {webhookSource.commentaries.length > 0 && (
@@ -336,18 +352,22 @@ export const SourceRecommendationV2 = ({
                 {content[language].sefariaLink}
               </Button>
             )}
-          </div>
-        </Card>
+            </div>
+          </Card>
+        </MotionWrapper>
 
         {/* Reflection Prompt */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-2">{content[language].reflectionPromptLabel}</h3>
-          <p className="text-muted-foreground italic">{reflectionPrompt}</p>
-        </Card>
+        <MotionWrapper type="fadeUp" delay={0.4}>
+          <Card className="p-6 shadow-gentle border-accent/20 bg-gradient-to-r from-accent/5 to-secondary/10">
+            <h3 className="font-semibold mb-2 text-primary">{content[language].reflectionPromptLabel}</h3>
+            <p className="text-muted-foreground italic leading-relaxed">{reflectionPrompt}</p>
+          </Card>
+        </MotionWrapper>
 
         {/* Action Buttons */}
-        <Card className="p-6 space-y-4">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <MotionWrapper type="fadeUp" delay={0.5}>
+          <Card className="p-6 space-y-4 shadow-blessed border-primary/10">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <Button
               onClick={handleSkip}
               variant="outline"
@@ -382,28 +402,31 @@ export const SourceRecommendationV2 = ({
               <Calendar className="h-4 w-4 mr-2" />
               {content[language].calendarButton}
             </Button>
-          </div>
+            </div>
 
-          <Button
-            onClick={handleReflection}
-            className="w-full"
-            disabled={webhookLoading}
-          >
-            <BookOpen className="h-4 w-4 mr-2" />
-            {content[language].reflectionButton}
-          </Button>
-        </Card>
+            <Button
+              onClick={handleReflection}
+              className="w-full"
+              disabled={webhookLoading}
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              {content[language].reflectionButton}
+            </Button>
+          </Card>
+        </MotionWrapper>
 
         {/* Social Sharing */}
-        <SocialSharing
-          language={language}
-          source={{
-            title: title,
-            text: excerpt || '',
-            sefariaLink: webhookSource.sefaria_link
-          }}
-        />
-      </div>
-    </div>
+        <MotionWrapper type="fadeUp" delay={0.6}>
+          <SocialSharing
+            language={language}
+            source={{
+              title: title,
+              text: excerpt || '',
+              sefariaLink: webhookSource.sefaria_link
+            }}
+          />
+        </MotionWrapper>
+      </StaggeredContainer>
+    </MotionWrapper>
   );
 };

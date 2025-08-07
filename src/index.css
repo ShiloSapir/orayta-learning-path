@@ -8,48 +8,51 @@
 
 @layer base {
   :root {
-    /* Warm Parchment & Spiritual Colors */
-    --background: 42 15% 97%;           /* Warm parchment white */
-    --foreground: 210 20% 15%;          /* Deep navy text */
+    /* Torah-inspired Parchment Colors */
+    --background: 45 15% 97%;           /* Soft parchment white */
+    --foreground: 220 25% 15%;          /* Deep sapphire text */
 
-    --card: 42 20% 98%;                 /* Slightly warmer card */
-    --card-foreground: 210 20% 15%;
+    --card: 45 20% 99%;                 /* Pure parchment card */
+    --card-foreground: 220 25% 15%;
 
-    --popover: 42 20% 98%;
-    --popover-foreground: 210 20% 15%;
+    --popover: 45 20% 99%;
+    --popover-foreground: 220 25% 15%;
 
-    /* Sunset Orange Primary */
-    --primary: 18 85% 65%;              /* Warm sunset orange */
-    --primary-foreground: 42 20% 98%;
+    /* Deep Sapphire Primary */
+    --primary: 220 85% 25%;             /* Deep Torah blue */
+    --primary-foreground: 45 20% 98%;
 
-    /* Soft Secondary */
-    --secondary: 42 25% 92%;            /* Warm light background */
-    --secondary-foreground: 210 20% 25%;
+    /* Warm Gold Secondary */
+    --secondary: 45 85% 75%;            /* Warm golden light */
+    --secondary-foreground: 220 25% 15%;
 
-    --muted: 42 20% 94%;                /* Subtle warm background */
-    --muted-foreground: 210 15% 45%;
+    --muted: 45 20% 94%;                /* Soft parchment background */
+    --muted-foreground: 220 15% 45%;
 
-    /* Gold Accent */
-    --accent: 35 65% 68%;               /* Warm gold accent */
-    --accent-foreground: 210 20% 15%;
+    /* Torah Blue Accent */
+    --accent: 210 75% 65%;              /* Bright Torah blue */
+    --accent-foreground: 45 20% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 42 20% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 45 20% 98%;
 
-    --border: 42 15% 88%;               /* Warm border */
-    --input: 42 15% 88%;
-    --ring: 18 85% 65%;                 /* Primary orange ring */
+    --border: 45 25% 88%;               /* Warm parchment border */
+    --input: 45 25% 88%;
+    --ring: 220 85% 25%;                /* Deep sapphire ring */
 
-    /* Spiritual Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(18 85% 65%), hsl(35 65% 68%));
-    --gradient-subtle: linear-gradient(180deg, hsl(42 20% 98%), hsl(42 15% 96%));
-    --gradient-warm: linear-gradient(135deg, hsl(42 25% 92%), hsl(35 40% 88%));
+    /* Sacred Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 85% 25%), hsl(210 75% 65%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 85% 75%), hsl(38 90% 70%));
+    --gradient-wisdom: linear-gradient(180deg, hsl(220 85% 25% / 0.1), hsl(220 85% 25% / 0.05));
+    --gradient-parchment: linear-gradient(180deg, hsl(45 20% 99%), hsl(45 15% 97%));
 
-    /* Shadows with warmth */
-    --shadow-warm: 0 10px 30px -10px hsl(18 85% 65% / 0.2);
-    --shadow-soft: 0 4px 20px -8px hsl(210 20% 15% / 0.1);
+    /* Divine Shadows */
+    --shadow-divine: 0 4px 20px hsl(220 85% 25% / 0.15);
+    --shadow-gentle: 0 2px 8px hsl(220 85% 25% / 0.1);
+    --shadow-glow: 0 0 20px hsl(45 85% 75% / 0.3);
+    --shadow-blessed: 0 8px 32px hsl(220 85% 25% / 0.2);
 
-    /* Transitions */
+    /* Sacred Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.75rem;
@@ -72,45 +75,49 @@
   }
 
   .dark {
-    /* Dark mode with warm spiritual tones */
-    --background: 210 20% 8%;           /* Deep warm dark */
-    --foreground: 42 20% 92%;           /* Warm light text */
+    /* Deep Torah Night Mode */
+    --background: 220 30% 8%;           /* Deep Torah night */
+    --foreground: 45 25% 92%;           /* Warm parchment text */
 
-    --card: 210 18% 10%;                /* Slightly lighter dark */
-    --card-foreground: 42 20% 92%;
+    --card: 220 30% 10%;                /* Darker sapphire card */
+    --card-foreground: 45 25% 92%;
 
-    --popover: 210 18% 10%;
-    --popover-foreground: 42 20% 92%;
+    --popover: 220 30% 10%;
+    --popover-foreground: 45 25% 92%;
 
-    /* Warm orange primary for dark mode */
-    --primary: 18 85% 65%;              /* Keep warm sunset orange */
-    --primary-foreground: 210 20% 8%;
+    /* Bright Sapphire Primary */
+    --primary: 220 90% 70%;             /* Bright Torah blue */
+    --primary-foreground: 220 30% 8%;
 
-    --secondary: 210 15% 15%;           /* Dark warm secondary */
-    --secondary-foreground: 42 20% 85%;
+    /* Warm Gold Secondary */
+    --secondary: 45 85% 70%;            /* Bright golden light */
+    --secondary-foreground: 220 30% 8%;
 
-    --muted: 210 15% 12%;               /* Subtle dark background */
-    --muted-foreground: 42 15% 65%;
+    --muted: 220 25% 18%;               /* Torah stone background */
+    --muted-foreground: 220 15% 65%;
 
-    /* Gold accent for dark mode */
-    --accent: 35 65% 68%;               /* Keep warm gold */
-    --accent-foreground: 210 20% 8%;
+    /* Divine Light Accent */
+    --accent: 210 80% 75%;              /* Divine bright blue */
+    --accent-foreground: 220 30% 8%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 42 20% 92%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 45 25% 92%;
 
-    --border: 210 15% 18%;              /* Warm dark border */
-    --input: 210 15% 18%;
-    --ring: 18 85% 65%;                 /* Primary orange ring */
+    --border: 220 25% 20%;              /* Deep sapphire border */
+    --input: 220 25% 20%;
+    --ring: 220 90% 70%;                /* Bright sapphire ring */
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(18 85% 65%), hsl(35 65% 68%));
-    --gradient-subtle: linear-gradient(180deg, hsl(210 18% 10%), hsl(210 15% 12%));
-    --gradient-warm: linear-gradient(135deg, hsl(210 15% 15%), hsl(210 12% 18%));
+    /* Night Sacred Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 90% 70%), hsl(210 80% 75%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 85% 70%), hsl(38 90% 65%));
+    --gradient-wisdom: linear-gradient(180deg, hsl(220 90% 70% / 0.1), hsl(220 90% 70% / 0.05));
+    --gradient-parchment: linear-gradient(180deg, hsl(220 30% 10%), hsl(220 25% 12%));
 
-    /* Dark mode shadows */
-    --shadow-warm: 0 10px 30px -10px hsl(18 85% 65% / 0.3);
-    --shadow-soft: 0 4px 20px -8px hsl(0 0% 0% / 0.4);
+    /* Night Divine Shadows */
+    --shadow-divine: 0 4px 20px hsl(220 90% 70% / 0.25);
+    --shadow-gentle: 0 2px 8px hsl(220 90% 70% / 0.15);
+    --shadow-glow: 0 0 20px hsl(45 85% 70% / 0.4);
+    --shadow-blessed: 0 8px 32px hsl(220 90% 70% / 0.3);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -128,7 +135,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    background: var(--gradient-parchment);
+    @apply text-foreground font-inter;
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: oldstyle-nums;
     /* Prevent horizontal scroll on mobile */
@@ -137,6 +145,8 @@
     -webkit-overflow-scrolling: touch;
     /* Better mobile tap handling */
     touch-action: manipulation;
+    /* Smooth transitions for reduced motion users */
+    transition: background 0.3s ease;
   }
 
   html {
