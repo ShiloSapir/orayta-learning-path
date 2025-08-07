@@ -58,7 +58,7 @@ const content = {
         subcategories: []
       }
     },
-    quote: "\"Torah is not in heaven. It is here for you to engage with and make part of your daily life\" - Deuteronomy 30:12"
+    quote: "\"Turn it and turn it again, for everything is in it.\" — Pirkei Avot 5:22"
   },
   he: {
     title: "מה תרצה ללמוד?",
@@ -97,7 +97,7 @@ const content = {
         subcategories: []
       }
     },
-    quote: "\"לא בשמים היא\" - התורה כאן עמך, למעשה ולחיים - דברים ל׳:יב"
+    quote: "\"הפוך בה והפוך בה, דכולא בה\" — פרקי אבות ה׳:כב"
   }
 };
 
