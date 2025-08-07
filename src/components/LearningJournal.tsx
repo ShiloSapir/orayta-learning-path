@@ -16,7 +16,6 @@ import {
   PenTool, 
   ExternalLink,
   Trash2,
-  RotateCcw,
   Share
 } from "lucide-react";
 
@@ -30,12 +29,13 @@ interface EnrichedLearningSession {
   title: string;
   topic: string;
   date: string;
-  duration: number;
-  status: 'learned' | 'saved' | 'reflected';
+  duration?: number;
+  status: 'saved' | 'reflected';
   reflection?: string;
   tags?: string[];
   sefariaLink: string;
   sourceId?: string;
+  excerpt?: string;
 }
 
 const content = {
@@ -44,7 +44,6 @@ const content = {
     subtitle: "Your Torah learning journey",
     backButton: "Back",
     tabs: {
-      learned: "Learned",
       saved: "Saved", 
       reflected: "With Reflections"
     },
@@ -61,8 +60,7 @@ const content = {
       oldest: "Oldest First"
     },
     empty: {
-      learned: "No completed learning sessions yet. Start learning to see them here!",
-      saved: "No saved sources yet. Save sources during learning to access them later.",
+      saved: "No saved sources yet. Explicitly save sources during learning to access them later.",
       reflected: "No reflections yet. Write reflections to deepen your learning experience."
     },
     duration: "min",
@@ -73,7 +71,6 @@ const content = {
     subtitle: "מסע הלימוד התורני שלך",
     backButton: "חזור",
     tabs: {
-      learned: "נלמד",
       saved: "נשמר",
       reflected: "עם הרהורים"
     },
@@ -90,8 +87,7 @@ const content = {
       oldest: "ישנים ראשון"
     },
     empty: {
-      learned: "אין עדיין סשני לימוד שהושלמו. התחל ללמוד כדי לראות אותם כאן!",
-      saved: "אין עדיין מקורות שמורים. שמור מקורות במהלך הלימוד כדי לגשת אליהם מאוחר יותר.",
+      saved: "אין עדיין מקורות שמורים במפורש. שמור מקורות במהלך הלימוד כדי לגשת אליהם מאוחר יותר.",
       reflected: "אין עדיין הרהורים. כתוב הרהורים כדי להעמיק את חוויית הלימוד שלך."
     },
     duration: "דק׳",
@@ -101,62 +97,70 @@ const content = {
 
 
 export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
-  const [activeTab, setActiveTab] = useState<'learned' | 'saved' | 'reflected'>('learned');
+  const [activeTab, setActiveTab] = useState<'saved' | 'reflected'>('saved');
   const [enrichedSessions, setEnrichedSessions] = useState<EnrichedLearningSession[]>([]);
+  
   const [dataLoading, setDataLoading] = useState(true);
   const { user } = useAuth();
-  const { sessions, reflections, sources, loading } = useSupabaseData();
+  const { reflections, loading } = useSupabaseData();
   const { toast } = useToast();
   const t = content[language];
   const isHebrew = language === 'he';
 
-  // Enrich sessions with source data and reflections
-  const enrichSessions = useCallback(async () => {
-    if (!sessions.length || !sources.length) return;
+  // Fetch saved sources and reflections
+  const fetchData = useCallback(async () => {
+    if (!user) return;
     
     setDataLoading(true);
     try {
-      const enriched: EnrichedLearningSession[] = sessions.map(session => {
-        const source = sources.find(s => s.id === session.source_id);
-        const sessionReflections = reflections.filter(r => r.session_id === session.id);
-        const hasReflection = sessionReflections.length > 0;
-        
-        // Determine session status based on actual data
-        let status: 'learned' | 'saved' | 'reflected' = 'saved';
-        if (session.status === 'learned' || session.status === 'completed') {
-          status = hasReflection ? 'reflected' : 'learned';
-        }
-        
-        return {
-          id: session.id,
-          title: source ? (language === 'he' ? source.title_he : source.title) : session.topic_selected,
-          topic: session.topic_selected,
-          date: session.created_at || new Date().toISOString(),
-          duration: session.time_selected,
-          status,
-          reflection: sessionReflections[0]?.note,
-          tags: sessionReflections[0]?.tags || [],
-          sefariaLink: source?.sefaria_link || '',
-          sourceId: session.source_id || undefined
-        };
-      });
-      
-      setEnrichedSessions(enriched);
+      // Fetch explicitly saved sources
+      const { data: savedData, error: savedError } = await supabase
+        .from('saved_sources')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_saved', true)
+        .order('saved_at', { ascending: false });
+
+      if (savedError) throw savedError;
+
+      // Create enriched sessions for saved sources
+      const enrichedSaved: EnrichedLearningSession[] = (savedData || []).map(saved => ({
+        id: saved.id,
+        title: language === 'he' ? (saved.source_title_he || saved.source_title) : saved.source_title,
+        topic: saved.topic_selected,
+        date: saved.saved_at,
+        status: 'saved' as const,
+        sefariaLink: saved.sefaria_link || '',
+        sourceId: saved.source_id || undefined,
+        excerpt: (language === 'he' ? saved.source_excerpt_he : saved.source_excerpt) || undefined
+      }));
+
+      // Create enriched sessions for reflections
+      const enrichedReflected: EnrichedLearningSession[] = reflections.map(reflection => ({
+        id: reflection.id,
+        title: reflection.session_id || 'Reflection',
+        topic: 'Reflection',
+        date: reflection.created_at || new Date().toISOString(),
+        status: 'reflected' as const,
+        reflection: reflection.note,
+        tags: reflection.tags || [],
+        sefariaLink: ''
+      }));
+
+      setEnrichedSessions([...enrichedSaved, ...enrichedReflected]);
     } catch (error) {
-      console.error('Error enriching sessions:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setDataLoading(false);
     }
-  }, [sessions, sources, reflections, language]);
+  }, [user, reflections, language]);
 
   useEffect(() => {
-    enrichSessions();
-  }, [enrichSessions]);
+    fetchData();
+  }, [fetchData]);
 
   const filteredSessions = enrichedSessions.filter(session => {
     switch (activeTab) {
-      case 'learned':
-        return session.status === 'learned' || session.status === 'reflected';
       case 'saved':
         return session.status === 'saved';
       case 'reflected':
@@ -166,29 +170,51 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
     }
   });
 
-  const handleDeleteSession = useCallback(async (sessionId: string) => {
+  const handleDeleteItem = useCallback(async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from('learning_sessions')
-        .delete()
-        .eq('id', sessionId)
-        .eq('user_id', user?.id || '');
+      const session = enrichedSessions.find(s => s.id === itemId);
+      if (!session) return;
 
-      if (error) throw error;
+      if (session.status === 'saved') {
+        // Delete from saved_sources
+        const { error } = await supabase
+          .from('saved_sources')
+          .delete()
+          .eq('id', itemId)
+          .eq('user_id', user?.id || '');
 
-      setEnrichedSessions(prev => prev.filter(s => s.id !== sessionId));
-      toast({
-        title: "Session deleted",
-        description: "Learning session has been removed"
-      });
+        if (error) throw error;
+
+        
+        toast({
+          title: "Saved source removed",
+          description: "Source has been removed from your saved list"
+        });
+      } else if (session.status === 'reflected') {
+        // Delete from reflections
+        const { error } = await supabase
+          .from('reflections')
+          .delete()
+          .eq('id', itemId)
+          .eq('user_id', user?.id || '');
+
+        if (error) throw error;
+
+        toast({
+          title: "Reflection deleted",
+          description: "Reflection has been removed"
+        });
+      }
+
+      setEnrichedSessions(prev => prev.filter(s => s.id !== itemId));
     } catch (error: any) {
       toast({
-        title: "Error deleting session",
+        title: "Error deleting item",
         description: error.message,
         variant: "destructive"
       });
     }
-  }, [user?.id, toast]);
+  }, [user?.id, toast, enrichedSessions]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -241,110 +267,11 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="learned">{t.tabs.learned}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="saved">{t.tabs.saved}</TabsTrigger>
             <TabsTrigger value="reflected">{t.tabs.reflected}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="learned">
-            <div className="space-y-4">
-              {loading || dataLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="learning-card">
-                      <div className="space-y-3">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-full" />
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              ) : filteredSessions.length === 0 ? (
-                <Card className="learning-card text-center py-12">
-                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{t.empty.learned}</p>
-                </Card>
-              ) : (
-                filteredSessions.map((session) => (
-                  <Card key={session.id} className="learning-card hover:shadow-warm transition-smooth">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getStatusIcon(session.status)}
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {session.title}
-                          </h3>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
-                          <span>{session.topic}</span>
-                          <span>•</span>
-                          <span>{session.duration} {t.duration}</span>
-                          <span>•</span>
-                          <span>{formatDate(session.date)}</span>
-                        </div>
-
-                        {session.reflection && (
-                          <p className="text-foreground/80 mb-3 italic">
-                            "{session.reflection.substring(0, 100)}..."
-                          </p>
-                        )}
-
-                        {session.tags && (
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {session.tags.map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2 ml-4">
-                        {session.sefariaLink && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(session.sefariaLink, '_blank')}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                        {session.reflection && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Share className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteSession(session.id)}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
 
           <TabsContent value="saved">
             <div className="space-y-4">
@@ -381,6 +308,12 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                           <span>•</span>
                           <span>{formatDate(session.date)}</span>
                         </div>
+
+                        {session.excerpt && (
+                          <p className="text-foreground/80 mb-3 text-sm">
+                            "{session.excerpt.substring(0, 150)}..."
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex gap-2 ml-4">
@@ -404,7 +337,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteSession(session.id)}
+                          onClick={() => handleDeleteItem(session.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -450,8 +383,6 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         
                         <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
                           <span>{session.topic}</span>
-                          <span>•</span>
-                          <span>{session.duration} {t.duration}</span>
                           <span>•</span>
                           <span>{formatDate(session.date)}</span>
                         </div>
@@ -501,7 +432,7 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteSession(session.id)}
+                          onClick={() => handleDeleteItem(session.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />

@@ -17,8 +17,10 @@ import {
   Calendar,
   SkipForward,
   CheckCircle,
-  
+  BookmarkPlus,
+  BookmarkCheck
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -34,7 +36,8 @@ const content = {
     subtitle: "Selected for your spiritual journey",
     backButton: "Back",
     skipButton: "Skip This Source",
-    
+    saveToggle: "Save Source",
+    savedIndicator: "Saved",
     saveButton: "Save for Later",
     learnedButton: "Mark as Learned",
     calendarButton: "Add to Calendar",
@@ -53,7 +56,8 @@ const content = {
     subtitle: "נבחר למסע הרוחני שלך",
     backButton: "חזור",
     skipButton: "דלג על המקור הזה",
-    
+    saveToggle: "שמור מקור",
+    savedIndicator: "נשמר",
     saveButton: "שמור למועד מאוחר",
     learnedButton: "סמן כנלמד",
     calendarButton: "הוסף ליומן",
@@ -79,6 +83,8 @@ export const SourceRecommendationV2 = ({
   const { user } = useAuth();
   const { success } = useAppToast();
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isTogglingSave, setIsTogglingSave] = useState<boolean>(false);
   
   // Use webhook source instead of Supabase
   const { source: webhookSource, loading: webhookLoading, error: webhookError, refetch } = useWebhookSource(
@@ -139,17 +145,55 @@ export const SourceRecommendationV2 = ({
     refetch();
   };
 
+  const handleToggleSave = async () => {
+    if (!user || !webhookSource || isTogglingSave) return;
+    
+    setIsTogglingSave(true);
+    try {
+      if (!isSaved) {
+        // Save to database
+        const { error } = await supabase
+          .from('saved_sources')
+          .insert({
+            user_id: user.id,
+            source_title: webhookSource.title,
+            source_title_he: webhookSource.title_he,
+            source_excerpt: webhookSource.excerpt,
+            source_excerpt_he: webhookSource.excerpt,
+            sefaria_link: webhookSource.sefaria_link,
+            topic_selected: topicSelected,
+            time_selected: timeSelected,
+            is_saved: true
+          });
+
+        if (error) throw error;
+        
+        setIsSaved(true);
+        success(content[language].saveToggle);
+      } else {
+        // Remove from database - find by matching content
+        const { error } = await supabase
+          .from('saved_sources')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('source_title', webhookSource.title)
+          .eq('topic_selected', topicSelected);
+
+        if (error) throw error;
+        
+        setIsSaved(false);
+        success("Removed from saved");
+      }
+    } catch (error: any) {
+      console.error('Error toggling save:', error);
+    } finally {
+      setIsTogglingSave(false);
+    }
+  };
+
   const handleSave = async () => {
-    if (!currentSessionId || !webhookSource) return;
-    
-    // Update session status in localStorage
-    const sessionKey = `webhook_session_${currentSessionId}`;
-    const sessionData = JSON.parse(localStorage.getItem(sessionKey) || '{}');
-    sessionData.status = 'saved';
-    sessionData.updated_at = new Date().toISOString();
-    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
-    
-    success(content[language].saveButton);
+    // Legacy save function - now just calls the toggle
+    handleToggleSave();
   };
 
   const handleMarkLearned = async () => {
@@ -234,9 +278,32 @@ export const SourceRecommendationV2 = ({
         {/* Webhook Source Display */}
         <Card className="p-6">
           <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">{title}</h2>
-              <p className="text-sm text-muted-foreground mb-4">{webhookSource.source_range}</p>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold mb-2">{title}</h2>
+                <p className="text-sm text-muted-foreground mb-4">{webhookSource.source_range}</p>
+              </div>
+              
+              {/* Save Toggle Button */}
+              <Button
+                variant={isSaved ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleSave}
+                disabled={isTogglingSave}
+                className="flex items-center gap-2 min-w-[100px]"
+              >
+                {isSaved ? (
+                  <>
+                    <BookmarkCheck className="h-4 w-4" />
+                    {content[language].savedIndicator}
+                  </>
+                ) : (
+                  <>
+                    <BookmarkPlus className="h-4 w-4" />
+                    {content[language].saveToggle}
+                  </>
+                )}
+              </Button>
             </div>
             
             {excerpt && (

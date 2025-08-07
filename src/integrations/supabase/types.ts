@@ -100,6 +100,57 @@ export type Database = {
           },
         ]
       }
+      saved_sources: {
+        Row: {
+          created_at: string
+          id: string
+          is_saved: boolean
+          saved_at: string
+          sefaria_link: string | null
+          source_excerpt: string | null
+          source_excerpt_he: string | null
+          source_id: string | null
+          source_title: string
+          source_title_he: string | null
+          time_selected: number
+          topic_selected: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_saved?: boolean
+          saved_at?: string
+          sefaria_link?: string | null
+          source_excerpt?: string | null
+          source_excerpt_he?: string | null
+          source_id?: string | null
+          source_title: string
+          source_title_he?: string | null
+          time_selected: number
+          topic_selected: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_saved?: boolean
+          saved_at?: string
+          sefaria_link?: string | null
+          source_excerpt?: string | null
+          source_excerpt_he?: string | null
+          source_id?: string | null
+          source_title?: string
+          source_title_he?: string | null
+          time_selected?: number
+          topic_selected?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sources: {
         Row: {
           category: string
