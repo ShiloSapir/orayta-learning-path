@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { selectCommentaries } from '@/utils/commentarySelector';
 
 export interface WebhookSource {
   title: string;
@@ -60,17 +61,35 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       .map(c => c.split(':')[0].replace(/\*\*/g, '').trim())
       .filter(c => c.length > 0);
 
+    const title = titleEngMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source';
+    const sourceRange = rangeMatch?.[1]?.trim() || '';
+    const excerpt = excerptMatch?.[1]?.trim() || '';
+    
+    // Intelligent commentary selection based on criteria
+    const intelligentCommentaries = selectCommentaries({
+      topicSelected,
+      sourceTitle: title,
+      sourceRange,
+      excerpt
+    });
+    
+    // Use parsed commentaries if available and intelligent selection permits,
+    // otherwise use intelligent selection or empty array
+    const finalCommentaries = intelligentCommentaries.length > 0 
+      ? intelligentCommentaries 
+      : (commentaries.length > 0 ? commentaries : []);
+
     return {
-      title: titleEngMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source',
+      title,
       title_he: titleHebrewMatch?.[1]?.replace(/\*/g, '').trim() || 'מקור תורני',
-      source_range: rangeMatch?.[1]?.trim() || '',
-      excerpt: excerptMatch?.[1]?.trim() || '',
-      commentaries: commentaries.length > 0 ? commentaries : ['Rashi', 'Ramban'],
+      source_range: sourceRange,
+      excerpt,
+      commentaries: finalCommentaries,
       reflection_prompt: reflectionMatch?.[1]?.trim() || '',
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
       sefaria_link: extractedLink,
     };
-  }, [timeSelected]);
+  }, [timeSelected, topicSelected]);
 
   const fetchWebhookSource = useCallback(async () => {
     setLoading(true);

@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.1';
+import { selectCommentaries } from '../commentary-selector/index.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -224,6 +225,20 @@ Language: ${language}
     generatedSource.learning_objectives = generatedSource.learning_objectives || [];
     generatedSource.topic = topic;
     generatedSource.language = language;
+
+    // Apply intelligent commentary selection based on criteria
+    const intelligentCommentaries = selectCommentaries({
+      topicSelected: topic,
+      sourceTitle: generatedSource.title,
+      sourceRange: generatedSource.sefaria_ref || '',
+      excerpt: generatedSource.translation
+    });
+
+    // Override any existing commentaries with intelligent selection
+    if (intelligentCommentaries.length > 0) {
+      // Add commentary suggestions to the response without modifying the main commentary field
+      generatedSource.suggested_commentaries = intelligentCommentaries;
+    }
 
     console.log('Successfully generated Torah source:', generatedSource.title);
 
