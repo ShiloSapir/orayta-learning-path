@@ -369,28 +369,216 @@
     touch-action: manipulation;
   }
 
-  /* Mobile-first spacing utilities */
-  .mobile-spacing-y {
-    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  /* Enhanced mobile-first spacing utilities */
+  .mobile-spacing-y > * + * {
+    margin-top: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-spacing-y > * + * {
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-spacing-y > * + * {
+      margin-top: 2rem;
+    }
   }
 
   .mobile-spacing-x {
     @apply space-x-3 sm:space-x-4 lg:space-x-6;
   }
 
-  /* Content readability on mobile */
+  /* Enhanced mobile content with optimal readability */
   .mobile-content {
-    @apply text-base sm:text-lg leading-relaxed max-w-none sm:max-w-prose mx-auto;
-    /* Better mobile reading experience */
+    @apply text-sm leading-7 px-4 max-w-2xl mx-auto;
+    line-height: 1.7;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
   }
 
+  @media (min-width: 640px) {
+    .mobile-content {
+      @apply text-base px-6;
+      line-height: 1.6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-content {
+      @apply text-lg px-8;
+    }
+  }
+
+  /* Responsive grids optimized for mobile */
+  .mobile-grid {
+    @apply grid grid-cols-1 gap-3 px-4;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-grid {
+      @apply grid-cols-2 gap-4 px-6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-grid {
+      @apply grid-cols-3 gap-6 px-8;
+    }
+  }
+
+  /* Enhanced mobile button stacks */
+  .mobile-stack {
+    @apply flex flex-col gap-2 px-4;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-stack {
+      @apply flex-row justify-center gap-3 px-6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-stack {
+      @apply gap-4 px-8;
+    }
+  }
+
+  /* Progressive mobile containers */
+  .mobile-container {
+    @apply px-3 py-4;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-container {
+      @apply px-6 py-6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-container {
+      @apply px-8 py-8;
+    }
+  }
+
+  /* Enhanced touch-friendly elements */
+  .touch-button {
+    @apply min-h-[48px] min-w-[48px] touch-manipulation text-base;
+    tap-highlight-color: transparent;
+  }
+
+  /* Optimized learning cards */
+  .learning-card {
+    @apply p-3 rounded-xl border transition-all duration-300 hover:shadow-lg backdrop-blur-sm;
+    min-height: 120px;
+  }
+
+  @media (min-width: 640px) {
+    .learning-card {
+      @apply p-5;
+      min-height: 140px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .learning-card {
+      @apply p-6;
+      min-height: 160px;
+    }
+  }
+
+  /* Mobile-optimized scrolling */
+  .mobile-scroll {
+    @apply overflow-y-auto overscroll-y-contain;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .mobile-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .mobile-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .mobile-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 2px;
+  }
+
+  /* Responsive text utilities */
+  .mobile-text-xs {
+    @apply text-xs;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-text-xs {
+      @apply text-sm;
+    }
+  }
+
+  .mobile-text-sm {
+    @apply text-sm;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-text-sm {
+      @apply text-base;
+    }
+  }
+
+  .mobile-text-base {
+    @apply text-sm;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-text-base {
+      @apply text-base;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-text-base {
+      @apply text-lg;
+    }
+  }
+
+  /* Mobile flex layouts */
+  .mobile-flex-col {
+    @apply flex flex-col gap-3;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-flex-col {
+      @apply flex-row gap-4;
+    }
+  }
+
+  /* Enhanced content cards */
+  .content-card {
+    @apply bg-card/90 backdrop-blur-sm border border-border/50 rounded-xl shadow-soft;
+    @apply p-4 space-y-3;
+  }
+
+  @media (min-width: 640px) {
+    .content-card {
+      @apply p-6 space-y-4;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .content-card {
+      @apply p-8 space-y-6;
+    }
+  }
+
   /* Mobile-safe bottom padding for navigation */
   .safe-bottom {
     @apply pb-20 sm:pb-4;
-    /* Account for mobile browser UI changes */
     padding-bottom: max(env(safe-area-inset-bottom), 5rem);
   }
 

@@ -21,7 +21,7 @@ import {
   BookmarkCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { MotionWrapper, StaggeredContainer } from "@/components/MotionWrapper";
+import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
@@ -273,160 +273,166 @@ export const SourceRecommendationV2 = ({
   const reflectionPrompt = webhookSource.reflection_prompt;
 
   return (
-    <MotionWrapper type="fadeUp" className="min-h-screen bg-gradient-parchment p-4">
-      <StaggeredContainer className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <MotionWrapper type="scale" delay={0.1}>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              {content[language].title}
-            </h1>
-            <p className="text-muted-foreground">{content[language].subtitle}</p>
-          </div>
-        </MotionWrapper>
+    <div className="min-h-screen bg-gradient-parchment mobile-container">
+      <div className="max-w-4xl mx-auto mobile-scroll" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className="space-y-4 pb-20">
+          {/* Header */}
+          <MotionWrapper type="scale" delay={0.1}>
+            <div className="text-center mobile-spacing-y">
+              <h1 className="mobile-text-base font-bold bg-gradient-primary bg-clip-text text-transparent sm:text-2xl">
+                {content[language].title}
+              </h1>
+              <p className="mobile-text-sm text-muted-foreground">{content[language].subtitle}</p>
+            </div>
+          </MotionWrapper>
 
-        {/* Webhook Source Display */}
-        <MotionWrapper type="fadeUp" delay={0.2}>
-          <Card className="p-6 shadow-divine border-border/50 bg-card/80 backdrop-blur-sm">
-            <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold mb-2">{title}</h2>
-                <p className="text-sm text-muted-foreground mb-4">{webhookSource.source_range}</p>
-              </div>
-              
-              {/* Save Toggle Button */}
-              <ScaleOnTap>
-                <Button
-                  variant={isSaved ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleToggleSave}
-                  disabled={isTogglingSave}
-                  className="flex items-center gap-2 min-w-[100px] transition-all duration-200"
-                >
-                {isSaved ? (
-                  <>
-                    <BookmarkCheck className="h-4 w-4" />
-                    {content[language].savedIndicator}
-                  </>
-                ) : (
-                  <>
-                    <BookmarkPlus className="h-4 w-4" />
-                    {content[language].saveToggle}
-                  </>
+          {/* Webhook Source Display */}
+          <MotionWrapper type="fadeUp" delay={0.2}>
+            <div className="content-card">
+              <div className="space-y-4">
+                <div className="mobile-flex-col items-start">
+                  <div className="flex-1 space-y-2">
+                    <h2 className="mobile-text-base font-semibold sm:text-xl">{title}</h2>
+                    <p className="mobile-text-xs text-muted-foreground">{webhookSource.source_range}</p>
+                  </div>
+                  
+                  {/* Save Toggle Button - Mobile Optimized */}
+                  <ScaleOnTap>
+                    <Button
+                      variant={isSaved ? "default" : "outline"}
+                      size="sm"
+                      onClick={handleToggleSave}
+                      disabled={isTogglingSave}
+                      className="touch-button flex items-center gap-2 min-w-[120px] transition-all duration-200"
+                    >
+                      {isSaved ? (
+                        <>
+                          <BookmarkCheck className="h-4 w-4" />
+                          <span className="mobile-text-xs">{content[language].savedIndicator}</span>
+                        </>
+                      ) : (
+                        <>
+                          <BookmarkPlus className="h-4 w-4" />
+                          <span className="mobile-text-xs">{content[language].saveToggle}</span>
+                        </>
+                      )}
+                    </Button>
+                  </ScaleOnTap>
+                </div>
+                
+                {excerpt && (
+                  <MotionWrapper type="fadeUp" delay={0.3}>
+                    <div className="bg-gradient-to-r from-secondary/20 to-accent/10 p-4 rounded-lg border-l-4 border-primary">
+                      <ScrollIcon className="h-6 w-6 text-primary mb-2" />
+                      <p className="mobile-text-sm leading-relaxed text-foreground">{excerpt}</p>
+                    </div>
+                  </MotionWrapper>
                 )}
-                </Button>
-              </ScaleOnTap>
-            </div>
-            
-            {excerpt && (
-              <MotionWrapper type="fadeUp" delay={0.3}>
-                <div className="bg-gradient-to-r from-secondary/20 to-accent/10 p-4 rounded-lg border-l-4 border-primary">
-                  <ScrollIcon className="h-6 w-6 text-primary mb-2" />
-                  <p className="text-sm leading-relaxed text-foreground">{excerpt}</p>
-                </div>
-              </MotionWrapper>
-            )}
-            
-            {webhookSource.commentaries.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2">{content[language].commentariesLabel}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {webhookSource.commentaries.map((commentary, index) => (
-                    <span key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                      {commentary}
-                    </span>
-                  ))}
-                </div>
+                
+                {webhookSource.commentaries.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="mobile-text-sm font-semibold">{content[language].commentariesLabel}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {webhookSource.commentaries.map((commentary, index) => (
+                        <span key={index} className="mobile-text-xs bg-primary/10 text-primary px-3 py-1 rounded-full">
+                          {commentary}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {webhookSource.sefaria_link && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(webhookSource.sefaria_link, '_blank')}
+                    className="w-full touch-button"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                  </Button>
+                )}
               </div>
-            )}
-            
-            {webhookSource.sefaria_link && (
+            </div>
+          </MotionWrapper>
+
+          {/* Reflection Prompt */}
+          <MotionWrapper type="fadeUp" delay={0.4}>
+            <div className="content-card bg-gradient-to-r from-accent/5 to-secondary/10 border-accent/20">
+              <h3 className="mobile-text-sm font-semibold text-primary">{content[language].reflectionPromptLabel}</h3>
+              <p className="mobile-text-sm text-muted-foreground italic leading-relaxed">{reflectionPrompt}</p>
+            </div>
+          </MotionWrapper>
+
+          {/* Action Buttons - Mobile Optimized */}
+          <MotionWrapper type="fadeUp" delay={0.5}>
+            <div className="content-card space-y-4 border-primary/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button
+                  onClick={handleSkip}
+                  variant="outline"
+                  disabled={webhookLoading}
+                  className="touch-button"
+                >
+                  <SkipForward className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].skipButton}</span>
+                </Button>
+                
+                <Button
+                  onClick={handleSave}
+                  variant="outline"
+                  disabled={webhookLoading}
+                  className="touch-button"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].saveButton}</span>
+                </Button>
+                
+                <Button
+                  onClick={handleMarkLearned}
+                  variant="outline"
+                  disabled={webhookLoading}
+                  className="touch-button"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].learnedButton}</span>
+                </Button>
+                
+                <Button
+                  onClick={handleCalendar}
+                  variant="outline"
+                  className="touch-button sm:col-span-2 lg:col-span-1"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                </Button>
+              </div>
+
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(webhookSource.sefaria_link, '_blank')}
-                className="w-full sm:w-auto"
+                onClick={handleReflection}
+                className="w-full touch-button"
+                disabled={webhookLoading}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                {content[language].sefariaLink}
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span className="mobile-text-base">{content[language].reflectionButton}</span>
               </Button>
-            )}
             </div>
-          </Card>
-        </MotionWrapper>
+          </MotionWrapper>
 
-        {/* Reflection Prompt */}
-        <MotionWrapper type="fadeUp" delay={0.4}>
-          <Card className="p-6 shadow-gentle border-accent/20 bg-gradient-to-r from-accent/5 to-secondary/10">
-            <h3 className="font-semibold mb-2 text-primary">{content[language].reflectionPromptLabel}</h3>
-            <p className="text-muted-foreground italic leading-relaxed">{reflectionPrompt}</p>
-          </Card>
-        </MotionWrapper>
-
-        {/* Action Buttons */}
-        <MotionWrapper type="fadeUp" delay={0.5}>
-          <Card className="p-6 space-y-4 shadow-blessed border-primary/10">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <Button
-              onClick={handleSkip}
-              variant="outline"
-              disabled={webhookLoading}
-            >
-              <SkipForward className="h-4 w-4 mr-2" />
-              {content[language].skipButton}
-            </Button>
-            
-            <Button
-              onClick={handleSave}
-              variant="outline"
-              disabled={webhookLoading}
-            >
-              <Heart className="h-4 w-4 mr-2" />
-              {content[language].saveButton}
-            </Button>
-            
-            <Button
-              onClick={handleMarkLearned}
-              variant="outline"
-              disabled={webhookLoading}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              {content[language].learnedButton}
-            </Button>
-            
-            <Button
-              onClick={handleCalendar}
-              variant="outline"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              {content[language].calendarButton}
-            </Button>
-            </div>
-
-            <Button
-              onClick={handleReflection}
-              className="w-full"
-              disabled={webhookLoading}
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              {content[language].reflectionButton}
-            </Button>
-          </Card>
-        </MotionWrapper>
-
-        {/* Social Sharing */}
-        <MotionWrapper type="fadeUp" delay={0.6}>
-          <SocialSharing
-            language={language}
-            source={{
-              title: title,
-              text: excerpt || '',
-              sefariaLink: webhookSource.sefaria_link
-            }}
-          />
-        </MotionWrapper>
-      </StaggeredContainer>
-    </MotionWrapper>
+          {/* Social Sharing */}
+          <MotionWrapper type="fadeUp" delay={0.6}>
+            <SocialSharing
+              language={language}
+              source={{
+                title: title,
+                text: excerpt || '',
+                sefariaLink: webhookSource.sefaria_link
+              }}
+            />
+          </MotionWrapper>
+        </div>
+      </div>
+    </div>
   );
 };
