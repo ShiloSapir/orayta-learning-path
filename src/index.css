@@ -133,6 +133,10 @@
     font-variant-numeric: oldstyle-nums;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
+    /* Enhanced mobile performance */
+    -webkit-overflow-scrolling: touch;
+    /* Better mobile tap handling */
+    touch-action: manipulation;
   }
 
   html {
@@ -143,6 +147,25 @@
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Ensure full viewport usage */
+    height: 100%;
+    /* Prevent zoom on focus for iOS */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Prevent mobile text selection and zoom on double tap */
+  * {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Enable text selection only where needed */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   /* Hebrew Typography */
@@ -191,6 +214,15 @@
   /* Mobile-optimized Torah Learning Cards */
   .learning-card {
     @apply bg-card border border-border rounded-xl p-4 sm:p-6 shadow-soft hover:shadow-warm transition-smooth relative overflow-hidden;
+    /* Ensure mobile-friendly scrolling inside cards */
+    -webkit-overflow-scrolling: touch;
+    /* Better mobile touch feedback */
+    cursor: pointer;
+  }
+
+  .learning-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-out;
   }
 
   /* Enhanced Topic Selection Cards - Mobile First */
@@ -299,19 +331,32 @@
   /* Mobile-specific utility classes */
   .mobile-container {
     @apply px-4 sm:px-6 lg:px-8 max-w-full;
+    /* Ensure no horizontal overflow */
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .mobile-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+    /* Ensure grid doesn't overflow on mobile */
+    width: 100%;
+    min-width: 0;
   }
 
   .mobile-stack {
     @apply flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4;
+    /* Ensure proper mobile stacking */
+    width: 100%;
+    align-items: stretch;
   }
 
   /* Touch-friendly buttons */
   .touch-button {
     @apply min-h-[48px] min-w-[48px] rounded-lg transition-all duration-200 active:scale-95;
+    /* Better mobile touch feedback */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   /* Mobile-first spacing utilities */
@@ -326,11 +371,23 @@
   /* Content readability on mobile */
   .mobile-content {
     @apply text-base sm:text-lg leading-relaxed max-w-none sm:max-w-prose mx-auto;
+    /* Better mobile reading experience */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   /* Mobile-safe bottom padding for navigation */
   .safe-bottom {
     @apply pb-20 sm:pb-4;
+    /* Account for mobile browser UI changes */
+    padding-bottom: max(env(safe-area-inset-bottom), 5rem);
+  }
+
+  @media (min-width: 640px) {
+    .safe-bottom {
+      padding-bottom: 1rem;
+    }
   }
 }
 

@@ -57,7 +57,8 @@ const content = {
         subtitle: "Random Divine Selection",
         subcategories: []
       }
-    }
+    },
+    quote: "\"Torah is not in heaven. It is here for you to engage with and make part of your daily life\" - Deuteronomy 30:12"
   },
   he: {
     title: "מה תרצה ללמוד?",
@@ -95,7 +96,8 @@ const content = {
         subtitle: "בחירה אלוהית אקראית",
         subcategories: []
       }
-    }
+    },
+    quote: "\"לא בשמים היא\" - התורה כאן עמך, למעשה ולחיים - דברים ל׳:יב"
   }
 };
 
@@ -235,6 +237,13 @@ export const TopicSelection = ({
           >
             {t.nextButton}
           </Button>
+        </div>
+
+        {/* Inspirational Quote - Mobile Readable */}
+        <div className="mt-8 pt-6 border-t border-border/50">
+          <p className="text-sm sm:text-base text-muted-foreground italic leading-relaxed text-center">
+            {t.quote}
+          </p>
         </div>
       </div>
     </div>
