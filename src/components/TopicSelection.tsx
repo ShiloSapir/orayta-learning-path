@@ -129,27 +129,27 @@ export const TopicSelection = ({
   const sourceStats = getSourceStats();
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="max-w-4xl mx-auto py-8 animate-fade-in">
+    <div className={`min-h-screen bg-gradient-subtle mobile-container safe-bottom ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="max-w-4xl mx-auto py-6 sm:py-8 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
           <div className="text-center">
             <Book className="h-8 w-8 text-primary mx-auto mb-2" />
           </div>
         </div>
 
-        {/* Title */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+        {/* Title - Mobile Responsive */}
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
             {t.title}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground">
             {t.subtitle}
           </p>
         </div>
 
-        {/* Topic Options */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {/* Topic Options - Mobile Grid */}
+        <div className="mobile-grid mb-8 sm:mb-12">
           {Object.entries(t.topics).map(([key, topic]) => {
             const Icon = topicIcons[key as keyof typeof topicIcons];
             const isSelected = selectedTopic === key;
@@ -162,7 +162,7 @@ export const TopicSelection = ({
                 variant="ghost"
                 onClick={() => onTopicSelect(key)}
                 className={`
-                  h-auto p-0 transition-all duration-300 bg-transparent hover:bg-transparent
+                  h-auto p-0 transition-all duration-300 bg-transparent hover:bg-transparent w-full
                   ${isSelected ? 'ring-2 ring-primary animate-scale-in' : 'hover:scale-105'}
                 `}
               >
@@ -175,25 +175,25 @@ export const TopicSelection = ({
                     }
                   `}
                 >
-                  {/* Header with icon */}
+                  {/* Header with icon - Mobile Optimized */}
                   <div className="flex items-start justify-between mb-3">
-                    <Icon className={`h-8 w-8 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
+                    <Icon className={`h-8 w-8 sm:h-10 sm:w-10 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
                   </div>
                   
-                  <h3 className="font-bold text-lg mb-2">{topic.title}</h3>
-                  <p className={`text-sm mb-3 ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <h3 className="font-bold text-lg sm:text-xl mb-2">{topic.title}</h3>
+                  <p className={`text-sm sm:text-base mb-3 ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     {topic.subtitle}
                   </p>
                   
-                  {/* Enhanced subcategories with progressive disclosure */}
+                  {/* Enhanced subcategories - Mobile Responsive */}
                   {topic.subcategories.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
                         {topic.subcategories.slice(0, isSelected ? topic.subcategories.length : 2).map((sub, index) => (
                           <div 
                             key={index}
-                            className={`text-xs px-2 py-1 rounded-md transition-all duration-200 ${
-                              isSelected 
+                            className={`text-xs sm:text-sm px-2 py-1 rounded-md transition-all duration-200 ${
+                              isSelected
                                 ? 'bg-primary-foreground/20 text-primary-foreground' 
                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                             }`}
@@ -202,16 +202,16 @@ export const TopicSelection = ({
                           </div>
                         ))}
                         {!isSelected && topic.subcategories.length > 2 && (
-                          <div className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground">
+                          <div className="text-xs sm:text-sm px-2 py-1 rounded-md bg-muted text-muted-foreground">
                             +{topic.subcategories.length - 2} more
                           </div>
                         )}
                       </div>
                       
-                      {/* Time availability indicator */}
+                      {/* Time availability indicator - Mobile Friendly */}
                       {isSelected && Object.keys(stats.timeRanges).length > 0 && (
                         <div className="mt-2 pt-2 border-t border-primary-foreground/20">
-                          <div className="flex items-center gap-1 text-xs opacity-80">
+                          <div className="flex items-center gap-1 text-xs sm:text-sm opacity-80">
                             <TrendingUp className="h-3 w-3" />
                             Available: {Object.entries(stats.timeRanges).map(([range, count]) => `${range} (${count})`).join(', ')}
                           </div>
@@ -225,13 +225,13 @@ export const TopicSelection = ({
           })}
         </div>
 
-        {/* Continue Button */}
+        {/* Continue Button - Mobile Optimized */}
         <div className="text-center">
           <Button
             onClick={onNext}
             disabled={!selectedTopic}
             size="lg"
-            className="btn-spiritual px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-spiritual px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {t.nextButton}
           </Button>

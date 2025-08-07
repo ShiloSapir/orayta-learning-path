@@ -57,57 +57,57 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
   const isHebrew = language === 'he';
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
-        {/* Header with Language Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="w-20"></div> {/* Spacer */}
-          <div className="text-sm text-muted-foreground font-medium translate-x-16">
+    <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center mobile-container safe-bottom ${isHebrew ? 'hebrew' : ''}`}>
+      <div className="w-full max-w-2xl text-center mobile-spacing-y animate-fade-in">
+        {/* Header with Language Toggle - Mobile Optimized */}
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1"></div> {/* Spacer */}
+          <div className="text-sm text-muted-foreground font-medium">
             {t.greeting}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 justify-end">
             <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
             <DarkModeToggle />
           </div>
         </div>
 
-        {/* Main Title */}
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold gradient-primary bg-clip-text text-transparent">
+        {/* Main Title - Mobile Responsive */}
+        <div className="mobile-spacing-y">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold gradient-primary bg-clip-text text-transparent">
             {t.title}
           </h1>
-          <p className="text-xl text-muted-foreground font-medium">
+          <p className="text-lg sm:text-xl text-muted-foreground font-medium max-w-lg mx-auto">
             {t.subtitle}
           </p>
         </div>
 
-        {/* Description */}
-        <p className="text-lg text-foreground/80 leading-relaxed max-w-lg mx-auto">
+        {/* Description - Mobile Readable */}
+        <p className="mobile-content text-foreground/80">
           {t.description}
         </p>
 
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
+        {/* Features - Mobile Grid */}
+        <div className="mobile-grid my-8">
           {t.features.map((feature, index) => (
             <div 
               key={index}
-              className="learning-card hover:scale-105 transition-smooth bg-gradient-warm"
+              className="learning-card hover:scale-105 transition-smooth bg-gradient-warm text-center"
             >
               <feature.icon className="h-8 w-8 text-primary mx-auto mb-3" />
-              <p className="font-medium text-foreground">
+              <p className="font-medium text-foreground text-sm sm:text-base">
                 {feature.text}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Action Buttons - Mobile Stack */}
+        <div className="mobile-spacing-y">
+          <div className="mobile-stack">
             <Button
               onClick={onStartLearning}
               size="lg"
-              className="btn-spiritual text-lg px-8 py-4"
+              className="btn-spiritual text-lg px-8 py-4 w-full sm:w-auto"
             >
               ✨ {t.startButton} ✨
             </Button>
@@ -116,7 +116,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
               onClick={onJournal}
               variant="outline"
               size="lg"
-              className="btn-gentle text-lg px-8 py-4"
+              className="btn-gentle text-lg px-8 py-4 w-full sm:w-auto"
             >
               📚 {t.journalButton}
             </Button>
@@ -125,20 +125,20 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
               onClick={onProfile}
               variant="outline"
               size="lg"
-              className="btn-gentle text-lg px-8 py-4"
+              className="btn-gentle text-lg px-8 py-4 w-full sm:w-auto"
             >
               ⚙️ {t.profileButton}
             </Button>
           </div>
 
-          {/* Advanced Features */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Advanced Features - Mobile Stack */}
+          <div className="mobile-stack">
             {onAnalytics && (
               <Button
                 onClick={onAnalytics}
                 variant="outline"
                 size="lg"
-                className="btn-gentle text-lg px-8 py-4"
+                className="btn-gentle text-lg px-8 py-4 w-full sm:w-auto"
               >
                 📊 {t.analyticsButton}
               </Button>
@@ -149,7 +149,7 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
                 onClick={onSearch}
                 variant="outline"
                 size="lg"
-                className="btn-gentle text-lg px-8 py-4"
+                className="btn-gentle text-lg px-8 py-4 w-full sm:w-auto"
               >
                 🔍 {t.searchButton}
               </Button>
@@ -157,19 +157,19 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
           </div>
         </div>
 
-        {/* Login Button */}
+        {/* Login Button - Touch Friendly */}
         <button 
           onClick={() => {
             window.location.href = '/auth';
           }}
-          className="text-primary hover:text-primary/80 transition-smooth underline underline-offset-4"
+          className="text-primary hover:text-primary/80 transition-smooth underline underline-offset-4 text-lg py-2 px-4 rounded-lg touch-button"
         >
           {t.loginButton}
         </button>
 
-        {/* Spiritual Quote */}
-        <div className="mt-12 pt-8 border-t border-border/50">
-          <p className="text-sm text-muted-foreground italic">
+        {/* Spiritual Quote - Mobile Readable */}
+        <div className="mt-8 pt-6 border-t border-border/50">
+          <p className="text-sm sm:text-base text-muted-foreground italic leading-relaxed">
             {t.quote}
           </p>
         </div>
