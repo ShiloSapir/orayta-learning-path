@@ -241,8 +241,9 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}>
-      <div className="max-w-6xl mx-auto py-8 animate-fade-in">
+    <div className="min-h-screen bg-gradient-subtle mobile-container">
+      <div className="max-w-6xl mx-auto mobile-scroll safe-bottom" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className={`py-8 animate-fade-in pb-20 ${isHebrew ? 'hebrew' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Button
@@ -443,9 +444,10 @@ export const LearningJournal = ({ language, onBack }: LearningJournalProps) => {
                 ))
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
+  </div>
   );
 };

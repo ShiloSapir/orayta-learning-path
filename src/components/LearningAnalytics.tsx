@@ -126,7 +126,9 @@ export function LearningAnalytics({ language }: LearningAnalyticsProps) {
   };
 
   return (
-    <div className={`space-y-6 ${isHebrew ? 'text-right' : 'text-left'}`}>
+    <div className="min-h-screen bg-gradient-parchment mobile-container">
+      <div className="max-w-4xl mx-auto mobile-scroll safe-bottom" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className={`space-y-6 pb-20 ${isHebrew ? 'text-right' : 'text-left'}`}>
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">{t.title}</h1>
         <div className="flex items-center justify-center gap-2">
@@ -265,6 +267,8 @@ export function LearningAnalytics({ language }: LearningAnalyticsProps) {
           </div>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
+  </div>
   );
 }

@@ -73,8 +73,9 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-4 pb-20">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-subtle mobile-container">
+      <div className="max-w-2xl mx-auto mobile-scroll safe-bottom" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className="space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={onBack} className="gap-2">
@@ -171,5 +172,6 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
         </Card>
       </div>
     </div>
+  </div>
   );
 };

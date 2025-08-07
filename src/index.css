@@ -147,6 +147,9 @@
     touch-action: manipulation;
     /* Smooth transitions for reduced motion users */
     transition: background 0.3s ease;
+    /* Mobile viewport fix */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 
   html {
@@ -162,6 +165,15 @@
     /* Prevent zoom on focus for iOS */
     -webkit-user-select: none;
     user-select: none;
+    /* Mobile viewport height fix */
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  /* Mobile viewport height fix */
+  #root {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 
   /* Prevent mobile text selection and zoom on double tap */

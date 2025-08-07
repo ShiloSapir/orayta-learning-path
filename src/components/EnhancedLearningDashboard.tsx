@@ -218,7 +218,9 @@ export function EnhancedLearningDashboard({ language, onBack }: EnhancedLearning
   };
 
   return (
-    <div className={`space-y-6 ${isHebrew ? 'text-right' : 'text-left'}`}>
+    <div className="min-h-screen bg-gradient-parchment mobile-container">
+      <div className="max-w-4xl mx-auto mobile-scroll safe-bottom" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className={`space-y-6 pb-20 ${isHebrew ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div className="text-center mb-6">
         {onBack && (
@@ -511,6 +513,8 @@ export function EnhancedLearningDashboard({ language, onBack }: EnhancedLearning
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
+  </div>
   );
 }

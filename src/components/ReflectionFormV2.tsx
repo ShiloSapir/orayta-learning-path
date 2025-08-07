@@ -96,8 +96,9 @@ export const ReflectionFormV2 = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 mobile-container">
+      <div className="max-w-2xl mx-auto mobile-scroll safe-bottom" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-bottom, 0px) - 80px)' }}>
+        <div className="space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button 
@@ -203,6 +204,7 @@ export const ReflectionFormV2 = ({
             )}
           </Button>
         </Card>
+        </div>
       </div>
     </div>
   );
