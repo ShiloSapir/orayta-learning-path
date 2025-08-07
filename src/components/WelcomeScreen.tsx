@@ -60,12 +60,13 @@ export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJ
     <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center mobile-container safe-bottom ${isHebrew ? 'hebrew' : ''}`}>
       <div className="w-full max-w-2xl text-center mobile-spacing-y animate-fade-in">
         {/* Header with Language Toggle - Mobile Optimized */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1"></div> {/* Spacer */}
-          <div className="text-sm text-muted-foreground font-medium">
-            {t.greeting}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+          <div className="text-center sm:text-left">
+            <div className="text-base sm:text-sm text-muted-foreground font-medium px-4 sm:px-0">
+              {t.greeting}
+            </div>
           </div>
-          <div className="flex items-center gap-2 flex-1 justify-end">
+          <div className="flex items-center gap-2 justify-center sm:justify-end">
             <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
             <DarkModeToggle />
           </div>
