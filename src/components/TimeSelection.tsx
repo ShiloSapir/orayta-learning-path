@@ -15,14 +15,16 @@ const content = {
     subtitle: "Choose your learning duration",
     backButton: "Back",
     nextButton: "Continue",
-    minutes: "min"
+    minutes: "min",
+    quote: '"For a mitzvah is a lamp, and the Torah is light." — Mishlei / Proverbs 6:23'
   },
   he: {
     title: "כמה זמן יש לך?",
     subtitle: "בחר את משך הלימוד שלך",
     backButton: "חזור",
     nextButton: "המשך",
-    minutes: "דק'"
+    minutes: "דק'",
+    quote: 'כִּי נֵר מִצְוָה וְתוֹרָה אוֹר — משלי ו׳:כ״ג'
   }
 };
 
@@ -90,6 +92,13 @@ export const TimeSelection = ({
           >
             {t.nextButton}
           </Button>
+        </div>
+
+        {/* Inspirational Quote */}
+        <div className="text-center mt-8 sm:mt-12 px-4">
+          <p className="text-sm sm:text-base text-muted-foreground italic font-light leading-relaxed">
+            {t.quote}
+          </p>
         </div>
       </div>
     </div>
