@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Language } from "./LanguageToggle";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useSmartRecommendation } from "@/hooks/useSmartRecommendation";
@@ -10,7 +9,6 @@ import {
   Users, 
   Heart, 
   Shuffle,
-  Clock,
   TrendingUp
 } from "lucide-react";
 
@@ -157,14 +155,6 @@ export const TopicSelection = ({
             const isSelected = selectedTopic === key;
             const stats = sourceStats[key] || { total: 0, timeRanges: {}, difficulties: {} };
             
-            // Calculate time range compatibility
-            const compatibleSources = Object.entries(stats.timeRanges).reduce((sum, [range, count]) => {
-              const [min, max] = range.split('-').map(r => parseInt(r.replace('min', '')));
-              if (timeSelected >= min && timeSelected <= max) {
-                return sum + (count as number);
-              }
-              return sum;
-            }, 0);
             
             return (
               <Button
@@ -185,26 +175,9 @@ export const TopicSelection = ({
                     }
                   `}
                 >
-                  {/* Header with icon and stats */}
+                  {/* Header with icon */}
                   <div className="flex items-start justify-between mb-3">
                     <Icon className={`h-8 w-8 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
-                    <div className="flex flex-col items-end gap-1">
-                      <Badge 
-                        variant={isSelected ? "secondary" : "outline"}
-                        className={`text-xs ${isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : ''}`}
-                      >
-                        {stats.total} sources
-                      </Badge>
-                      {compatibleSources > 0 && (
-                        <Badge 
-                          variant={isSelected ? "secondary" : "outline"}
-                          className={`text-xs ${isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-green-100 text-green-800'}`}
-                        >
-                          <Clock className="h-3 w-3 mr-1" />
-                          {compatibleSources} for {timeSelected}min
-                        </Badge>
-                      )}
-                    </div>
                   </div>
                   
                   <h3 className="font-bold text-lg mb-2">{topic.title}</h3>
