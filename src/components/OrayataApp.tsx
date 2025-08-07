@@ -21,7 +21,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 export const OrayataApp = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile } = useUserProfile(user);
-  const { state, actions } = useAppContext();
+  const { state, actions, dispatch } = useAppContext();
   const { currentStep, language: selectedLanguage, selectedTime, selectedTopic, currentSource } = state;
 
   
@@ -30,14 +30,14 @@ export const OrayataApp = () => {
   useEffect(() => {
     // Load language preference from profile if available, otherwise from localStorage
     if (profile?.preferred_language && (profile.preferred_language === 'en' || profile.preferred_language === 'he')) {
-      actions.setLanguage(profile.preferred_language);
+      dispatch({ type: 'SET_LANGUAGE', payload: profile.preferred_language });
     } else {
       const storedLang = localStorage.getItem('orayta_lang');
       if (storedLang === 'he' || storedLang === 'en') {
-        actions.setLanguage(storedLang);
+        dispatch({ type: 'SET_LANGUAGE', payload: storedLang });
       }
     }
-  }, [profile, actions]);
+  }, [profile, dispatch]);
 
   useEffect(() => {
     localStorage.setItem('orayta_lang', selectedLanguage);
