@@ -13,6 +13,8 @@ import { NavigationHeader } from "./NavigationHeader";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { BottomNav } from "./BottomNav";
 import { SourceLoadingState } from "./SourceLoadingState";
+import { LanguageToggle } from "./LanguageToggle";
+import { DarkModeToggle } from "./DarkModeToggle";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -94,9 +96,16 @@ export const OrayataApp = () => {
 
   // Apply RTL direction to the entire app when Hebrew is selected
   const appDirection = selectedLanguage === 'he' ? 'rtl' : 'ltr';
+  const isHebrew = selectedLanguage === 'he';
 
   return (
     <div dir={appDirection} className="font-inter min-h-screen bg-background">
+      {/* Global toggles */}
+      <div className={`fixed top-4 z-50 flex items-center gap-2 ${isHebrew ? 'left-4' : 'right-4'}`}>
+        <LanguageToggle language={selectedLanguage} onLanguageChange={actions.setLanguage} />
+        <DarkModeToggle />
+      </div>
+
       {/* Show navigation header for learning flow */}
       {['time', 'topic', 'source', 'reflection'].includes(currentStep) && (
         <NavigationHeader />
@@ -106,7 +115,6 @@ export const OrayataApp = () => {
         {currentStep === 'welcome' && (
             <WelcomeScreen
               language={selectedLanguage}
-              onLanguageChange={actions.setLanguage}
               onStartLearning={handleStartLearning}
               onJournal={handleJournal}
               onProfile={handleOpenProfile}
