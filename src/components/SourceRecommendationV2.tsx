@@ -313,7 +313,7 @@ export const SourceRecommendationV2 = ({
           {/* Header */}
           <MotionWrapper type="scale" delay={0.1}>
             <div className="text-center mobile-spacing-y">
-              <h1 className="mobile-text-base font-bold bg-gradient-primary bg-clip-text text-transparent sm:text-2xl">
+              <h1 className="mobile-text-base font-bold gradient-primary bg-clip-text text-transparent sm:text-2xl">
                 {content[language].title}
               </h1>
               <p className="mobile-text-sm text-muted-foreground">{content[language].subtitle}</p>
