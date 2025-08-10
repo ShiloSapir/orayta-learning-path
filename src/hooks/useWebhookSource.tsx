@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { selectCommentaries } from '@/utils/commentarySelector';
+
 
 export interface WebhookSource {
   title: string;
@@ -26,7 +26,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebrewMatch = responseText.match(/Hebrew:\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const commentariesMatch = responseText.match(/\*\*2 Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
+    const commentariesMatch = responseText.match(/\*\*(?:\d+\s*)?Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
     
@@ -65,19 +65,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const sourceRange = rangeMatch?.[1]?.trim() || '';
     const excerpt = excerptMatch?.[1]?.trim() || '';
     
-    // Intelligent commentary selection based on criteria
-    const intelligentCommentaries = selectCommentaries({
-      topicSelected,
-      sourceTitle: title,
-      sourceRange,
-      excerpt
-    });
-    
-    // Use parsed commentaries if available and intelligent selection permits,
-    // otherwise use intelligent selection or empty array
-    const finalCommentaries = intelligentCommentaries.length > 0 
-      ? intelligentCommentaries 
-      : (commentaries.length > 0 ? commentaries : []);
+    // Use webhook-provided recommended commentaries (take up to two)
+    const finalCommentaries = commentaries.slice(0, 2);
 
     return {
       title,
