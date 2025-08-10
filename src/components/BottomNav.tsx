@@ -136,6 +136,7 @@ export const BottomNav = ({
             </Button>
           </DrawerTrigger>
         </div>
+        </div>
       </nav>
       <DrawerContent>
         <DrawerHeader>

@@ -101,18 +101,7 @@ export const OrayataApp = () => {
   return (
     <div dir={appDirection} className="font-inter min-h-screen bg-background">
       {/* Global toggles - desktop only */}
-      <div
-        className={`fixed top-4 z-50 hidden md:flex items-center gap-2 ${
-          isHebrew ? 'left-4' : 'right-4'
-        }`}
-      >
-        <LanguageToggle
-          language={selectedLanguage}
-          onLanguageChange={actions.setLanguage}
-        />
-=======
-      {/* Global toggles */}
-      <div className={`fixed top-4 z-50 flex items-center gap-2 ${isHebrew ? 'left-4' : 'right-4'}`}>
+      <div className={`fixed top-4 z-50 hidden md:flex items-center gap-2 ${isHebrew ? 'left-4' : 'right-4'}`}>
         <LanguageToggle language={selectedLanguage} onLanguageChange={actions.setLanguage} />
         <DarkModeToggle />
       </div>
