@@ -110,6 +110,10 @@ export const OrayataApp = () => {
           language={selectedLanguage}
           onLanguageChange={actions.setLanguage}
         />
+=======
+      {/* Global toggles */}
+      <div className={`fixed top-4 z-50 flex items-center gap-2 ${isHebrew ? 'left-4' : 'right-4'}`}>
+        <LanguageToggle language={selectedLanguage} onLanguageChange={actions.setLanguage} />
         <DarkModeToggle />
       </div>
 
