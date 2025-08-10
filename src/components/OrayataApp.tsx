@@ -98,8 +98,8 @@ export const OrayataApp = () => {
   return (
     <div dir={appDirection} className="font-inter min-h-screen bg-background">
 
-      {/* Show navigation header for learning flow */}
-      {['time', 'topic', 'source', 'reflection'].includes(currentStep) && (
+      {/* Show navigation header including welcome page */}
+      {['welcome', 'time', 'topic', 'source', 'reflection'].includes(currentStep) && (
         <NavigationHeader />
       )}
 
