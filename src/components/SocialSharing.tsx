@@ -88,12 +88,14 @@ export function SocialSharing({ language, source }: SocialSharingProps) {
 
   const handleCopyLink = async () => {
     try {
-      const shareText = createShareText();
-      const textToCopy = `${shareText}\n\n${source.sefariaLink}`;
-      await navigator.clipboard.writeText(textToCopy);
+      const hasValidSefaria = isValidSefariaUrl(source.sefariaLink);
+      const linkToCopy = hasValidSefaria
+        ? normalizeSefariaUrl(source.sefariaLink)
+        : (typeof window !== 'undefined' ? window.location.href : source.sefariaLink);
+      await navigator.clipboard.writeText(linkToCopy);
       toast.success(t.linkCopied);
     } catch (err) {
-      toast.error('Failed to copy to clipboard');
+      toast.error(isHebrew ? 'ההעתקה נכשלה' : 'Failed to copy to clipboard');
     }
   };
 
