@@ -60,8 +60,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       .map(l => l.trim())
       .filter(l => l.length > 0)
       .map(l => {
-        // Support formats like: "1. **Rashi:** ...", "- Rashi: ...", "* Rashi ..."
-        const m = l.match(/^(?:\*|-|\d+\.)\s*(?:\*\*)?([^:*\n]+?)(?:\s*\([^)]*\))?(?:\*\*)?:?/);
+        // Support formats like: "1. **Rashi:** ...", "- Rashi: ...", "* Rashi ...", "**Rashi:** ..."
+        const m = l.match(/^(?:\*|-|\d+\.)?\s*(?:\*\*)?\s*([^:*()\n]+?)(?:\s*\([^)]*\))?(?:\*\*)?\s*:?.*/);
         return m ? m[1].trim() : '';
       })
       .filter(c => c.length > 0);
