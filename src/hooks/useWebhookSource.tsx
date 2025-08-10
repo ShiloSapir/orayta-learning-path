@@ -29,28 +29,36 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebHeMatch = responseText.match(/(?:^|\n)\s*עברית\s*:\s*(.+?)(?:\n|$)/);
 
     // Source range (support bold and plain, English + Hebrew)
-    const rangeEngMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/) 
-      || responseText.match(/(?:^|\n)\s*Source Range\s*[:：]?\s*(.+?)(?:\n|$)/i);
-    const rangeHebMatch = responseText.match(/\*\*(?:טווח מקור|מראה מקום):\*\*\s*(.+?)(?:\n|$)/) 
-      || responseText.match(/(?:^|\n)\s*(?:טווח מקור|מראה מקום)\s*[:：]?\s*(.+?)(?:\n|$)/i);
+    const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i);
+    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i);
 
     // Excerpt (support bold and plain, flexible boundary to next heading)
-    const excerptEngMatch = (responseText.match(/\*\*(?:Brief Excerpt|Excerpt|Summary):\*\*\s*([\s\S]*?)(?=\n\*\*|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:Brief Excerpt|Excerpt|Summary)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i));
-    const excerptHebMatch = (responseText.match(/\*\*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\s*:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/)
-      || responseText.match(/(?:^|\n)\s*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i));
+    const excerptEngMatch = (
+      responseText.match(/\*\*\s*(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[#>*•\-]+\s*)?(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i)
+    );
+    const excerptHebMatch = (
+      responseText.match(/\*\*\s*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט|ציטוט מרכזי|ציטוט מפתח|קטע מקור)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[#>*•\-]+\s*)?(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט|ציטוט מרכזי|ציטוט מפתח|קטע מקור)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i)
+    );
 
     // Reflection prompt (support bold and plain, flexible boundary)
-    const reflectionEngMatch = (responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/i)
-      || responseText.match(/(?:^|\n)\s*Reflection Prompt\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Brief Excerpt|Excerpt|Summary)\b|$)/i));
-    const reflectionHebMatch = (responseText.match(/\*\*(?:שאלה להרהור|שאלת הרהור|הרהור|שאלה)\s*:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/)
-      || responseText.match(/(?:^|\n)\s*(?:שאלה להרהור|שאלת הרהור|הרהור|שאלה)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\b|$)/i));
+    const reflectionEngMatch = (
+      responseText.match(/\*\*\s*(?:Reflection Prompt|Reflection Questions?|Guiding Questions?|Discussion Questions?|Question|Prompt)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|Brief Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:Reflection Prompt|Reflection Questions?|Guiding Questions?|Discussion Questions?|Question|Prompt)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|Brief Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i)
+    );
+    const reflectionHebMatch = (
+      responseText.match(/\*\*\s*(?:שאלה ל?(?:הרהור|דיון)|שאלת ל?(?:הרהור|דיון)|שאלות ל?(?:הרהור|דיון)|הרהור|מחשבה|שאלה|דיון|שאלת עיון|שאלה לעיון)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט|ציטוט מרכזי|ציטוט מפתח|קטע מקור)\b|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:שאלה ל?(?:הרהור|דיון)|שאלת ל?(?:הרהור|דיון)|שאלות ל?(?:הרהור|דיון)|הרהור|מחשבה|שאלה|דיון|שאלת עיון|שאלה לעיון)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט|ציטוט מרכזי|ציטוט מפתח|קטע מקור)\b|$)/i)
+    );
 
     // Estimated time (support bold and plain, English + Hebrew)
-    const timeEngMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/i)
-      || responseText.match(/(?:^|\n)\s*Estimated Time\s*[:：]?\s*(\d+)/i);
-    const timeHebMatch = responseText.match(/\*\*זמן משוער\s*:\*\*\s*(\d+)/)
-      || responseText.match(/(?:^|\n)\s*זמן משוער\s*[:：]?\s*(\d+)/i);
+    const timeEngMatch = responseText.match(/\*\*\s*Estimated Time\s*\*\*\s*[:：\-–—]?\s*(\d+)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Estimated Time\s*[:：\-–—]?\s*(\d+)/i);
+    const timeHebMatch = responseText.match(/\*\*\s*זמן משוער\s*\*\*\s*[:：\-–—]?\s*(\d+)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?זמן משוער\s*[:：\-–—]?\s*(\d+)/i);
     
     // Look for Sefaria links - handle multiple formats (support Hebrew "Working Link")
     const markdownLinkMatch = responseText.match(/\[.*?\]\((https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^)]+)\)/);
@@ -77,10 +85,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
     // Extract commentaries with flexible section detection and splitting (English + Hebrew)
     const commentarySectionRegexes = [
-      /\*\*\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?:\s*\*\*\s*([\s\S]*?)(?=\n\s*\*\*\s*(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
-      /(?:^|\n)\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?:\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
-      /\*\*\s*(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*:\s*\*\*\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
-      /(?:^|\n)\s*(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*:\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
+      /\*\*\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*\*\*|\n\s*(?:[*•\-]\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
+      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
+      /\*\*\s*(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
+      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
     ];
     let commentariesText = '';
     for (const r of commentarySectionRegexes) {
@@ -138,11 +146,42 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const rawExcerptHe = excerptHebMatch?.[1]?.trim();
     const rawExcerptEn = excerptEngMatch?.[1]?.trim();
     const rawExcerpt = preferredLang === 'he' ? (rawExcerptHe || rawExcerptEn) : (rawExcerptEn || rawExcerptHe);
-    const excerpt = sanitizeField(rawExcerpt || '');
+    let excerpt = sanitizeField(rawExcerpt || '');
+
+    // Heuristic fallback: pick the first non-heading, non-link paragraph
+    if (!excerpt) {
+      const paragraphs = responseText
+        .replace(/\r/g, '\n')
+        .split(/\n{2,}/)
+        .map(p => p.trim())
+        .filter(p => p.length > 40)
+        .filter(p => !/https?:\/\//i.test(p))
+        .filter(p => !/(?:^|\n)\s*\*\*?\s*(?:Working Link|Source Link|Sefaria|Link|קישור(?: עובד)?)/i.test(p))
+        .filter(p => !new RegExp(
+          '^(?:[#>*•\\-]+\\s*)?(?:' +
+          '(?:Recommended\\s+)?Commentaries|פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים|' +
+          'Brief\\s+Excerpt|Excerpt|Summary|Key\\s+Quote|Short\\s+Quote|Quote|' +
+          'Reflection Prompt|Reflection Questions?|' +
+          'שאלה|שאלות|הרהור|דיון|' +
+          'Source Range|טווח מקור|מראה מקום' +
+          ')', 'i'
+        ).test(p));
+      if (paragraphs.length > 0) {
+        excerpt = sanitizeField(paragraphs[0]);
+      }
+    }
 
     const rawReflectionHe = reflectionHebMatch?.[1]?.trim();
     const rawReflectionEn = reflectionEngMatch?.[1]?.trim();
-    const reflection = sanitizeField((preferredLang === 'he' ? (rawReflectionHe || rawReflectionEn) : (rawReflectionEn || rawReflectionHe)) || '');
+    let reflection = sanitizeField((preferredLang === 'he' ? (rawReflectionHe || rawReflectionEn) : (rawReflectionEn || rawReflectionHe)) || '');
+
+    // Heuristic fallback: first question-like line
+    if (!reflection) {
+      const qMatch = responseText.match(/(?:^|\n)\s*(?:[#>*•\-\d\.]+\s*)?(.+?\?)\s*(?:\n|$)/m);
+      if (qMatch?.[1]) {
+        reflection = sanitizeField(qMatch[1]);
+      }
+    }
 
     // Use webhook-provided recommended commentaries (take up to two), with smart fallback
     let finalCommentaries = commentaries.slice(0, 2);
@@ -157,10 +196,12 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
     // Diagnostics for Hebrew parsing
     if (preferredLang === 'he' && (excerpt.length === 0 || reflection.length === 0 || finalCommentaries.length === 0)) {
+      const snippet = responseText.slice(0, 600);
       console.debug('Hebrew webhook parse diagnostics', {
         hasExcerpt: excerpt.length > 0,
         hasReflection: reflection.length > 0,
         commentaryCount: finalCommentaries.length,
+        snippet
       });
     }
 
