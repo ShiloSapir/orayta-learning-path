@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { LanguageToggle, Language } from "./LanguageToggle";
-import { DarkModeToggle } from "./DarkModeToggle";
+import { type Language } from "./LanguageToggle";
 import { BookOpen, Clock, Heart } from "lucide-react";
 
 interface WelcomeScreenProps {
   language: Language;
-  onLanguageChange: (lang: Language) => void;
   onStartLearning: () => void;
   onJournal: () => void;
   onProfile: () => void;
@@ -52,23 +50,17 @@ const content = {
   }
 };
 
-export const WelcomeScreen = ({ language, onLanguageChange, onStartLearning, onJournal, onProfile, onAnalytics, onSearch }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ language, onStartLearning, onJournal, onProfile, onAnalytics, onSearch }: WelcomeScreenProps) => {
   const t = content[language];
   const isHebrew = language === 'he';
 
   return (
     <div className={`min-h-screen bg-gradient-subtle flex items-center justify-center mobile-container safe-bottom ${isHebrew ? 'hebrew' : ''}`}>
       <div className="w-full max-w-2xl text-center mobile-spacing-y animate-fade-in">
-        {/* Header with Language Toggle - Mobile Optimized */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-          <div className="text-center sm:text-left">
-            <div className="text-base sm:text-sm text-muted-foreground font-medium px-4 sm:px-0">
-              {t.greeting}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 justify-center sm:justify-end">
-            <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
-            <DarkModeToggle />
+        {/* Header */}
+        <div className="mb-6">
+          <div className="text-base sm:text-sm text-muted-foreground font-medium px-4 sm:px-0">
+            {t.greeting}
           </div>
         </div>
 
