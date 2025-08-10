@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
+import { selectCommentaries, shouldProvideCommentaries } from '@/utils/commentarySelector';
 
 export interface WebhookSource {
   title: string;
@@ -53,10 +53,21 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       }
     }
 
-    // Extract commentaries
-    const commentariesText = commentariesMatch?.[1] || '';
+    // Extract commentaries with flexible section detection and splitting
+    const commentarySectionRegexes = [
+      /\*\*\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?:\s*\*\*\s*([\s\S]*?)(?=\n\s*\*\*\s*(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
+      /(?:^|\n)\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?:\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
+    ];
+    let commentariesText = '';
+    for (const r of commentarySectionRegexes) {
+      const m = responseText.match(r);
+      if (m?.[1]) { commentariesText = m[1]; break; }
+    }
+    if (!commentariesText) {
+      commentariesText = commentariesMatch?.[1] || '';
+    }
     const commentaries = commentariesText
-      .split('\n')
+      .split(/\r?\n|•|;|—|–/)
       .map(l => l.trim())
       .filter(l => l.length > 0)
       .map(l => {
@@ -89,8 +100,14 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const rawExcerpt = excerptMatch?.[1]?.trim() || '';
     const excerpt = sanitizeField(rawExcerpt);
     
-    // Use webhook-provided recommended commentaries (take up to two)
-    const finalCommentaries = commentaries.slice(0, 2);
+    // Use webhook-provided recommended commentaries (take up to two), with smart fallback
+    let finalCommentaries = commentaries.slice(0, 2);
+    if (finalCommentaries.length === 0) {
+      const config = { topicSelected, sourceTitle: title, sourceRange, excerpt };
+      if (shouldProvideCommentaries(config)) {
+        finalCommentaries = selectCommentaries(config).slice(0, 2);
+      }
+    }
 
     const reflection = sanitizeField(reflectionMatch?.[1]?.trim() || '');
 

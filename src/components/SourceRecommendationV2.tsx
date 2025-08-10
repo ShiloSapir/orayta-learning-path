@@ -25,6 +25,7 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
+import { selectCommentaries } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -296,6 +297,14 @@ export const SourceRecommendationV2 = ({
   };
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
+  const displayedCommentaries = (webhookSource.commentaries && webhookSource.commentaries.length > 0)
+    ? webhookSource.commentaries
+    : selectCommentaries({
+        topicSelected,
+        sourceTitle: webhookSource.title,
+        sourceRange: webhookSource.source_range,
+        excerpt: webhookSource.excerpt || ''
+      });
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
@@ -354,11 +363,11 @@ export const SourceRecommendationV2 = ({
                   </MotionWrapper>
                 )}
                 
-                {webhookSource.commentaries.length > 0 && (
+                {displayedCommentaries.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="mobile-text-sm font-semibold">{content[language].commentariesLabel}</h3>
                     <div className="flex flex-wrap gap-2">
-                      {webhookSource.commentaries.map((commentary, index) => (
+                      {displayedCommentaries.map((commentary, index) => (
                         <span key={index} className="mobile-text-xs bg-primary/10 text-primary px-3 py-1 rounded-full">
                           {commentary}
                         </span>
