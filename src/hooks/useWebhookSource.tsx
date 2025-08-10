@@ -26,7 +26,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebrewMatch = responseText.match(/Hebrew:\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const commentariesMatch = responseText.match(/\*\*\s*Recommended Commentaries(?:\s*\([^)]*\))?:\s*\*\*\s*([\s\S]*?)(?:\n\*\*|$)/i);
+    const commentariesMatch = responseText.match(/\*\*\s*Recommended Commentaries(?:\s*\([^)]*\))?:\s*\*\*\s*([\s\S]*?)(?=\n\s*\*\*\s*(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
     
@@ -56,9 +56,14 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     // Extract commentaries
     const commentariesText = commentariesMatch?.[1] || '';
     const commentaries = commentariesText
-      .split(/\d+\.\s*/)
-      .slice(1) // Remove first empty element
-      .map(c => c.split(':')[0].replace(/\*\*/g, '').trim())
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0)
+      .map(l => {
+        // Support formats like: "1. **Rashi:** ...", "- Rashi: ...", "* Rashi ..."
+        const m = l.match(/^(?:\*|-|\d+\.)\s*(?:\*\*)?([^:*\n]+?)(?:\s*\([^)]*\))?(?:\*\*)?:?/);
+        return m ? m[1].trim() : '';
+      })
       .filter(c => c.length > 0);
 
     const sanitizeField = (raw: string) => {
