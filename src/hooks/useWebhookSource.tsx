@@ -61,12 +61,33 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       .map(c => c.split(':')[0].replace(/\*\*/g, '').trim())
       .filter(c => c.length > 0);
 
+    const sanitizeField = (raw: string) => {
+      if (!raw) return '';
+      let s = raw
+        // Strip Markdown links but keep the link text
+        .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+        // Remove any bare URLs
+        .replace(/https?:\/\/[^\s)]+/g, '')
+        // Remove lines that look like link metadata (Working Link, Source Link, Link)
+        .replace(/(?:^|\n)\s*\*\*?\s*(?:Working Link|Source Link|Link)[^:\n]*:?\.*.*$/gim, '')
+        // Strip any stray HTML tags
+        .replace(/<[^>]+>/g, '')
+        // Normalize whitespace
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      return s;
+    };
+
     const title = titleEngMatch?.[1]?.replace(/\*/g, '').trim() || 'Torah Source';
     const sourceRange = rangeMatch?.[1]?.trim() || '';
-    const excerpt = excerptMatch?.[1]?.trim() || '';
+    const rawExcerpt = excerptMatch?.[1]?.trim() || '';
+    const excerpt = sanitizeField(rawExcerpt);
     
     // Use webhook-provided recommended commentaries (take up to two)
     const finalCommentaries = commentaries.slice(0, 2);
+
+    const reflection = sanitizeField(reflectionMatch?.[1]?.trim() || '');
 
     return {
       title,
@@ -74,7 +95,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       source_range: sourceRange,
       excerpt,
       commentaries: finalCommentaries,
-      reflection_prompt: reflectionMatch?.[1]?.trim() || '',
+      reflection_prompt: reflection,
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
       sefaria_link: extractedLink,
     };
