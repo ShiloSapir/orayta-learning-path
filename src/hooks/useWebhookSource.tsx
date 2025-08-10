@@ -26,10 +26,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebrewMatch = responseText.match(/Hebrew:\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const excerptHebrewMatch = responseText.match(/\*\*Brief Excerpt \(Hebrew\):\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const commentariesMatch = responseText.match(/\*\*(?:\d+\s*)?Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const reflectionHebrewMatch = responseText.match(/\*\*Reflection Prompt \(Hebrew\):\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
     
     // Look for Sefaria links - handle multiple formats
@@ -75,10 +73,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       title_he: titleHebrewMatch?.[1]?.replace(/\*/g, '').trim() || 'מקור תורני',
       source_range: sourceRange,
       excerpt,
-      excerpt_he: excerptHebrewMatch?.[1]?.trim(),
       commentaries: finalCommentaries,
       reflection_prompt: reflectionMatch?.[1]?.trim() || '',
-      reflection_prompt_he: reflectionHebrewMatch?.[1]?.trim(),
       estimated_time: timeMatch?.[1] ? parseInt(timeMatch[1]) : timeSelected,
       sefaria_link: extractedLink,
     };

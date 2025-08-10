@@ -53,9 +53,7 @@ const content = {
     sefariaLink: "Open in Sefaria",
     loading: "Finding your perfect source...",
     noSources: "No sources available for this topic. Please try another topic.",
-    errorLoading: "Error loading source. Please try again.",
-    tryAgain: "Try Again",
-    removedSaved: "Removed from saved"
+    errorLoading: "Error loading source. Please try again."
   },
   he: {
     title: "המקור שלך",
@@ -75,9 +73,7 @@ const content = {
     sefariaLink: "פתח בספריא",
     loading: "מחפש את המקור המושלם עבורך...",
     noSources: "אין מקורות זמינים לנושא זה. אנא נסה נושא אחר.",
-    errorLoading: "שגיאה בטעינת המקור. אנא נסה שוב.",
-    tryAgain: "נסה שוב",
-    removedSaved: "הוסר מהשמורים"
+    errorLoading: "שגיאה בטעינת המקור. אנא נסה שוב."
   }
 };
 
@@ -148,7 +144,7 @@ export const SourceRecommendationV2 = ({
     if (!webhookSource) return;
     
     console.log('⏭️ Skipping webhook source:', webhookSource.title);
-    announce(content[language].skipButton);
+    announce(`Skipping to new source`);
     
     // Generate new source
     refetch();
@@ -168,7 +164,7 @@ export const SourceRecommendationV2 = ({
             source_title: webhookSource.title,
             source_title_he: webhookSource.title_he,
             source_excerpt: webhookSource.excerpt,
-            source_excerpt_he: webhookSource.excerpt_he,
+            source_excerpt_he: webhookSource.excerpt,
             sefaria_link: webhookSource.sefaria_link,
             topic_selected: topicSelected,
             time_selected: timeSelected,
@@ -192,7 +188,7 @@ export const SourceRecommendationV2 = ({
         if (error) throw error;
         
         setIsSaved(false);
-        success(content[language].removedSaved);
+        success("Removed from saved");
       }
     } catch (error: any) {
       console.error('Error toggling save:', error);
@@ -225,9 +221,8 @@ export const SourceRecommendationV2 = ({
     const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
     const startDate = new Date();
     const endDate = new Date(startDate.getTime() + timeSelected * 60000);
-    const detailsLabel = language === 'he' ? 'לימוד' : 'Study';
     
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`${detailsLabel}: ${title}`)}`;
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Study: ${title}`)}`;
     
     window.open(calendarUrl, '_blank');
     success(content[language].calendarButton);
@@ -252,12 +247,12 @@ export const SourceRecommendationV2 = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">
         <Card className="p-6 max-w-md text-center">
-          <h2 className="text-xl font-semibold mb-4">{content[language].errorLoading}</h2>
+          <h2 className="text-xl font-semibold mb-4">Error Loading Source</h2>
           <p className="text-muted-foreground mb-4">
-            {content[language].errorLoading}
+            Failed to load your Torah source. Please try again.
           </p>
           <Button onClick={refetch} variant="outline">
-            {content[language].tryAgain}
+            Try Again
           </Button>
         </Card>
       </div>
@@ -274,11 +269,8 @@ export const SourceRecommendationV2 = ({
   }
 
   const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
-  const excerpt = language === 'he' ? (webhookSource.excerpt_he || '') : webhookSource.excerpt;
-  const reflectionPrompt = language === 'he' ? (webhookSource.reflection_prompt_he || '') : webhookSource.reflection_prompt;
-  const hasHebrew = (s: string | undefined | null) => !!s && /[\u0590-\u05FF]/.test(s);
-  const showSourceRange = language === 'en' || hasHebrew(webhookSource.source_range);
-  const showCommentaries = webhookSource.commentaries.length > 0 && (language === 'en' || webhookSource.commentaries.every(c => hasHebrew(c)));
+  const excerpt = webhookSource.excerpt;
+  const reflectionPrompt = webhookSource.reflection_prompt;
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
@@ -301,9 +293,7 @@ export const SourceRecommendationV2 = ({
                 <div className="mobile-flex-col items-start">
                   <div className="flex-1 space-y-2">
                     <h2 className="mobile-text-base font-semibold sm:text-xl">{title}</h2>
-                    {showSourceRange && (
-                      <p className="mobile-text-xs text-muted-foreground">{webhookSource.source_range}</p>
-                    )}
+                    <p className="mobile-text-xs text-muted-foreground">{webhookSource.source_range}</p>
                   </div>
                   
                   {/* Save Toggle Button - Mobile Optimized */}
@@ -339,7 +329,7 @@ export const SourceRecommendationV2 = ({
                   </MotionWrapper>
                 )}
                 
-                {showCommentaries && (
+                {webhookSource.commentaries.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="mobile-text-sm font-semibold">{content[language].commentariesLabel}</h3>
                     <div className="flex flex-wrap gap-2">
