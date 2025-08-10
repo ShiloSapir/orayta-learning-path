@@ -28,21 +28,29 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleEngHeMatch = responseText.match(/(?:^|\n)\s*אנגלית\s*:\s*(.+?)(?:\n|$)/);
     const titleHebHeMatch = responseText.match(/(?:^|\n)\s*עברית\s*:\s*(.+?)(?:\n|$)/);
 
-    // Source range
-    const rangeEngMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
-    const rangeHebMatch = responseText.match(/\*\*(?:טווח מקור|מראה מקום):\*\*\s*(.+?)(?:\n|$)/);
+    // Source range (support bold and plain, English + Hebrew)
+    const rangeEngMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/) 
+      || responseText.match(/(?:^|\n)\s*Source Range\s*[:：]?\s*(.+?)(?:\n|$)/i);
+    const rangeHebMatch = responseText.match(/\*\*(?:טווח מקור|מראה מקום):\*\*\s*(.+?)(?:\n|$)/) 
+      || responseText.match(/(?:^|\n)\s*(?:טווח מקור|מראה מקום)\s*[:：]?\s*(.+?)(?:\n|$)/i);
 
-    // Excerpt
-    const excerptEngMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const excerptHebMatch = responseText.match(/\*\*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\s*:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
+    // Excerpt (support bold and plain, flexible boundary to next heading)
+    const excerptEngMatch = (responseText.match(/\*\*(?:Brief Excerpt|Excerpt|Summary):\*\*\s*([\s\S]*?)(?=\n\*\*|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:Brief Excerpt|Excerpt|Summary)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i));
+    const excerptHebMatch = (responseText.match(/\*\*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\s*:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/)
+      || responseText.match(/(?:^|\n)\s*(?:ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i));
 
-    // Reflection prompt
-    const reflectionEngMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const reflectionHebMatch = responseText.match(/\*\*(?:שאלה להרהור|שאלת הרהור|הרהור|שאלה)\s*:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
+    // Reflection prompt (support bold and plain, flexible boundary)
+    const reflectionEngMatch = (responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/i)
+      || responseText.match(/(?:^|\n)\s*Reflection Prompt\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה להרהור|שאלת הרהור|הרהור|זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Brief Excerpt|Excerpt|Summary)\b|$)/i));
+    const reflectionHebMatch = (responseText.match(/\*\*(?:שאלה להרהור|שאלת הרהור|הרהור|שאלה)\s*:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/)
+      || responseText.match(/(?:^|\n)\s*(?:שאלה להרהור|שאלת הרהור|הרהור|שאלה)\s*[:：]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:זמן משוער|ספאריה|קישור|קישור עובד|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|ציטוט קצר|קטע קצר|תמצית(?: המקור)?|ציטוט)\b|$)/i));
 
-    // Estimated time
-    const timeEngMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
-    const timeHebMatch = responseText.match(/\*\*זמן משוער\s*:\*\*\s*(\d+)/);
+    // Estimated time (support bold and plain, English + Hebrew)
+    const timeEngMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/i)
+      || responseText.match(/(?:^|\n)\s*Estimated Time\s*[:：]?\s*(\d+)/i);
+    const timeHebMatch = responseText.match(/\*\*זמן משוער\s*:\*\*\s*(\d+)/)
+      || responseText.match(/(?:^|\n)\s*זמן משוער\s*[:：]?\s*(\d+)/i);
     
     // Look for Sefaria links - handle multiple formats (support Hebrew "Working Link")
     const markdownLinkMatch = responseText.match(/\[.*?\]\((https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^)]+)\)/);

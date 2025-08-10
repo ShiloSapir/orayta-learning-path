@@ -395,13 +395,14 @@ export const SourceRecommendationV2 = ({
             </div>
           </MotionWrapper>
 
-          {/* Reflection Prompt */}
-          <MotionWrapper type="fadeUp" delay={0.4}>
-            <div className="content-card bg-gradient-to-r from-accent/5 to-secondary/10 border-accent/20">
-              <h3 className="mobile-text-sm font-semibold text-primary">{content[language].reflectionPromptLabel}</h3>
-              <p className="mobile-text-sm text-muted-foreground italic leading-relaxed">{reflectionPrompt}</p>
-            </div>
-          </MotionWrapper>
+          {reflectionPrompt && (
+            <MotionWrapper type="fadeUp" delay={0.4}>
+              <div className="content-card bg-gradient-to-r from-accent/5 to-secondary/10 border-accent/20">
+                <h3 className="mobile-text-sm font-semibold text-primary">{content[language].reflectionPromptLabel}</h3>
+                <p className="mobile-text-sm text-muted-foreground italic leading-relaxed">{reflectionPrompt}</p>
+              </div>
+            </MotionWrapper>
+          )}
 
           {/* Action Buttons - Mobile Optimized */}
           <MotionWrapper type="fadeUp" delay={0.5}>
