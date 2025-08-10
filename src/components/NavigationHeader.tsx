@@ -4,7 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Home, Clock, BookOpen, PenTool, Calendar, User, Search, BarChart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-
+import { LanguageToggle } from './LanguageToggle';
+import { DarkModeToggle } from './DarkModeToggle';
 const stepIcons = {
   welcome: Home,
   time: Clock,
@@ -132,6 +133,13 @@ export function NavigationHeader() {
           {isHebrew ? 'הבא' : 'Next'}
           <ChevronRight className={`h-4 w-4 ${isHebrew ? 'rotate-180' : ''}`} />
         </Button>
+      </div>
+      {/* Mobile quick preferences under header */}
+      <div className="md:hidden border-t border-border px-4 pb-3">
+        <div className={`pt-2 flex items-center ${isHebrew ? 'flex-row-reverse justify-between' : 'justify-between'} gap-3`}>
+          <LanguageToggle language={language} onLanguageChange={actions.setLanguage} />
+          <DarkModeToggle />
+        </div>
       </div>
     </Card>
   );

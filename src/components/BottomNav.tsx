@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Home, BookOpen, BarChart3, Search, Sparkles, User, Sun, Moon, Globe } from "lucide-react";
-import { useTheme } from "@/components/ThemeProvider";
+import { Home, BookOpen, BarChart3, Search, Sparkles, User } from "lucide-react";
+
 import type { Language } from "./LanguageToggle";
 
 interface BottomNavProps {
@@ -23,11 +23,9 @@ export const BottomNav = ({
   onAnalytics,
   onSearch,
   onAdmin,
-  language,
-  onLanguageChange,
+  language: _language,
+  onLanguageChange: _onLanguageChange,
 }: BottomNavProps) => {
-  const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
   return (
       <nav className="fixed bottom-0 left-0 right-0 bg-background/98 backdrop-blur-lg border-t border-border shadow-soft md:hidden z-50">
         <div className="safe-area-inset-bottom">
@@ -117,34 +115,6 @@ export const BottomNav = ({
             >
               <User className="h-5 w-5" />
               <span className="text-xs font-medium">Profile</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Toggle language"
-              onClick={() => onLanguageChange(language === 'en' ? 'he' : 'en')}
-              className={`h-14 w-16 flex flex-col gap-1 rounded-xl touch-button transition-all duration-200 ${
-                language === 'he' ? 'text-primary bg-primary/15 shadow-lg scale-105' : 'hover:bg-muted/50'
-              }`}
-            >
-              <Globe className="h-5 w-5" />
-              <span className="text-xs font-medium">Lang</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Toggle theme"
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className={`h-14 w-16 flex flex-col gap-1 rounded-xl touch-button transition-all duration-200 ${
-                isDark ? 'text-primary bg-primary/15 shadow-lg scale-105' : 'hover:bg-muted/50'
-              }`}
-            >
-              {isDark ? (
-                <Moon className="h-5 w-5" />
-              ) : (
-                <Sun className="h-5 w-5" />
-              )}
-              <span className="text-xs font-medium">Theme</span>
             </Button>
           </div>
         </div>
