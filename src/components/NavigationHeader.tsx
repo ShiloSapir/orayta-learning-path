@@ -134,8 +134,8 @@ export function NavigationHeader() {
           <ChevronRight className={`h-4 w-4 ${isHebrew ? 'rotate-180' : ''}`} />
         </Button>
       </div>
-      {/* Mobile quick preferences under header */}
-      <div className="md:hidden border-t border-border px-4 pb-3">
+      {/* Preferences under header */}
+      <div className="border-t border-border px-4 pb-3">
         <div className={`pt-2 flex items-center ${isHebrew ? 'flex-row-reverse justify-between' : 'justify-between'} gap-3`}>
           <LanguageToggle language={language} onLanguageChange={actions.setLanguage} />
           <DarkModeToggle />
