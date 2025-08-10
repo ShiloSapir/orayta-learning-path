@@ -297,14 +297,18 @@ export const SourceRecommendationV2 = ({
   };
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
-  const displayedCommentaries = (webhookSource.commentaries && webhookSource.commentaries.length > 0)
-    ? webhookSource.commentaries
+  const rawCommentaries = webhookSource.commentaries || [];
+  const cleanedCommentaries = rawCommentaries
+    .map(c => (c || '').replace(/[*_`~]/g, '').trim())
+    .filter(c => c && c.length > 2);
+  const displayedCommentaries = cleanedCommentaries.length > 0
+    ? cleanedCommentaries
     : selectCommentaries({
         topicSelected,
         sourceTitle: webhookSource.title,
         sourceRange: webhookSource.source_range,
         excerpt: webhookSource.excerpt || ''
-      });
+      }).slice(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">

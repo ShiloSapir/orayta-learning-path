@@ -66,16 +66,27 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     if (!commentariesText) {
       commentariesText = commentariesMatch?.[1] || '';
     }
-    const commentaries = commentariesText
+    const commentaries = (commentariesText || '')
+      .replace(/\r/g, '\n')
+      .replace(/\*+/g, '')
+      .replace(/_+/g, '')
+      .replace(/`+/g, '')
       .split(/\r?\n|•|;|—|–/)
       .map(l => l.trim())
       .filter(l => l.length > 0)
       .map(l => {
-        // Support formats like: "1. **Rashi:** ...", "- Rashi: ...", "* Rashi ...", "**Rashi:** ..."
-        const m = l.match(/^(?:\*|-|\d+\.)?\s*(?:\*\*)?\s*([^:*()\n]+?)(?:\s*\([^)]*\))?(?:\*\*)?\s*:?.*/);
-        return m ? m[1].trim() : '';
+        // Support formats like: "1. **Rashi:** ...", "- **R**ashi: ...", "* Tosafot ...", "Ramban — ..."
+        const m = l.match(/^(?:\*|-|\d+\.)?\s*([^:\n]+?)(?:\s*\([^)]*\))?\s*:?.*/);
+        let name = m ? m[1] : '';
+        name = name
+          .replace(/[*_`~]/g, '')
+          .replace(/^\s*[•\-–—]\s*/, '')
+          .replace(/\s*[-–—:]\s*$/, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        return name;
       })
-      .filter(c => c.length > 0);
+      .filter(c => c.length > 2);
 
     const sanitizeField = (raw: string) => {
       if (!raw) return '';

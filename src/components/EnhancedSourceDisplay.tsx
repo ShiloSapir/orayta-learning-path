@@ -122,6 +122,10 @@ export const EnhancedSourceDisplay = ({
     }
   };
 
+  const displayCommentaries = (source.commentaries || [])
+    .map(c => (c || '').replace(/[*_`~]/g, '').trim())
+    .filter(c => c && c.length > 2);
+
   return (
     <Card className="p-6 space-y-6">
       {/* Title and Basic Info */}
@@ -287,14 +291,14 @@ export const EnhancedSourceDisplay = ({
       )}
 
       {/* Enhanced Commentaries */}
-      {source.commentaries && source.commentaries.length > 0 && (
+      {displayCommentaries && displayCommentaries.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Suggested Commentaries
           </h3>
           <div className="flex flex-wrap gap-2">
-            {source.commentaries.map((commentary, index) => (
+            {displayCommentaries.map((commentary, index) => (
               <Badge key={index} variant="secondary">
                 {commentary}
               </Badge>
