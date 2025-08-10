@@ -26,7 +26,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebrewMatch = responseText.match(/Hebrew:\s*(.+?)(?:\n|$)/);
     const rangeMatch = responseText.match(/\*\*Source Range:\*\*\s*(.+?)(?:\n|$)/);
     const excerptMatch = responseText.match(/\*\*Brief Excerpt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
-    const commentariesMatch = responseText.match(/\*\*(?:\d+\s*)?Recommended Commentaries:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
+    const commentariesMatch = responseText.match(/\*\*\s*Recommended Commentaries(?:\s*\([^)]*\))?:\s*\*\*\s*([\s\S]*?)(?:\n\*\*|$)/i);
     const reflectionMatch = responseText.match(/\*\*Reflection Prompt:\*\*\s*([\s\S]*?)(?:\n\*\*|$)/);
     const timeMatch = responseText.match(/\*\*Estimated Time:\*\*\s*(\d+)/);
     

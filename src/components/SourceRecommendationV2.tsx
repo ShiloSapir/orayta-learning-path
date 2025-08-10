@@ -163,8 +163,22 @@ export const SourceRecommendationV2 = ({
             user_id: user.id,
             source_title: webhookSource.title,
             source_title_he: webhookSource.title_he,
-            source_excerpt: webhookSource.excerpt,
-            source_excerpt_he: webhookSource.excerpt,
+            source_excerpt: (webhookSource.excerpt || '')
+              .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+              .replace(/https?:\/\/[^\s)]+/g, '')
+              .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+              .replace(/<[^>]+>/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim(),
+            source_excerpt_he: (webhookSource.excerpt || '')
+              .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+              .replace(/https?:\/\/[^\s)]+/g, '')
+              .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+              .replace(/<[^>]+>/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim(),
             sefaria_link: webhookSource.sefaria_link,
             topic_selected: topicSelected,
             time_selected: timeSelected,
@@ -269,8 +283,19 @@ export const SourceRecommendationV2 = ({
   }
 
   const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
-  const excerpt = webhookSource.excerpt;
-  const reflectionPrompt = webhookSource.reflection_prompt;
+  const sanitizeText = (raw?: string) => {
+    if (!raw) return '';
+    return raw
+      .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+      .replace(/https?:\/\/[^\s)]+/g, '')
+      .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+  const excerpt = sanitizeText(webhookSource.excerpt);
+  const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
