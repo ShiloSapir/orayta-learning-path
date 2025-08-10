@@ -64,6 +64,17 @@ export const WelcomeScreen = ({ language, onStartLearning, onJournal, onProfile,
           </div>
         </div>
 
+        {/* Brand Logo */}
+        <div className="flex justify-center mb-4">
+          <img
+            src="/lovable-uploads/cf5812a6-5c3d-4d0b-a312-4a0aab231db9.png"
+            alt={isHebrew ? "לוגו אורייתא - תורה בזמן שלך" : "Orayta logo - Torah in your time"}
+            className="h-20 w-20 sm:h-24 sm:w-24 object-contain"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+
         {/* Main Title - Mobile Responsive */}
         <div className="mobile-spacing-y">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold gradient-primary bg-clip-text text-transparent">

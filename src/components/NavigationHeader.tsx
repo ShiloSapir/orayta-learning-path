@@ -100,7 +100,17 @@ export function NavigationHeader() {
         {/* Current Step Info */}
         <div className="flex items-center gap-3 flex-1 max-w-md mx-4">
           <div className="flex items-center gap-2">
-            <StepIcon className="h-5 w-5 text-primary" />
+            {currentStep === 'welcome' ? (
+              <img
+                src="/lovable-uploads/cf5812a6-5c3d-4d0b-a312-4a0aab231db9.png"
+                alt={isHebrew ? "לוגו אורייתא" : "Orayta logo"}
+                className="h-6 w-6 object-contain"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <StepIcon className="h-5 w-5 text-primary" />
+            )}
             <span className="font-medium text-sm md:text-base">
               {titles[currentStep]}
             </span>
