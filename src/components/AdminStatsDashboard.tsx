@@ -183,14 +183,16 @@ export const AdminStatsDashboard = () => {
             <div className="space-y-2">
               <Label htmlFor="topic">Topic</Label>
               <Select
-                value={filters.topic || ''}
-                onValueChange={(value) => setFilters({ ...filters, topic: value || undefined })}
+                value={filters.topic ?? 'all'}
+                onValueChange={(value) =>
+                  setFilters({ ...filters, topic: value === 'all' ? undefined : value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All topics" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All topics</SelectItem>
+                  <SelectItem value="all">All topics</SelectItem>
                   {TOPICS.map((topic) => (
                     <SelectItem key={topic} value={topic}>
                       {topic}
@@ -203,14 +205,19 @@ export const AdminStatsDashboard = () => {
             <div className="space-y-2">
               <Label htmlFor="time_bucket">Time Bucket</Label>
               <Select
-                value={filters.time_bucket || ''}
-                onValueChange={(value) => setFilters({ ...filters, time_bucket: value || undefined })}
+                value={filters.time_bucket ?? 'all'}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    time_bucket: value === 'all' ? undefined : value,
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All durations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All durations</SelectItem>
+                  <SelectItem value="all">All durations</SelectItem>
                   {TIME_BUCKETS.map((bucket) => (
                     <SelectItem key={bucket} value={bucket}>
                       {bucket} minutes

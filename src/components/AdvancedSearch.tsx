@@ -15,7 +15,7 @@ interface AdvancedSearchProps {
 
 export const AdvancedSearch = ({ sources, onFilteredResults, language }: AdvancedSearchProps) => {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredSources = useMemo(() => {
@@ -30,7 +30,7 @@ export const AdvancedSearch = ({ sources, onFilteredResults, language }: Advance
       });
     }
 
-    if (category) {
+    if (category !== 'all') {
       filtered = filtered.filter(source => source.category === category);
     }
 
@@ -68,7 +68,7 @@ export const AdvancedSearch = ({ sources, onFilteredResults, language }: Advance
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="halacha">Halacha</SelectItem>
             <SelectItem value="rambam">Rambam</SelectItem>
             <SelectItem value="tanakh">Tanakh</SelectItem>
