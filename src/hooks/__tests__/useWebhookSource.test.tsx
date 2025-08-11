@@ -15,6 +15,8 @@ describe('parseWebhookResponse', () => {
     const sampleResponse = `
 English: Sample Title
 **Source Range**: Genesis 1:1-2
+From: Genesis 1:1
+To: Genesis 1:2
 
 **Brief Excerpt**: In the beginning...
 **Reflection Prompt**: What does this teach us?
@@ -23,6 +25,7 @@ English: Sample Title
 `;
 
     const parsed = parseWebhookResponse(sampleResponse, 'en');
+    // Even with explicit From/To lines present, the original Source Range should be preserved
     expect(parsed.source_range).toBe('Genesis 1:1-2');
   });
 });
