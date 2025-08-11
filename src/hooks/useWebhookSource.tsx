@@ -239,7 +239,11 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     setError(null);
 
     try {
-      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
+      const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+      if (!webhookUrl) {
+        throw new Error('Webhook URL is not configured');
+      }
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
