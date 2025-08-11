@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { AdminRoute } from "@/components/AdminRoute";
 import { AdminSourceGenerator } from "@/components/AdminSourceGenerator";
+import { AdminTestRunner } from "@/components/AdminTestRunner";
+import { AdminStatsDashboard } from "@/components/AdminStatsDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Accordion,
@@ -346,6 +348,23 @@ const AdminDashboard = () => {
                       <SelectItem value="he">Hebrew</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Unit Tests & Stats */}
+          <AccordionItem value="tests-stats">
+            <AccordionTrigger>Unit Tests & Stats</AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Test Runner</h3>
+                  <AdminTestRunner />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Analytics Dashboard</h3>
+                  <AdminStatsDashboard />
                 </div>
               </div>
             </AccordionContent>
