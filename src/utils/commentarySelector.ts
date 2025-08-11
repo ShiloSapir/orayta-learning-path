@@ -82,22 +82,14 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
  * Selects 2 appropriate commentaries based on the topic selected
  */
 export function selectCommentaries(config: CommentaryConfig): string[] {
-  const normalizedTopic = config.topicSelected.toLowerCase();
+  const normalizedTopic = (config.topicSelected || '').toLowerCase();
   
-  // Rule 1: Only provide commentaries for Talmud, Halacha, or Tanach topics
-  const allowedTopics = ['talmud', 'halacha', 'tanach', 'tanakh'];
-  const shouldShowCommentaries = allowedTopics.some(topic => normalizedTopic.includes(topic));
-  
-  if (!shouldShowCommentaries) {
-    return [];
-  }
-  
-  // Rule 2: Identify source type to get appropriate commentaries
+  // First, try to identify the source type from the content itself
   const sourceType = identifySourceType(config);
   
-  // Rule 3: Get commentaries based on source type, with fallbacks
+  // Get commentaries based on detected source type, with topic-based fallbacks
   let availableCommentaries: readonly string[] = [];
-  
+
   if (sourceType && COMMENTARY_MAPPINGS[sourceType]) {
     availableCommentaries = COMMENTARY_MAPPINGS[sourceType];
   } else {

@@ -283,7 +283,6 @@ export const SourceRecommendationV2 = ({
     );
   }
 
-  const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
   const sanitizeText = (raw?: string) => {
     if (!raw) return '';
     return raw
@@ -295,6 +294,16 @@ export const SourceRecommendationV2 = ({
       .replace(/\n{3,}/g, '\n\n')
       .trim();
   };
+
+  const sanitizeTitle = (raw?: string) => {
+    if (!raw) return '';
+    return raw
+      .replace(/(?:\s*\.\s*)+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  };
+
+  const title = sanitizeTitle(language === 'he' ? webhookSource.title_he : webhookSource.title);
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
   const rawCommentaries = webhookSource.commentaries || [];
