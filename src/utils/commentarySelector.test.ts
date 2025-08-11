@@ -133,12 +133,33 @@ export const testCases = [
 ];
 
 /**
+ * Structure of a single test result.
+ */
+interface TestResult {
+  name: string;
+  passed: boolean;
+  expected: {
+    shouldProvide: boolean;
+    commentaries: string[];
+  };
+  actual: {
+    shouldProvide: boolean;
+    commentaries: string[];
+    sourceType: string;
+  };
+}
+
+/**
  * Run all tests and return results
  */
-export function runCommentaryTests(): { passed: number; failed: number; results: any[] } {
+export function runCommentaryTests(): {
+  passed: number;
+  failed: number;
+  results: TestResult[];
+} {
   let passed = 0;
   let failed = 0;
-  const results = [];
+  const results: TestResult[] = [];
 
   for (const testCase of testCases) {
     const result = debugSourceTypeIdentification(testCase.config);
