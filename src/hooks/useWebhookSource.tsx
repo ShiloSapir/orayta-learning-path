@@ -313,6 +313,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     source,
     loading,
     error,
-    refetch: fetchWebhookSource
+    refetch: fetchWebhookSource,
+    parseWebhookResponse
   };
 };
