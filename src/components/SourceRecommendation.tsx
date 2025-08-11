@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
-import { useAppToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { useMinimumLoading } from "@/hooks/useMinimumLoading";
@@ -636,7 +636,7 @@ const [isLoading, setIsLoading] = useState(false);
   
   const t = content[language];
   const isHebrew = language === 'he';
-  const toast = useAppToast();
+  const toast = useToast();
   const { announce } = useAccessibilityAnnouncements();
 
   // Keyboard shortcuts

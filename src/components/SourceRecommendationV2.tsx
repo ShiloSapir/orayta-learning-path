@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 import { useAuth } from "@/hooks/useAuth";
-import { useAppToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
@@ -86,7 +86,7 @@ export const SourceRecommendationV2 = ({
   onReflection 
 }: SourceRecommendationProps) => {
   const { user } = useAuth();
-  const { success } = useAppToast();
+  const { success } = useToast();
   const { showBlessing } = useBlessingToast();
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(false);
