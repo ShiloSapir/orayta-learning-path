@@ -188,16 +188,20 @@ export function LearningStats({ language }: LearningStatsProps) {
   );
 }
 
-function calculateStreak(sessions: any[]): number {
+interface Session {
+  createdAt: Date;
+}
+
+function calculateStreak(sessions: Session[]): number {
   if (sessions.length === 0) return 0;
-  
+
   // Sort sessions by date (newest first)
-  const sortedSessions = [...sessions].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const sortedSessions = [...sessions].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-  
+
   let streak = 0;
-  let currentDate = new Date();
+  const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   
   // Check each day going backwards
