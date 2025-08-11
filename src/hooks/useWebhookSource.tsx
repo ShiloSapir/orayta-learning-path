@@ -31,8 +31,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     // Source range (support bold and plain, English + Hebrew) and explicit From/To pairs
     const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
-    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
+    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום|מ.*?עד)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*\*\*|\n\s*(?:פירושים|שאלה|זמן)|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום|מ.*?עד)\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:פירושים|שאלה|זמן)|$)/i);
 
     // Optional explicit From/To lines (English + Hebrew)
     const fromEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*From\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
@@ -93,8 +93,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const commentarySectionRegexes = [
       /\*\*\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*\*\*|\n\s*(?:[*•\-]\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
       /(?:^|\n)\s*(?:[*•\-]\s*)?(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
-      /\*\*\s*(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
-      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
+      /\*\*\s*(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים|פירושים)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
+      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים|פירושים)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
     ];
     let commentariesText = '';
     for (const r of commentarySectionRegexes) {
