@@ -29,10 +29,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebHeMatch = responseText.match(/(?:^|\n)\s*עברית\s*:\s*(.+?)(?:\n|$)/);
 
     // Source range (support bold and plain, English + Hebrew)
-    const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i);
-    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i);
+    const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
+    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
 
     // Excerpt (support bold and plain, flexible boundary to next heading)
     const excerptEngMatch = (
@@ -55,10 +55,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     );
 
     // Estimated time (support bold and plain, English + Hebrew)
-    const timeEngMatch = responseText.match(/\*\*\s*Estimated Time\s*\*\*\s*[:：\-–—]?\s*(\d+)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Estimated Time\s*[:：\-–—]?\s*(\d+)/i);
-    const timeHebMatch = responseText.match(/\*\*\s*זמן משוער\s*\*\*\s*[:：\-–—]?\s*(\d+)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?זמן משוער\s*[:：\-–—]?\s*(\d+)/i);
+    const timeEngMatch = responseText.match(/\*\*\s*Estimated Time\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Estimated Time\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i);
+    const timeHebMatch = responseText.match(/\*\*\s*זמן משוער\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?זמן משוער\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i);
     
     // Look for Sefaria links - handle multiple formats (support Hebrew "Working Link")
     const markdownLinkMatch = responseText.match(/\[.*?\]\((https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^)]+)\)/);
