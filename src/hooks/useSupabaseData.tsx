@@ -42,6 +42,7 @@ export interface Source {
   start_ref: string;
   end_ref: string;
   commentaries?: string[];
+  source_range?: string;
   // Enhanced fields
   difficulty_level?: 'beginner' | 'intermediate' | 'advanced';
   source_type?: 'text_study' | 'practical_halacha' | 'philosophical' | 'historical' | 'mystical';

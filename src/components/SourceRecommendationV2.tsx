@@ -383,9 +383,19 @@ export const SourceRecommendationV2 = ({
             <div className="content-card">
               <div className="space-y-4">
                 <div className="mobile-flex-col items-start">
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-3">
                     <h2 className="mobile-text-base font-semibold sm:text-xl">{title}</h2>
-                    <p className="mobile-text-xs text-muted-foreground">{webhookSource.source_range}</p>
+                    {webhookSource.source_range && (
+                      <div className="bg-primary/10 rounded-lg p-3 border-l-4 border-primary">
+                        <div className="flex items-center gap-2 mb-1">
+                          <BookOpen className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">
+                            {language === 'he' ? 'מקור הלימוד' : 'Study Source'}
+                          </span>
+                        </div>
+                        <p className="mobile-text-sm font-medium whitespace-pre-line">{webhookSource.source_range}</p>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Save Toggle Button - Mobile Optimized */}

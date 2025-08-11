@@ -165,14 +165,19 @@ export const EnhancedSourceDisplay = ({
         </div>
 
         {/* Torah Reference Section - Enhanced for exact location */}
-        {(source.start_ref || source.end_ref) && (
+        {(source.start_ref || source.end_ref || source.source_range) && (
           <div className="bg-primary/5 rounded-lg p-4 border-l-4 border-primary">
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-primary">{t.torahReference}</h3>
             </div>
             <div className="space-y-2">
-              {source.start_ref && source.end_ref ? (
+              {source.source_range ? (
+                <p className="text-lg font-medium">
+                  <span className="text-primary">{t.studyHere}:</span>{" "}
+                  <span className="font-bold whitespace-pre-line">{source.source_range}</span>
+                </p>
+              ) : source.start_ref && source.end_ref ? (
                 <p className="text-lg font-medium">
                   <span className="text-primary">{t.studyHere}:</span>{" "}
                   <span className="font-bold">{source.start_ref}</span>{" "}
@@ -185,21 +190,23 @@ export const EnhancedSourceDisplay = ({
                   <span className="font-bold">{source.start_ref || source.end_ref}</span>
                 </p>
               )}
-              <Button 
-                onClick={() => {
-                  if (source.sefaria_link && isValidSefariaUrl(source.sefaria_link)) {
-                    const normalizedUrl = normalizeSefariaUrl(source.sefaria_link);
-                    window.open(normalizedUrl, '_blank');
-                  }
-                  onSefariaClick();
-                }}
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ExternalLink className="h-3 w-3" />
-                {t.openSefaria}
-              </Button>
+              {source.sefaria_link && (
+                <Button 
+                  onClick={() => {
+                    if (isValidSefariaUrl(source.sefaria_link)) {
+                      const normalizedUrl = normalizeSefariaUrl(source.sefaria_link);
+                      window.open(normalizedUrl, '_blank');
+                    }
+                    onSefariaClick();
+                  }}
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  {t.openSefaria}
+                </Button>
+              )}
             </div>
           </div>
         )}
