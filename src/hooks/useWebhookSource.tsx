@@ -139,9 +139,26 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const hebrewTitleRaw = titleHebLabelMatch?.[1] || titleHebHeMatch?.[1];
     const title = (englishTitleRaw || hebrewTitleRaw || 'Torah Source').replace(/\*/g, '').trim();
 
-    const sourceRange = (preferredLang === 'he'
+    let sourceRange = (preferredLang === 'he'
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
       : (rangeEngMatch?.[1] || rangeHebMatch?.[1]))?.trim() || '';
+
+    // Fallback: derive range from Sefaria link if missing
+    let finalRange = sourceRange;
+    if (!finalRange && extractedLink) {
+      const m = extractedLink.match(/sefaria\.org\/([^?\#]+)/);
+      if (m?.[1]) {
+        let ref = decodeURIComponent(m[1])
+          .replace(/^texts\//i, '')
+          .replace(/_/g, '.')
+          .trim();
+        // Only main ref segment
+        ref = ref.split(/[?\#]/)[0];
+        // Convert Book.Chapter.Verses -> Book Chapter:Verses
+        const once = ref.replace(/\./, ' ');
+        finalRange = once.replace(/\./, ':');
+      }
+    }
 
     const rawExcerptHe = excerptHebMatch?.[1]?.trim();
     const rawExcerptEn = excerptEngMatch?.[1]?.trim();
@@ -186,7 +203,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     // Use webhook-provided recommended commentaries (take up to two), with smart fallback
     let finalCommentaries = commentaries.slice(0, 2);
     if (finalCommentaries.length === 0) {
-      const config = { topicSelected, sourceTitle: title, sourceRange, excerpt };
+      const config = { topicSelected, sourceTitle: title, sourceRange: finalRange, excerpt };
       if (shouldProvideCommentaries(config)) {
         finalCommentaries = selectCommentaries(config).slice(0, 2);
       }
@@ -208,7 +225,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     return {
       title,
       title_he: (hebrewTitleRaw || 'מקור תורני').replace(/\*/g, '').trim(),
-      source_range: sourceRange,
+      source_range: finalRange,
       excerpt,
       commentaries: finalCommentaries,
       reflection_prompt: reflection,
