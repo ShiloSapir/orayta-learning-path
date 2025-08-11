@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { TimeSelection } from "./TimeSelection";
 import { TopicSelection } from "./TopicSelection";
@@ -19,6 +20,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 
 
 export const OrayataApp = () => {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { profile } = useUserProfile(user);
   const { state, actions, dispatch } = useAppContext();
@@ -84,7 +86,7 @@ export const OrayataApp = () => {
   };
 
   const handleAdmin = () => {
-    window.location.assign('/admin');
+    navigate('/admin');
   };
 
   const handleSaveReflection = () => {

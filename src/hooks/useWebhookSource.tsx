@@ -152,45 +152,42 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
       : (rangeEngMatch?.[1] || rangeHebMatch?.[1]))?.trim() || '';
 
-    // Clean and sanitize the source range
+    // Clean and sanitize the source range into a single line
     if (sourceRange) {
       sourceRange = sourceRange
-        // Remove any markdown formatting
         .replace(/\*+/g, '')
         .replace(/_+/g, '')
         .replace(/`+/g, '')
+
         // Remove any explicit From/To lines accidentally captured in the range block
         .split('\n')
         .filter(line => !/^\s*(?:From|To|מ|עד)\s*[:：\-–—]?/i.test(line))
         .join('\n')
         // Clean up excess whitespace but preserve line breaks for multi-line ranges
+=======
+
         .replace(/[ \t]+/g, ' ')
-        .replace(/\n+/g, '\n')
+        .replace(/\r?\n+/g, ' ')
         .trim();
     }
 
-    // Prefer explicit From/To if provided by webhook
+    // Use explicit From/To only if Source Range block is missing
     const fromPref = preferredLang === 'he' ? (fromHeb || fromEng) : (fromEng || fromHeb);
     const toPref = preferredLang === 'he' ? (toHeb || toEng) : (toEng || toHeb);
 
     let finalRange = sourceRange;
+
     // Only build a range from "From"/"To" lines when an explicit Source Range isn't provided
     if (!finalRange && fromPref && toPref) {
       finalRange = `${fromPref} ${preferredLang === 'he' ? 'עד' : 'to'} ${toPref}`.trim();
+=======
+    if (!finalRange && fromPref && toPref) {
+      finalRange = `${fromPref} ${preferredLang === 'he' ? 'עד' : '–'} ${toPref}`;
+
     }
 
-    // Fallback: derive range from Sefaria link if still missing
-    if (!finalRange && extractedLink) {
-      const m = extractedLink.match(/sefaria\.org\/([^?\#]+)/);
-      if (m?.[1]) {
-        let ref = decodeURIComponent(m[1])
-          .replace(/^texts\//i, '')
-          .replace(/_/g, ' ')
-          .trim();
-        // Only main ref segment
-        ref = ref.split(/[?\#]/)[0];
-        finalRange = ref;
-      }
+    if (finalRange) {
+      finalRange = finalRange.replace(/\s+/g, ' ').trim();
     }
     // Compute title with fallback to finalRange when explicit title missing (handles Hebrew)
     const baseTitle = (englishTitleRaw || hebrewTitleRaw || '').replace(/\*/g, '').trim();
