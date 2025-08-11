@@ -27,6 +27,7 @@ export const useUserProfile = (user: User | null) => {
   const fetchProfile = useCallback(async () => {
     if (!user) return;
     
+    console.log('useUserProfile - fetchProfile called for user:', user.id);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -34,6 +35,8 @@ export const useUserProfile = (user: User | null) => {
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
+
+      console.log('useUserProfile - query result:', { data, error });
 
       if (error) {
         console.error('Error fetching profile:', error);
@@ -45,12 +48,15 @@ export const useUserProfile = (user: User | null) => {
         return;
       }
 
-      setProfile(data ? {
+      const profileData = data ? {
         ...data,
         learning_preferences: (data.learning_preferences && typeof data.learning_preferences === 'object' && !Array.isArray(data.learning_preferences)) 
           ? data.learning_preferences as Record<string, unknown>
           : {}
-      } : null);
+      } : null;
+      
+      console.log('useUserProfile - setting profile to:', profileData);
+      setProfile(profileData);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
