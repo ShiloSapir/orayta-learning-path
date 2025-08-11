@@ -1,13 +1,19 @@
-/**
- * Test cases for commentary selection logic
- * This can be used to validate the commentary selection works as expected
- */
-
+import { describe, it, expect } from 'vitest';
 import { selectCommentaries, debugSourceTypeIdentification } from './commentarySelector';
 
-// Test cases
-export const testCases = [
-  // Should provide commentaries - Tanach sources
+interface TestCase {
+  name: string;
+  config: {
+    topicSelected: string;
+    sourceTitle: string;
+    sourceRange: string;
+    excerpt: string;
+  };
+  expectedCommentaries: string[];
+  shouldProvide: boolean;
+}
+
+const testCases: TestCase[] = [
   {
     name: 'Tanach - Bereishit',
     config: {
@@ -30,8 +36,6 @@ export const testCases = [
     expectedCommentaries: ['Rashi', 'Ibn Ezra'],
     shouldProvide: true
   },
-
-  // Should provide commentaries - Talmud sources
   {
     name: 'Talmud - Berachot',
     config: {
@@ -54,8 +58,6 @@ export const testCases = [
     expectedCommentaries: ['Rashi', 'Tosafot'],
     shouldProvide: true
   },
-
-  // Should provide commentaries - Rambam sources
   {
     name: 'Rambam - Mishneh Torah',
     config: {
@@ -67,8 +69,6 @@ export const testCases = [
     expectedCommentaries: ['Kesef Mishneh', 'Maggid Mishneh'],
     shouldProvide: true
   },
-
-  // Should provide commentaries - Shulchan Aruch sources
   {
     name: 'Shulchan Aruch - Orach Chaim',
     config: {
@@ -80,8 +80,6 @@ export const testCases = [
     expectedCommentaries: ['Mishnah Berurah', 'Shach'],
     shouldProvide: true
   },
-
-  // Should NOT provide commentaries - Spiritual Growth topic
   {
     name: 'Spiritual Growth - Should be empty',
     config: {
@@ -104,8 +102,6 @@ export const testCases = [
     expectedCommentaries: [],
     shouldProvide: false
   },
-
-  // Should NOT provide commentaries - Unknown source types
   {
     name: 'Unknown source type',
     config: {
@@ -117,8 +113,6 @@ export const testCases = [
     expectedCommentaries: [],
     shouldProvide: false
   },
-
-  // Should NOT provide commentaries - Mixed or unclear sources
   {
     name: 'Unclear source type',
     config: {
@@ -132,85 +126,13 @@ export const testCases = [
   }
 ];
 
-/**
- * Structure of a single test result.
- */
-interface TestResult {
-  name: string;
-  passed: boolean;
-  expected: {
-    shouldProvide: boolean;
-    commentaries: string[];
-  };
-  actual: {
-    shouldProvide: boolean;
-    commentaries: string[];
-    sourceType: string | null;
-  };
-}
-
-/**
- * Run all tests and return results
- */
-export function runCommentaryTests(): {
-  passed: number;
-  failed: number;
-  results: TestResult[];
-} {
-  let passed = 0;
-  let failed = 0;
-  const results: TestResult[] = [];
-
-  for (const testCase of testCases) {
-    const result = debugSourceTypeIdentification(testCase.config);
-    const actualCommentaries = selectCommentaries(testCase.config);
-    
-    const testPassed = 
-      result.shouldProvide === testCase.shouldProvide &&
-      JSON.stringify(actualCommentaries.sort()) === JSON.stringify(testCase.expectedCommentaries.sort());
-
-    if (testPassed) {
-      passed++;
-    } else {
-      failed++;
-    }
-
-    results.push({
-      name: testCase.name,
-      passed: testPassed,
-      expected: {
-        shouldProvide: testCase.shouldProvide,
-        commentaries: testCase.expectedCommentaries
-      },
-      actual: {
-        shouldProvide: result.shouldProvide,
-        commentaries: actualCommentaries,
-        sourceType: result.sourceType
-      }
+describe('commentarySelector', () => {
+  testCases.forEach(({ name, config, expectedCommentaries, shouldProvide }) => {
+    it(name, () => {
+      const result = debugSourceTypeIdentification(config);
+      const commentaries = selectCommentaries(config);
+      expect(result.shouldProvide).toBe(shouldProvide);
+      expect(commentaries.sort()).toEqual(expectedCommentaries.sort());
     });
-  }
-
-  return { passed, failed, results };
-}
-
-/**
- * Utility function to print test results (for console debugging)
- */
-export function printTestResults() {
-  const { passed, failed, results } = runCommentaryTests();
-  
-  console.log(`\n=== Commentary Selection Test Results ===`);
-  console.log(`Passed: ${passed}, Failed: ${failed}`);
-  console.log(`\nDetailed Results:`);
-  
-  results.forEach(result => {
-    const status = result.passed ? '✅' : '❌';
-    console.log(`${status} ${result.name}`);
-    if (!result.passed) {
-      console.log(`   Expected: ${JSON.stringify(result.expected)}`);
-      console.log(`   Actual: ${JSON.stringify(result.actual)}`);
-    }
   });
-  
-  return { passed, failed };
-}
+});
