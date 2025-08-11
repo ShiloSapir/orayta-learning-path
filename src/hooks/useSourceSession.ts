@@ -29,18 +29,12 @@ export const useSourceSession = ({
   content
 }: UseSourceSessionOptions) => {
   const { user } = useAuth();
-  const { success } = useAppToast();
+  const { success } = useToast();
   const { showBlessing } = useBlessingToast();
 
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isTogglingSave, setIsTogglingSave] = useState(false);
-
-  useEffect(() => {
-    if (source && user && !currentSessionId) {
-      createSessionForSource(source);
-    }
-  }, [source, user, currentSessionId, createSessionForSource]);
 
   const createSessionForSource = useCallback((src: WebhookSource) => {
     if (!user) return;
@@ -57,6 +51,12 @@ export const useSourceSession = ({
     };
     localStorage.setItem(`webhook_session_${sessionId}`, JSON.stringify(sessionData));
   }, [user, topicSelected, timeSelected]);
+  
+  useEffect(() => {
+    if (source && user && !currentSessionId) {
+      createSessionForSource(source);
+    }
+  }, [source, user, currentSessionId, createSessionForSource]);
 
   const sanitizeText = useCallback((raw?: string) => {
     if (!raw) return "";
@@ -70,7 +70,8 @@ export const useSourceSession = ({
       .trim();
   }, []);
 
-  const title = language === "he" ? source?.title_he : source?.title;
+  const rawTitle = language === "he" ? source?.title_he : source?.title;
+  const title = sanitizeText(rawTitle).replace(/\s*\.+\s*/g, " ").replace(/\s{2,}/g, " ").trim();
   const excerpt = sanitizeText(source?.excerpt);
   const reflectionPrompt = sanitizeText(source?.reflection_prompt);
   const rawCommentaries = source?.commentaries || [];

@@ -2,8 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
@@ -81,13 +79,6 @@ export const SourceRecommendationV2 = ({
 }: SourceRecommendationProps) => {
 
 
-  const { user } = useAuth();
-  const { success } = useToast();
-  const { showBlessing } = useBlessingToast();
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [isSaved, setIsSaved] = useState<boolean>(false);
-  const [isTogglingSave, setIsTogglingSave] = useState<boolean>(false);
-  
   // Use webhook source instead of Supabase
 
   const { source: webhookSource, loading: webhookLoading, error: webhookError, refetch } = useWebhookSource(
@@ -317,9 +308,9 @@ export const SourceRecommendationV2 = ({
             <SocialSharing
               language={language}
               source={{
-                title: title,
+                title: title || '',
                 text: excerpt || '',
-                sefariaLink: webhookSource.sefaria_link
+                sefariaLink: webhookSource.sefaria_link ?? ''
               }}
             />
           </MotionWrapper>
