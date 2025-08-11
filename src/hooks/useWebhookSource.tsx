@@ -31,8 +31,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     // Source range (support bold and plain, English + Hebrew) and explicit From/To pairs
     const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
-    const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום|מ.*?עד)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*\*\*|\n\s*(?:פירושים|שאלה|זמן)|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום|מ.*?עד)\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:פירושים|שאלה|זמן)|$)/i);
+    
+    // Hebrew source range with better patterns
+    const rangeHebMatch = responseText.match(/\*\*\s*(?:מקור הלימוד|טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*\*\*|\n\s*$)/i)
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:מקור הלימוד|טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*(?:\*\*|$))/i);
 
     // Optional explicit From/To lines (English + Hebrew)
     const fromEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*From\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
