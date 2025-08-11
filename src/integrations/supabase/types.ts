@@ -14,6 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json
+          id: string
+          ip_address: unknown | null
+          resource: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          ip_address?: unknown | null
+          resource: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          ip_address?: unknown | null
+          resource?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          event_data: Json
+          event_type: string
+          id: string
+          latency_ms: number | null
+          request_id: string | null
+          scope: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          event_data?: Json
+          event_type: string
+          id?: string
+          latency_ms?: number | null
+          request_id?: string | null
+          scope?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          event_data?: Json
+          event_type?: string
+          id?: string
+          latency_ms?: number | null
+          request_id?: string | null
+          scope?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       learning_sessions: {
         Row: {
           created_at: string | null
@@ -232,6 +307,48 @@ export type Database = {
         }
         Relationships: []
       }
+      test_runs: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          error_details: string | null
+          execution_time_ms: number
+          id: string
+          logs: Json
+          passed: boolean
+          payload_snippet: Json | null
+          suite_name: string
+          test_case: string
+          test_config: Json
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          error_details?: string | null
+          execution_time_ms: number
+          id?: string
+          logs?: Json
+          passed: boolean
+          payload_snippet?: Json | null
+          suite_name: string
+          test_case: string
+          test_config?: Json
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          error_details?: string | null
+          execution_time_ms?: number
+          id?: string
+          logs?: Json
+          passed?: boolean
+          payload_snippet?: Json | null
+          suite_name?: string
+          test_case?: string
+          test_config?: Json
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -285,7 +402,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_resource: string
+          p_details?: Json
+          p_ip_address?: unknown
+          p_user_agent?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
