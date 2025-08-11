@@ -317,16 +317,9 @@ export const SourceRecommendationV2 = ({
           {/* Header */}
           <MotionWrapper type="scale" delay={0.1}>
             <div className="text-center mobile-spacing-y">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
                 <h1 className="mobile-text-base font-bold gradient-primary bg-clip-text text-transparent sm:text-2xl">
                   {content[language].title}
                 </h1>
-                {webhookSource?.source_range && (
-                  <span className="mobile-text-xs text-muted-foreground">
-                    {webhookSource.source_range} {title ? `— ${title}` : ''}
-                  </span>
-                )}
-              </div>
               <p className="mobile-text-sm text-muted-foreground">{content[language].subtitle}</p>
             </div>
           </MotionWrapper>

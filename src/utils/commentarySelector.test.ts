@@ -145,7 +145,7 @@ interface TestResult {
   actual: {
     shouldProvide: boolean;
     commentaries: string[];
-    sourceType: string;
+    sourceType: string | null;
   };
 }
 
