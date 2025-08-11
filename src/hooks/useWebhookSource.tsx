@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { selectCommentaries, shouldProvideCommentaries } from '@/utils/commentarySelector';
-import { supabase } from '@/integrations/supabase/client';
+
 export interface WebhookSource {
   title: string;
   title_he: string;
@@ -239,76 +239,30 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     setError(null);
 
     try {
-      const webhookUrl = (import.meta as any)?.env?.VITE_WEBHOOK_URL as string | undefined;
+      const response = await fetch('https://hook.eu2.make.com/yph8frq3ykdvsqjjbz0zxym2ihrjnv1j', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          time_selected: timeSelected,
+          topic_selected: topicSelected,
+          language_selected: language,
+          user_id: crypto.randomUUID(), // Generate a random ID for webhook tracking
+          timestamp: new Date().toISOString(),
+        }),
+      });
 
-      if (webhookUrl) {
-        // Legacy Make.com webhook path returning formatted text
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            time_selected: timeSelected,
-            topic_selected: topicSelected,
-            language_selected: language,
-            user_id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-          }),
-        });
-        if (!response.ok) throw new Error('Failed to fetch source from webhook');
-        const responseText = await response.text();
-        const parsedSource = parseWebhookResponse(responseText, language);
-        setSource(parsedSource);
-      } else {
-        // Preferred path: call Supabase Edge Function (no env vars needed)
-        const { data, error } = await supabase.functions.invoke('gemini-source-agent', {
-          body: {
-            topic: topicSelected,
-            timeMinutes: timeSelected,
-            language
-          }
-        });
-        if (error) throw error;
-        const payload: any = data || {};
-
-        const ref: string = payload.sefaria_ref || '';
-        const buildRangeFromRef = (r: string) => {
-          if (!r) return '';
-          const parts = decodeURIComponent(r).replace(/^texts\//i, '').replace(/_/g, '.').split('.');
-          if (parts.length >= 3) return `${parts[0]} ${parts[1]}:${parts.slice(2).join('-')}`;
-          if (parts.length === 2) return `${parts[0]} ${parts[1]}`;
-          return parts[0] || '';
-        };
-        const finalRange = buildRangeFromRef(ref);
-        const link = ref ? `https://www.sefaria.org/${encodeURI(ref.replace(/\s+/g, '.').replace(/:/g, '.'))}` : '';
-
-        const excerpt = (payload.translation || payload.text || '').toString().trim();
-        const title = (payload.title || 'Torah Source').toString().trim();
-        const reflection = Array.isArray(payload.reflection_prompts) && payload.reflection_prompts.length > 0
-          ? String(payload.reflection_prompts[0])
-          : '';
-
-        let finalCommentaries: string[] = (payload.suggested_commentaries || payload.commentaries || [])
-          .map((c: any) => String(c))
-          .filter((c: string) => c.length > 2)
-          .slice(0, 2);
-        if (finalCommentaries.length === 0) {
-          const config = { topicSelected, sourceTitle: title, sourceRange: finalRange, excerpt };
-          if (shouldProvideCommentaries(config)) {
-            finalCommentaries = selectCommentaries(config).slice(0, 2);
-          }
-        }
-
-        setSource({
-          title,
-          title_he: title,
-          source_range: finalRange,
-          excerpt,
-          commentaries: finalCommentaries,
-          reflection_prompt: reflection,
-          estimated_time: Number(payload.estimated_time) || timeSelected,
-          sefaria_link: link,
-        });
+      if (!response.ok) {
+        throw new Error('Failed to fetch source from webhook');
       }
+
+      const responseText = await response.text();
+
+      // Parse the formatted response from Make
+      const parsedSource = parseWebhookResponse(responseText, language);
+      setSource(parsedSource);
+
     } catch (err) {
       console.error('Webhook fetch error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');

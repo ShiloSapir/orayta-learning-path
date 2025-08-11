@@ -1,23 +1,31 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
-
-
+import { useAuth } from "@/hooks/useAuth";
+import { useAppToast } from "@/hooks/useToast";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { SocialSharing } from "./SocialSharing";
 import { SourceLoadingState } from "./SourceLoadingState";
 import { useMinimumLoading } from "@/hooks/useMinimumLoading";
-import { useWebhookSource } from "@/hooks/useWebhookSource";
-import { ExternalLink, SkipForward, BookmarkPlus, BookmarkCheck } from "lucide-react";
+import { useWebhookSource, WebhookSource } from "@/hooks/useWebhookSource";
+import { 
+  ExternalLink, 
+  BookOpen, 
+  Heart, 
+  Calendar,
+  SkipForward,
+  CheckCircle,
+  BookmarkPlus,
+  BookmarkCheck
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
+import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
-import { useSourceSession } from "@/hooks/useSourceSession";
-import { SaveButton } from "@/components/source/SaveButton";
-import { LearnedButton } from "@/components/source/LearnedButton";
-import { CalendarButton } from "@/components/source/CalendarButton";
-import { ReflectionButton } from "@/components/source/ReflectionButton";
+import { selectCommentaries } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -70,62 +78,169 @@ const content = {
   }
 };
 
-export const SourceRecommendationV2 = ({
-  language,
-  timeSelected,
-  topicSelected,
-  onBack,
-  onReflection
+export const SourceRecommendationV2 = ({ 
+  language, 
+  timeSelected, 
+  topicSelected, 
+  onBack, 
+  onReflection 
 }: SourceRecommendationProps) => {
-
-
+  const { user } = useAuth();
+  const { success } = useAppToast();
+  const { showBlessing } = useBlessingToast();
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isTogglingSave, setIsTogglingSave] = useState<boolean>(false);
+  
   // Use webhook source instead of Supabase
-
   const { source: webhookSource, loading: webhookLoading, error: webhookError, refetch } = useWebhookSource(
-    timeSelected,
-    topicSelected,
+    timeSelected, 
+    topicSelected, 
     language
   );
+
   const showLoading = useMinimumLoading(webhookLoading);
   const { announce } = useAccessibilityAnnouncements();
-  const {
-    title,
-    excerpt,
-    reflectionPrompt,
-    displayedCommentaries,
-    currentSessionId,
-    isSaved,
-    isTogglingSave,
-    handleToggleSave,
-    handleMarkLearned,
-    handleCalendar
-  } = useSourceSession({
-    source: webhookSource,
-    topicSelected,
-    timeSelected,
-    language,
-    content: {
-      saveToggle: content[language].saveToggle,
-      learnedButton: content[language].learnedButton,
-      calendarButton: content[language].calendarButton
-    }
-  });
 
   // Set up keyboard navigation
   useKeyboardNavigation({
     shortcuts: [
       { key: 'ArrowLeft', action: onBack, description: 'Go back' },
       { key: 'Enter', action: () => webhookSource && handleReflection(), description: 'Write reflection' },
-      { key: 's', action: () => webhookSource && handleToggleSave(), description: 'Save source' },
+      { key: 's', action: () => webhookSource && handleSave(), description: 'Save source' },
       { key: 'l', action: () => webhookSource && handleMarkLearned(), description: 'Mark as learned' },
       { key: 'n', action: () => webhookSource && handleSkip(), description: 'Skip source' }
     ]
   });
-  const handleSkip = () => {
+
+  // Create a session when source is loaded
+  useEffect(() => {
+    if (webhookSource && user && !currentSessionId) {
+      createSessionForWebhookSource(webhookSource);
+    }
+  }, [webhookSource, user, currentSessionId]);
+
+  const createSessionForWebhookSource = async (source: WebhookSource) => {
+    if (!user) return;
+    
+    // Create a simple session tracking for webhook sources
+    const sessionId = crypto.randomUUID();
+    setCurrentSessionId(sessionId);
+    
+    // Store session data in localStorage for now
+    const sessionData = {
+      id: sessionId,
+      user_id: user.id,
+      topic_selected: topicSelected,
+      time_selected: timeSelected,
+      source_title: source.title,
+      status: 'recommended',
+      created_at: new Date().toISOString()
+    };
+    
+    localStorage.setItem(`webhook_session_${sessionId}`, JSON.stringify(sessionData));
+  };
+
+  const handleSkip = async () => {
     if (!webhookSource) return;
+    
     console.log('⏭️ Skipping webhook source:', webhookSource.title);
     announce(`Skipping to new source`);
+    
+    // Generate new source
     refetch();
+  };
+
+  const handleToggleSave = async () => {
+    if (!user || !webhookSource || isTogglingSave) return;
+    
+    setIsTogglingSave(true);
+    try {
+      if (!isSaved) {
+        // Save to database
+        const { error } = await supabase
+          .from('saved_sources')
+          .insert({
+            user_id: user.id,
+            source_title: webhookSource.title,
+            source_title_he: webhookSource.title_he,
+            source_excerpt: (webhookSource.excerpt || '')
+              .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+              .replace(/https?:\/\/[^\s)]+/g, '')
+              .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+              .replace(/<[^>]+>/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim(),
+            source_excerpt_he: (webhookSource.excerpt || '')
+              .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+              .replace(/https?:\/\/[^\s)]+/g, '')
+              .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+              .replace(/<[^>]+>/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim(),
+            sefaria_link: webhookSource.sefaria_link,
+            topic_selected: topicSelected,
+            time_selected: timeSelected,
+            is_saved: true
+          });
+
+        if (error) throw error;
+        
+        setIsSaved(true);
+        showBlessing(language === 'he' ? 'חזק וברוך!' : 'Chazak u\'Baruch!');
+        success(content[language].saveToggle);
+      } else {
+        // Remove from database - find by matching content
+        const { error } = await supabase
+          .from('saved_sources')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('source_title', webhookSource.title)
+          .eq('topic_selected', topicSelected);
+
+        if (error) throw error;
+        
+        setIsSaved(false);
+        success("Removed from saved");
+      }
+    } catch (error: any) {
+      console.error('Error toggling save:', error);
+    } finally {
+      setIsTogglingSave(false);
+    }
+  };
+
+  const handleSave = async () => {
+    // Legacy save function - now just calls the toggle
+    handleToggleSave();
+  };
+
+  const handleMarkLearned = async () => {
+    if (!currentSessionId || !webhookSource) return;
+    
+    // Update session status in localStorage
+    const sessionKey = `webhook_session_${currentSessionId}`;
+    const sessionData = JSON.parse(localStorage.getItem(sessionKey) || '{}');
+    sessionData.status = 'learned';
+    sessionData.updated_at = new Date().toISOString();
+    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+    
+    success(content[language].learnedButton);
+  };
+
+  const handleCalendar = () => {
+    if (!webhookSource) return;
+    
+    const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
+    const startDate = new Date();
+    const endDate = new Date(startDate.getTime() + timeSelected * 60000);
+    
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Study: ${title}`)}`;
+    
+    window.open(calendarUrl, '_blank');
+    success(content[language].calendarButton);
   };
 
   const handleReflection = () => {
@@ -167,6 +282,33 @@ export const SourceRecommendationV2 = ({
       />
     );
   }
+
+  const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
+  const sanitizeText = (raw?: string) => {
+    if (!raw) return '';
+    return raw
+      .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
+      .replace(/https?:\/\/[^\s)]+/g, '')
+      .replace(/(?:^|\n)\s*\**\s*(?:Working Link|Source Link|Sefaria Link)[^:\n]*:?.*$/gim, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+  const excerpt = sanitizeText(webhookSource.excerpt);
+  const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
+  const rawCommentaries = webhookSource.commentaries || [];
+  const cleanedCommentaries = rawCommentaries
+    .map(c => (c || '').replace(/[*_`~]/g, '').trim())
+    .filter(c => c && c.length > 2);
+  const displayedCommentaries = cleanedCommentaries.length > 0
+    ? cleanedCommentaries
+    : selectCommentaries({
+        topicSelected,
+        sourceTitle: webhookSource.title,
+        sourceRange: webhookSource.source_range,
+        excerpt: webhookSource.excerpt || ''
+      }).slice(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
@@ -275,31 +417,45 @@ export const SourceRecommendationV2 = ({
                   <SkipForward className="h-4 w-4 mr-2" />
                   <span className="mobile-text-sm">{content[language].skipButton}</span>
                 </Button>
-
-                <SaveButton
-                  onClick={handleToggleSave}
+                
+                <Button
+                  onClick={handleSave}
+                  variant="outline"
                   disabled={webhookLoading}
-                  label={content[language].saveButton}
-                />
-
-                <LearnedButton
+                  className="touch-button"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].saveButton}</span>
+                </Button>
+                
+                <Button
                   onClick={handleMarkLearned}
+                  variant="outline"
                   disabled={webhookLoading}
-                  label={content[language].learnedButton}
-                />
-
-                <CalendarButton
+                  className="touch-button"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].learnedButton}</span>
+                </Button>
+                
+                <Button
                   onClick={handleCalendar}
-                  label={content[language].calendarButton}
-                  className="sm:col-span-2 lg:col-span-1"
-                />
+                  variant="outline"
+                  className="touch-button sm:col-span-2 lg:col-span-1"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                </Button>
               </div>
 
-              <ReflectionButton
+              <Button
                 onClick={handleReflection}
+                className="w-full touch-button"
                 disabled={webhookLoading}
-                label={content[language].reflectionButton}
-              />
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span className="mobile-text-base">{content[language].reflectionButton}</span>
+              </Button>
             </div>
           </MotionWrapper>
 
@@ -308,9 +464,9 @@ export const SourceRecommendationV2 = ({
             <SocialSharing
               language={language}
               source={{
-                title: title || '',
+                title: title,
                 text: excerpt || '',
-                sefariaLink: webhookSource.sefaria_link ?? ''
+                sefariaLink: webhookSource.sefaria_link
               }}
             />
           </MotionWrapper>

@@ -84,25 +84,34 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
 export function selectCommentaries(config: CommentaryConfig): string[] {
   const normalizedTopic = config.topicSelected.toLowerCase();
   
-  // Suppress only for spiritual growth topics
-  const isSuppressed = /spiritual/.test(normalizedTopic);
-  if (isSuppressed) return [];
+  // Rule 1: Only provide commentaries for Talmud, Halacha, or Tanach topics
+  const allowedTopics = ['talmud', 'halacha', 'tanach', 'tanakh'];
+  const shouldShowCommentaries = allowedTopics.some(topic => normalizedTopic.includes(topic));
   
-  // Identify source type to get appropriate commentaries
+  if (!shouldShowCommentaries) {
+    return [];
+  }
+  
+  // Rule 2: Identify source type to get appropriate commentaries
   const sourceType = identifySourceType(config);
   
-  // Get commentaries based on source type, with sensible fallbacks
+  // Rule 3: Get commentaries based on source type, with fallbacks
   let availableCommentaries: readonly string[] = [];
+  
   if (sourceType && COMMENTARY_MAPPINGS[sourceType]) {
     availableCommentaries = COMMENTARY_MAPPINGS[sourceType];
   } else {
-    const t = normalizedTopic;
-    if (t.includes('talmud')) availableCommentaries = COMMENTARY_MAPPINGS.talmud;
-    else if (t.includes('halacha')) availableCommentaries = COMMENTARY_MAPPINGS.shulchan_aruch;
-    else if (t.includes('tanach') || t.includes('tanakh')) availableCommentaries = COMMENTARY_MAPPINGS.tanach;
-    else if (t.includes('rambam') || t.includes('mishneh')) availableCommentaries = COMMENTARY_MAPPINGS.rambam;
+    // Fallback based on topic if source type can't be identified
+    if (normalizedTopic.includes('talmud')) {
+      availableCommentaries = COMMENTARY_MAPPINGS.talmud;
+    } else if (normalizedTopic.includes('halacha')) {
+      availableCommentaries = COMMENTARY_MAPPINGS.shulchan_aruch;
+    } else if (normalizedTopic.includes('tanach') || normalizedTopic.includes('tanakh')) {
+      availableCommentaries = COMMENTARY_MAPPINGS.tanach;
+    }
   }
   
+  // Return first 2 commentaries for consistency
   return availableCommentaries.slice(0, 2);
 }
 

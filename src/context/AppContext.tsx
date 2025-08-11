@@ -109,7 +109,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'ADD_SESSION':
       const newSession: LearningSession = {
         ...action.payload,
-        id: crypto.randomUUID(),
+        id: Date.now().toString(),
         createdAt: new Date()
       };
       return {

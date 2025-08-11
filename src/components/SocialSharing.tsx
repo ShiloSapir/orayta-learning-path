@@ -13,7 +13,7 @@ import {
   Heart,
   Quote
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useAppToast } from '@/hooks/useToast';
 import { Language } from './LanguageToggle';
 import { normalizeSefariaUrl, isValidSefariaUrl } from '@/utils/sefariaLinkValidator';
 
@@ -70,7 +70,7 @@ const content = {
 export function SocialSharing({ language, source }: SocialSharingProps) {
   const [customMessage, setCustomMessage] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
-  const toast = useToast();
+  const toast = useAppToast();
   const t = content[language];
   const isHebrew = language === 'he';
 
