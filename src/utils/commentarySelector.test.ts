@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { selectCommentaries, debugSourceTypeIdentification } from './commentarySelector';
+import { selectCommentaries, debugSourceTypeIdentification, filterCommentariesByTopic } from './commentarySelector';
 
 interface TestCase {
   name: string;
@@ -134,5 +134,17 @@ describe('commentarySelector', () => {
       expect(result.shouldProvide).toBe(shouldProvide);
       expect(commentaries.sort()).toEqual(expectedCommentaries.sort());
     });
+  });
+});
+
+describe('filterCommentariesByTopic', () => {
+  it('removes commentaries for spiritual growth topics', () => {
+    const result = filterCommentariesByTopic('Spiritual Growth', ['Rashi', 'Ibn Ezra']);
+    expect(result).toEqual([]);
+  });
+
+  it('keeps commentaries for other topics', () => {
+    const result = filterCommentariesByTopic('Halacha', ['Rashi', 'Ibn Ezra']);
+    expect(result).toEqual(['Rashi', 'Ibn Ezra']);
   });
 });

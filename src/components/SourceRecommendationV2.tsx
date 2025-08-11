@@ -25,7 +25,7 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
-import { selectCommentaries } from "@/utils/commentarySelector";
+import { selectCommentaries, filterCommentariesByTopic } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -205,7 +205,7 @@ export const SourceRecommendationV2 = ({
         setIsSaved(false);
         success("Removed from saved");
       }
-    } catch (error: any) {
+      } catch (error: unknown) {
       console.error('Error toggling save:', error);
     } finally {
       setIsTogglingSave(false);
@@ -306,7 +306,7 @@ export const SourceRecommendationV2 = ({
   const title = sanitizeTitle(language === 'he' ? webhookSource.title_he : webhookSource.title);
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
-  const normalizeCommentaries = (input: any): string[] => {
+  const normalizeCommentaries = (input: unknown): string[] => {
     if (!input) return [];
     if (Array.isArray(input)) {
       return input
@@ -353,16 +353,20 @@ export const SourceRecommendationV2 = ({
     return [];
   };
 
-  const fromField = normalizeCommentaries((webhookSource as any).commentaries);
+  const fromField = normalizeCommentaries(webhookSource.commentaries);
   const fromExcerpt = extractFromExcerpt(webhookSource.excerpt);
-  const displayedCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).length > 0
-    ? (fromField.length > 0 ? fromField : fromExcerpt).slice(0, 2)
+  const baseCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).length > 0
+    ? fromField.length > 0 ? fromField : fromExcerpt
     : selectCommentaries({
         topicSelected,
         sourceTitle: webhookSource.title,
         sourceRange: webhookSource.source_range,
         excerpt: webhookSource.excerpt || ''
-      }).slice(0, 2);
+      });
+  const displayedCommentaries = filterCommentariesByTopic(
+    topicSelected,
+    baseCommentaries
+  ).slice(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">

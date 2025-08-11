@@ -15,6 +15,15 @@ export interface CommentaryConfig {
   excerpt: string;
 }
 
+/**
+ * Determines if the given topic relates to spiritual growth
+ *
+ * Used to suppress commentary suggestions for spiritual-oriented content
+ */
+export function isSpiritualTopic(topic: string): boolean {
+  return (topic || '').toLowerCase().includes('spiritual');
+}
+
 // Commentary mappings for each source type
 const COMMENTARY_MAPPINGS = {
   tanach: ['Rashi', 'Ibn Ezra', 'Ramban', 'Radak', 'Sforno'],
@@ -91,6 +100,19 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
  * Selects 2 appropriate commentaries based on the topic selected
  */
 export function selectCommentaries(config: CommentaryConfig): string[] {
+
+  // Do not provide commentaries for Spiritual Growth topics
+  if (isSpiritualTopic(config.topicSelected)) {
+    return [];
+  }
+
+  // Only provide commentaries when the source type can be identified
+  const sourceType = identifySourceType(config);
+  if (!sourceType) {
+    return [];
+  }
+
+=======
   const normalizedTopic = (config.topicSelected || '').toLowerCase();
 
   // Do not provide commentaries for Spiritual Growth topics
@@ -104,6 +126,7 @@ export function selectCommentaries(config: CommentaryConfig): string[] {
     return [];
   }
 
+
   return COMMENTARY_MAPPINGS[sourceType].slice(0, 2);
 }
 
@@ -112,6 +135,15 @@ export function selectCommentaries(config: CommentaryConfig): string[] {
  */
 export function shouldProvideCommentaries(config: CommentaryConfig): boolean {
   return selectCommentaries(config).length > 0;
+}
+
+/**
+ * Filter an existing list of commentaries based on topic
+ *
+ * Ensures topics related to spiritual growth do not display commentaries
+ */
+export function filterCommentariesByTopic(topic: string, commentaries: string[]): string[] {
+  return isSpiritualTopic(topic) ? [] : commentaries;
 }
 
 /**
