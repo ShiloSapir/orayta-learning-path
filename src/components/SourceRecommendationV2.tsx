@@ -306,12 +306,57 @@ export const SourceRecommendationV2 = ({
   const title = sanitizeTitle(language === 'he' ? webhookSource.title_he : webhookSource.title);
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
-  const rawCommentaries = webhookSource.commentaries || [];
-  const cleanedCommentaries = rawCommentaries
-    .map(c => (c || '').replace(/[*_`~]/g, '').trim())
-    .filter(c => c && c.length > 2);
-  const displayedCommentaries = cleanedCommentaries.length > 0
-    ? cleanedCommentaries
+  const normalizeCommentaries = (input: any): string[] => {
+    if (!input) return [];
+    if (Array.isArray(input)) {
+      return input
+        .map((c) => {
+          if (typeof c === 'string') return c;
+          if (c && typeof c === 'object') {
+            return (c.title || c.name || '').toString();
+          }
+          return '';
+        })
+        .map((c) => c.replace(/[*_`~]/g, '').trim())
+        .filter((c) => c && c.length > 2);
+    }
+    if (typeof input === 'string') {
+      return input
+        .split(/\n|,|\d+\./g)
+        .map((c) => c.replace(/[*_`~]/g, '').trim())
+        .filter((c) => c && c.length > 2);
+    }
+    return [];
+  };
+
+  const extractFromExcerpt = (raw?: string): string[] => {
+    if (!raw) return [];
+    // Prefer bolded items like **Kessef Mishneh**
+    const boldMatches = Array.from(raw.matchAll(/\*\*([^*]+)\*\*/g))
+      .map((m) => m[1])
+      .filter((s) => !/recommended\s+commentaries/i.test(s))
+      .map((s) => s.split(':')[0].trim());
+    if (boldMatches.length >= 2) return boldMatches;
+
+    // Fallback: parse lines after the "Recommended Commentaries" header
+    const sectionMatch = raw.match(/recommended\s+commentaries[\s\S]*$/i);
+    if (sectionMatch) {
+      const items = sectionMatch[0]
+        .split(/\n|\r|\d+\.|•|- /g)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => s.replace(/\*\*|__|[*_`~]/g, ''))
+        .map((s) => s.split(':')[0].trim())
+        .filter((s) => s && s.length > 2 && s.length < 60);
+      if (items.length >= 2) return items;
+    }
+    return [];
+  };
+
+  const fromField = normalizeCommentaries((webhookSource as any).commentaries);
+  const fromExcerpt = extractFromExcerpt(webhookSource.excerpt);
+  const displayedCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).length > 0
+    ? (fromField.length > 0 ? fromField : fromExcerpt).slice(0, 2)
     : selectCommentaries({
         topicSelected,
         sourceTitle: webhookSource.title,
