@@ -436,13 +436,15 @@ export const SourceRecommendationV2 = ({
                 
                 {webhookSource.sefaria_link && (
                   <Button
+                    asChild
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(webhookSource.sefaria_link, '_blank')}
                     className="w-full touch-button"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                    <a href={webhookSource.sefaria_link} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2 inline" />
+                      <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                    </a>
                   </Button>
                 )}
               </div>

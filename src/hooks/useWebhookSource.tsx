@@ -93,8 +93,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const commentarySectionRegexes = [
       /\*\*\s*(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*\*\*|\n\s*(?:[*•\-]\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
       /(?:^|\n)\s*(?:[*•\-]\s*)?(?:Recommended\s+)?Commentaries(?:\s*\([^)]*\))?\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English|שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית)\b|$)/i,
-      /\*\*\s*(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
-      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
+      /\*\*\s*(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*\*\*\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i,
+      /(?:^|\n)\s*(?:[*•\-]\s*)?(?:(?:שני|שתי|שתיים|2)\s+)?(?:פירושים מומלצים|מפרשים מומלצים|פרשנים מומלצים)\s*[:：\-–—]?\s*([\s\S]*?)(?=\n\s*(?:\*\*\s*)?(?:שאלה(?:ות)? ל?(?:הרהור|דיון)|הרהור|זמן משוער|ספאריה|קישור(?: עובד)?|טווח מקור|כותרת|עברית|אנגלית|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Source Range|Title|Hebrew|English)\b|$)/i
     ];
     let commentariesText = '';
     for (const r of commentarySectionRegexes) {
@@ -145,7 +145,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
     const englishTitleRaw = titleEngMatch?.[1] || titleEngHeMatch?.[1];
     const hebrewTitleRaw = titleHebLabelMatch?.[1] || titleHebHeMatch?.[1];
-    const title = (englishTitleRaw || hebrewTitleRaw || 'Torah Source').replace(/\*/g, '').trim();
 
     let sourceRange = (preferredLang === 'he'
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
@@ -173,6 +172,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
         finalRange = ref;
       }
     }
+    // Compute title with fallback to finalRange when explicit title missing (handles Hebrew)
+    const baseTitle = (englishTitleRaw || hebrewTitleRaw || '').replace(/\*/g, '').trim();
+    const title = baseTitle || finalRange || (preferredLang === 'he' ? 'מקור תורני' : 'Torah Source');
+    const titleHe = (hebrewTitleRaw || '').replace(/\*/g, '').trim() || finalRange || 'מקור תורני';
 
     const rawExcerptHe = excerptHebMatch?.[1]?.trim();
     const rawExcerptEn = excerptEngMatch?.[1]?.trim();
@@ -238,7 +241,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
     return {
       title,
-      title_he: (hebrewTitleRaw || 'מקור תורני').replace(/\*/g, '').trim(),
+      title_he: titleHe,
       source_range: finalRange,
       excerpt,
       commentaries: finalCommentaries,
