@@ -46,4 +46,22 @@ English: Sample Title
     const parsed = parseWebhookResponse(sampleResponse, 'en');
     expect(parsed.source_range).toBe('Genesis 1:1 to Genesis 1:2');
   });
+
+  it('parses suggested source and range lines', () => {
+    const { parseWebhookResponse } = useWebhookSource(5, 'topic', 'en');
+
+    const sampleResponse = `
+Suggested Source: Pirkei Avot 1:1
+Suggested Range: Pirkei Avot 1:1-2
+
+**Brief Excerpt**: Example...
+**Reflection Prompt**: Think about it
+**Estimated Time**: 5
+**Sefaria**: https://www.sefaria.org/Pirkei_Avot.1.1-2
+`;
+
+    const parsed = parseWebhookResponse(sampleResponse, 'en');
+    expect(parsed.title).toBe('Pirkei Avot 1:1');
+    expect(parsed.source_range).toBe('Pirkei Avot 1:1-2');
+  });
 });

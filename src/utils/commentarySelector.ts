@@ -100,7 +100,6 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
  * Selects 2 appropriate commentaries based on the topic selected
  */
 export function selectCommentaries(config: CommentaryConfig): string[] {
-
   // Do not provide commentaries for Spiritual Growth topics
   if (isSpiritualTopic(config.topicSelected)) {
     return [];
@@ -111,21 +110,6 @@ export function selectCommentaries(config: CommentaryConfig): string[] {
   if (!sourceType) {
     return [];
   }
-
-=======
-  const normalizedTopic = (config.topicSelected || '').toLowerCase();
-
-  // Do not provide commentaries for Spiritual Growth topics
-  if (normalizedTopic.includes('spiritual')) {
-    return [];
-  }
-
-  // Only provide commentaries when the source type can be identified
-  const sourceType = identifySourceType(config);
-  if (!sourceType) {
-    return [];
-  }
-
 
   return COMMENTARY_MAPPINGS[sourceType].slice(0, 2);
 }
