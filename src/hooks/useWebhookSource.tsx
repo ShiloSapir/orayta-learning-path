@@ -163,9 +163,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
         .split('\n')
         .filter(line => !/^\s*(?:From|To|מ|עד)\s*[:：\-–—]?/i.test(line))
         .join('\n')
-        // Clean up excess whitespace but preserve line breaks for multi-line ranges
-=======
-
         .replace(/[ \t]+/g, ' ')
         .replace(/\r?\n+/g, ' ')
         .trim();
@@ -180,10 +177,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     // Only build a range from "From"/"To" lines when an explicit Source Range isn't provided
     if (!finalRange && fromPref && toPref) {
       finalRange = `${fromPref} ${preferredLang === 'he' ? 'עד' : 'to'} ${toPref}`.trim();
-=======
-    if (!finalRange && fromPref && toPref) {
-      finalRange = `${fromPref} ${preferredLang === 'he' ? 'עד' : '–'} ${toPref}`;
-
     }
 
     if (finalRange) {
