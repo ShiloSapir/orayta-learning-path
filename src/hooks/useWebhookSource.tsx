@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { useState, useEffect, useCallback } from 'react';
 import { selectCommentaries, shouldProvideCommentaries } from '@/utils/commentarySelector';
 
@@ -37,10 +38,10 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:מקור הלימוד|טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:ציטוט קצר|קטע קצר|תמצית|ציטוט|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית|Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English)\b|$)/i);
 
     // Optional explicit From/To lines (English + Hebrew)
-    const fromEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*From\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
-    const toEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*To\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
-    const fromHeb = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*מ\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
-    const toHeb = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*עד\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
+    const fromEng = responseText.match(/(?:^|\n)\s*(?:[*•\-]+\s*)?(?:\*\*)?\s*From\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
+    const toEng = responseText.match(/(?:^|\n)\s*(?:[*•\-]+\s*)?(?:\*\*)?\s*To\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
+    const fromHeb = responseText.match(/(?:^|\n)\s*(?:[*•\-]+\s*)?(?:\*\*)?\s*מ\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
+    const toHeb = responseText.match(/(?:^|\n)\s*(?:[*•\-]+\s*)?(?:\*\*)?\s*עד\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
 
     // Excerpt (support bold and plain, flexible boundary to next heading)
     const excerptEngMatch = (
@@ -129,7 +130,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
     const sanitizeField = (raw: string) => {
       if (!raw) return '';
-      let s = raw
+      const s = raw
         // Strip Markdown links but keep the link text
         .replace(/\[([^\]]+)\]\((?:https?:\/\/)[^)]+\)/g, '$1')
         // Remove any bare URLs
@@ -161,7 +162,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
 
         // Remove any explicit From/To lines accidentally captured in the range block
         .split('\n')
-        .filter(line => !/^\s*(?:From|To|מ|עד)\s*[:：\-–—]?/i.test(line))
+        .filter(line => !/^\s*(?:[*•\-]+\s*)?(?:From|To|מ|עד)\s*[:：\-–—]?/i.test(line))
         .join('\n')
         .replace(/[ \t]+/g, ' ')
         .replace(/\r?\n+/g, ' ')
@@ -259,7 +260,7 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       estimated_time: timeStr ? parseInt(timeStr) : timeSelected,
       sefaria_link: extractedLink,
     };
-  }, [timeSelected, topicSelected, language]);
+  }, [timeSelected, topicSelected]);
 
   const fetchWebhookSource = useCallback(async () => {
     setLoading(true);

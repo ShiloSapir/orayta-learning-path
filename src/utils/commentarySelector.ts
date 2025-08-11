@@ -92,28 +92,19 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
  */
 export function selectCommentaries(config: CommentaryConfig): string[] {
   const normalizedTopic = (config.topicSelected || '').toLowerCase();
-  
-  // First, try to identify the source type from the content itself
-  const sourceType = identifySourceType(config);
-  
-  // Get commentaries based on detected source type, with topic-based fallbacks
-  let availableCommentaries: readonly string[] = [];
 
-  if (sourceType && COMMENTARY_MAPPINGS[sourceType]) {
-    availableCommentaries = COMMENTARY_MAPPINGS[sourceType];
-  } else {
-    // Fallback based on topic if source type can't be identified
-    if (normalizedTopic.includes('talmud')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.talmud;
-    } else if (normalizedTopic.includes('halacha')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.shulchan_aruch;
-    } else if (normalizedTopic.includes('tanach') || normalizedTopic.includes('tanakh')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.tanach;
-    }
+  // Do not provide commentaries for Spiritual Growth topics
+  if (normalizedTopic.includes('spiritual')) {
+    return [];
   }
-  
-  // Return first 2 commentaries for consistency
-  return availableCommentaries.slice(0, 2);
+
+  // Only provide commentaries when the source type can be identified
+  const sourceType = identifySourceType(config);
+  if (!sourceType) {
+    return [];
+  }
+
+  return COMMENTARY_MAPPINGS[sourceType].slice(0, 2);
 }
 
 /**
