@@ -3,6 +3,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 import { AdminSourceGenerator } from "@/components/AdminSourceGenerator";
 import { AdminTestRunner } from "@/components/AdminTestRunner";
 import { AdminStatsDashboard } from "@/components/AdminStatsDashboard";
+import { AdminAnalyticsDashboard } from "@/components/AdminAnalyticsDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Accordion,
@@ -273,29 +274,7 @@ const AdminDashboard = () => {
           <AccordionItem value="analytics">
             <AccordionTrigger>Analytics Dashboard</AccordionTrigger>
             <AccordionContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card className="p-4">
-                  <h3 className="font-semibold">Active Users</h3>
-                  <p className="text-3xl">123</p>
-                  <p className="text-sm text-muted-foreground">
-                    Daily active users
-                  </p>
-                </Card>
-                <Card className="p-4">
-                  <h3 className="font-semibold">Avg. Session Duration</h3>
-                  <p className="text-3xl">15m</p>
-                  <p className="text-sm text-muted-foreground">
-                    Last 7 days
-                  </p>
-                </Card>
-                <Card className="p-4 md:col-span-2">
-                  <h3 className="font-semibold mb-2">Export Analytics</h3>
-                  <div className="flex gap-2">
-                    <Button variant="outline">CSV</Button>
-                    <Button variant="outline">JSON</Button>
-                  </div>
-                </Card>
-              </div>
+              <AdminAnalyticsDashboard />
             </AccordionContent>
           </AccordionItem>
 
