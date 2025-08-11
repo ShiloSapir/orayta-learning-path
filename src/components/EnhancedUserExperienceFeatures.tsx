@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAppToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Bell, 
   BookmarkPlus, 
@@ -172,7 +172,7 @@ const content = {
 
 export function EnhancedUserExperienceFeatures({ language }: EnhancedUserExperienceFeaturesProps) {
   const { user } = useAuth();
-  const { success, error } = useAppToast();
+  const { success, error } = useToast();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [bookmarks, setBookmarks] = useState<BookmarkedSource[]>([]);
