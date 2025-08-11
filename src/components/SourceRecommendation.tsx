@@ -7,6 +7,7 @@ import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useAccessibilityAnnouncements } from "@/hooks/useAccessibility";
 import { useMinimumLoading } from "@/hooks/useMinimumLoading";
 import { SocialSharing } from "./SocialSharing";
+import { selectCommentaries } from "@/utils/commentarySelector";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -603,6 +604,12 @@ const sourcesByTopic: Record<string, Record<Language, SourceEntry[]>> = {
   }
 };
 
+const formatTopicName = (topic: string): string =>
+  topic
+    .replace(/[._-]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+
 const getSourceForTopic = (
   topic: string,
   language: Language
@@ -636,6 +643,7 @@ const [isLoading, setIsLoading] = useState(false);
   
   const t = content[language];
   const isHebrew = language === 'he';
+  const displayTopic = formatTopicName(topicSelected);
   const toast = useAppToast();
   const { announce } = useAccessibilityAnnouncements();
 
@@ -761,12 +769,24 @@ const [isLoading, setIsLoading] = useState(false);
 
   const source = currentSource!;
 
+  const baseCommentaries = source.commentaries || [];
+  let displayedCommentaries = baseCommentaries.slice(0, 2);
+  if (displayedCommentaries.length < 2) {
+    const additional = selectCommentaries({
+      topicSelected,
+      sourceTitle: source.title,
+      sourceRange: `${source.startRef} ${source.endRef}`,
+      excerpt: source.text
+    }).filter((c) => !displayedCommentaries.includes(c));
+    displayedCommentaries = [...displayedCommentaries, ...additional].slice(0, 2);
+  }
+
   return (
     <div 
       className={`min-h-screen bg-gradient-subtle p-4 pb-20 ${isHebrew ? 'hebrew' : ''}`}
       id="main-content"
       role="main"
-      aria-label={`Source recommendation for ${topicSelected}`}
+      aria-label={`Source recommendation for ${displayTopic}`}
     >
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         {/* Header */}
@@ -782,7 +802,7 @@ const [isLoading, setIsLoading] = useState(false);
           <div className="text-center">
             <BookOpen className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-sm text-muted-foreground">
-              {timeSelected} min • {topicSelected}
+              {timeSelected} min • {displayTopic}
             </div>
           </div>
             <Button
@@ -838,21 +858,23 @@ const [isLoading, setIsLoading] = useState(false);
             </div>
 
             {/* Commentaries */}
-            <div>
-              <h3 className="font-semibold text-foreground mb-3">
-                {t.commentariesLabel}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {source.commentaries.map((commentary, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                  >
-                    {commentary}
-                  </span>
-                ))}
+            {displayedCommentaries.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-foreground mb-3">
+                  {t.commentariesLabel}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {displayedCommentaries.map((commentary, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
+                    >
+                      {commentary}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Reflection Prompt */}
             <div className="bg-accent/20 rounded-lg p-4 border border-accent/30">
