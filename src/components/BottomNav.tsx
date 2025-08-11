@@ -95,7 +95,11 @@ export const BottomNav = ({
                 variant="ghost"
                 size="icon"
                 aria-label="Admin"
-                onClick={onAdmin}
+                onClick={() => {
+                  console.log('Admin button clicked in BottomNav');
+                  console.log('onAdmin function:', typeof onAdmin);
+                  onAdmin();
+                }}
                 className="h-14 w-16 flex flex-col gap-1 rounded-xl touch-button transition-all duration-200 hover:bg-muted/50"
               >
                 <Sparkles className="h-5 w-5" />

@@ -14,9 +14,14 @@ export const AdminRoute = ({ children }: AdminRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('AdminRoute - useEffect triggered');
+    console.log('Loading:', loading, 'User:', !!user, 'ProfileLoading:', profileLoading, 'Profile role:', profile?.role);
+    
     if (!loading && !user) {
+      console.log('AdminRoute - No user, redirecting to /auth');
       navigate("/auth");
     } else if (!profileLoading && profile?.role !== "admin") {
+      console.log('AdminRoute - User is not admin, redirecting to /');
       navigate("/");
     }
   }, [user, loading, profile, profileLoading, navigate]);

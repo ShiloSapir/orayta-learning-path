@@ -86,7 +86,12 @@ export const OrayataApp = () => {
   };
 
   const handleAdmin = () => {
+    console.log('Admin button clicked in OrayataApp');
+    console.log('Profile role:', profile?.role);
+    console.log('User:', user);
+    console.log('Navigate function:', typeof navigate);
     navigate('/admin');
+    console.log('Navigate called');
   };
 
   const handleSaveReflection = () => {
