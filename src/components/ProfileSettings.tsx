@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileSettingsProps {
   language: Language;
@@ -50,6 +51,7 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
   const { user, signOut } = useAuth();
   const { profile, loading, updateProfile } = useUserProfile(user);
   const [isUpdating, setIsUpdating] = useState(false);
+  const navigate = useNavigate();
   const t = content[language];
 
   const handleUpdateName = async (newName: string) => {
@@ -145,7 +147,7 @@ export const ProfileSettings = ({ language, onLanguageChange, onBack }: ProfileS
           <Card>
             <CardContent className="pt-6">
               <Button
-                onClick={() => window.location.assign('/admin')}
+                onClick={() => navigate('/admin')}
                 className="w-full"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
