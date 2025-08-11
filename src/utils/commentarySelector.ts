@@ -84,34 +84,25 @@ function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_M
 export function selectCommentaries(config: CommentaryConfig): string[] {
   const normalizedTopic = config.topicSelected.toLowerCase();
   
-  // Rule 1: Only provide commentaries for Talmud, Halacha, or Tanach topics
-  const allowedTopics = ['talmud', 'halacha', 'tanach', 'tanakh'];
-  const shouldShowCommentaries = allowedTopics.some(topic => normalizedTopic.includes(topic));
+  // Suppress only for spiritual growth topics
+  const isSuppressed = /spiritual/.test(normalizedTopic);
+  if (isSuppressed) return [];
   
-  if (!shouldShowCommentaries) {
-    return [];
-  }
-  
-  // Rule 2: Identify source type to get appropriate commentaries
+  // Identify source type to get appropriate commentaries
   const sourceType = identifySourceType(config);
   
-  // Rule 3: Get commentaries based on source type, with fallbacks
+  // Get commentaries based on source type, with sensible fallbacks
   let availableCommentaries: readonly string[] = [];
-  
   if (sourceType && COMMENTARY_MAPPINGS[sourceType]) {
     availableCommentaries = COMMENTARY_MAPPINGS[sourceType];
   } else {
-    // Fallback based on topic if source type can't be identified
-    if (normalizedTopic.includes('talmud')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.talmud;
-    } else if (normalizedTopic.includes('halacha')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.shulchan_aruch;
-    } else if (normalizedTopic.includes('tanach') || normalizedTopic.includes('tanakh')) {
-      availableCommentaries = COMMENTARY_MAPPINGS.tanach;
-    }
+    const t = normalizedTopic;
+    if (t.includes('talmud')) availableCommentaries = COMMENTARY_MAPPINGS.talmud;
+    else if (t.includes('halacha')) availableCommentaries = COMMENTARY_MAPPINGS.shulchan_aruch;
+    else if (t.includes('tanach') || t.includes('tanakh')) availableCommentaries = COMMENTARY_MAPPINGS.tanach;
+    else if (t.includes('rambam') || t.includes('mishneh')) availableCommentaries = COMMENTARY_MAPPINGS.rambam;
   }
   
-  // Return first 2 commentaries for consistency
   return availableCommentaries.slice(0, 2);
 }
 

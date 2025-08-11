@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useAppToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { selectCommentaries } from "@/utils/commentarySelector";
 import { WebhookSource } from "@/hooks/useWebhookSource";

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 
-=======
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -81,7 +80,7 @@ export const SourceRecommendationV2 = ({
   onReflection
 }: SourceRecommendationProps) => {
 
-=======
+
   const { user } = useAuth();
   const { success } = useToast();
   const { showBlessing } = useBlessingToast();
