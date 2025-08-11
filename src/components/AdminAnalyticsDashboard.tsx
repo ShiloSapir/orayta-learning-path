@@ -28,6 +28,24 @@ interface AnalyticsData {
   deviceSplit: { ios: number; android: number; web: number };
 }
 
+const EMPTY_ANALYTICS: AnalyticsData = {
+  dailyActiveUsers: 0,
+  weeklyActiveUsers: 0,
+  monthlyActiveUsers: 0,
+  newSignUps: { daily: 0, total: 0 },
+  sessionCounts: { started: 0, completed: 0 },
+  topicBreakdown: [],
+  timeBucketUsage: [],
+  ctirToSefaria: 0,
+  retentionRates: { day1: 0, day7: 0, day30: 0 },
+  topRecommendedSources: [],
+  completionRates: 0,
+  avgResponseTime: 0,
+  errorRate: 0,
+  latencyStats: { p50: 0, p95: 0 },
+  deviceSplit: { ios: 0, android: 0, web: 0 },
+};
+
 interface TestResult {
   passed: boolean;
   responseTime: number;
@@ -58,7 +76,19 @@ export const AdminAnalyticsDashboard = () => {
       });
 
       if (error) throw error;
-      setAnalytics(data);
+      const mergedAnalytics: AnalyticsData = {
+        ...EMPTY_ANALYTICS,
+        ...(data || {}),
+        newSignUps: { ...EMPTY_ANALYTICS.newSignUps, ...(data?.newSignUps || {}) },
+        sessionCounts: { ...EMPTY_ANALYTICS.sessionCounts, ...(data?.sessionCounts || {}) },
+        topicBreakdown: data?.topicBreakdown ?? EMPTY_ANALYTICS.topicBreakdown,
+        timeBucketUsage: data?.timeBucketUsage ?? EMPTY_ANALYTICS.timeBucketUsage,
+        retentionRates: { ...EMPTY_ANALYTICS.retentionRates, ...(data?.retentionRates || {}) },
+        topRecommendedSources: data?.topRecommendedSources ?? EMPTY_ANALYTICS.topRecommendedSources,
+        latencyStats: { ...EMPTY_ANALYTICS.latencyStats, ...(data?.latencyStats || {}) },
+        deviceSplit: { ...EMPTY_ANALYTICS.deviceSplit, ...(data?.deviceSplit || {}) },
+      };
+      setAnalytics(mergedAnalytics);
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
       toast({
