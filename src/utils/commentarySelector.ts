@@ -68,7 +68,16 @@ const SOURCE_TYPE_IDENTIFIERS = {
 function identifySourceType(config: CommentaryConfig): keyof typeof COMMENTARY_MAPPINGS | null {
   const searchText = `${config.sourceTitle} ${config.sourceRange} ${config.excerpt}`.toLowerCase();
   
-  // Check each source type for matching identifiers
+  // Prioritize more specific types first to avoid generic matches like "torah"
+  const priorityOrder: (keyof typeof SOURCE_TYPE_IDENTIFIERS)[] = ['rambam', 'shulchan_aruch', 'talmud', 'tanach'];
+  for (const sourceType of priorityOrder) {
+    const identifiers = SOURCE_TYPE_IDENTIFIERS[sourceType];
+    if (identifiers.some(identifier => searchText.includes(identifier.toLowerCase()))) {
+      return sourceType as keyof typeof COMMENTARY_MAPPINGS;
+    }
+  }
+
+  // Fallback generic scan
   for (const [sourceType, identifiers] of Object.entries(SOURCE_TYPE_IDENTIFIERS)) {
     if (identifiers.some(identifier => searchText.includes(identifier.toLowerCase()))) {
       return sourceType as keyof typeof COMMENTARY_MAPPINGS;

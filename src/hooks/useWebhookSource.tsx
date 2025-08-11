@@ -28,11 +28,17 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleEngHeMatch = responseText.match(/(?:^|\n)\s*אנגלית\s*:\s*(.+?)(?:\n|$)/);
     const titleHebHeMatch = responseText.match(/(?:^|\n)\s*עברית\s*:\s*(.+?)(?:\n|$)/);
 
-    // Source range (support bold and plain, English + Hebrew)
+    // Source range (support bold and plain, English + Hebrew) and explicit From/To pairs
     const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
     const rangeHebMatch = responseText.match(/\*\*\s*(?:טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i)
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?(?:טווח מקור|מראה מקום)\s*[:：\-–—]?\s*(?:\r?\n\s*)?(.+?)(?:\n|$)/i);
+
+    // Optional explicit From/To lines (English + Hebrew)
+    const fromEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*From\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
+    const toEng = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*To\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i)?.[1]?.trim();
+    const fromHeb = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*מ\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
+    const toHeb = responseText.match(/(?:^|\n)\s*(?:\*\*)?\s*עד\s*(?:\*\*)?\s*[:：\-–—]?\s*(.+?)(?:\n|$)/)?.[1]?.trim();
 
     // Excerpt (support bold and plain, flexible boundary to next heading)
     const excerptEngMatch = (
@@ -97,6 +103,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     }
     const commentaries = (commentariesText || '')
       .replace(/\r/g, '\n')
+      // Ensure numbered items split into separate lines: 1., 2., etc.
+      .replace(/(\d+\.)\s+/g, '\n$1 ')
       .replace(/\*+/g, '')
       .replace(/_+/g, '')
       .replace(/`+/g, '')
@@ -143,20 +151,26 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
       : (rangeEngMatch?.[1] || rangeHebMatch?.[1]))?.trim() || '';
 
-    // Fallback: derive range from Sefaria link if missing
+    // Prefer explicit From/To if provided by webhook
+    const fromPref = preferredLang === 'he' ? (fromHeb || fromEng) : (fromEng || fromHeb);
+    const toPref = preferredLang === 'he' ? (toHeb || toEng) : (toEng || toHeb);
+
     let finalRange = sourceRange;
+    if (fromPref && toPref) {
+      finalRange = `${fromPref} ${preferredLang === 'he' ? 'עד' : 'to'} ${toPref}`.trim();
+    }
+
+    // Fallback: derive range from Sefaria link if still missing
     if (!finalRange && extractedLink) {
       const m = extractedLink.match(/sefaria\.org\/([^?\#]+)/);
       if (m?.[1]) {
         let ref = decodeURIComponent(m[1])
           .replace(/^texts\//i, '')
-          .replace(/_/g, '.')
+          .replace(/_/g, ' ')
           .trim();
         // Only main ref segment
         ref = ref.split(/[?\#]/)[0];
-        // Convert Book.Chapter.Verses -> Book Chapter:Verses
-        const once = ref.replace(/\./, ' ');
-        finalRange = once.replace(/\./, ':');
+        finalRange = ref;
       }
     }
 
