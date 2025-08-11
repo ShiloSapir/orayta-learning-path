@@ -28,10 +28,16 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const titleHebLabelMatch = responseText.match(/(?:^|\n)\s*Hebrew:\s*(.+?)(?:\n|$)/);
     const titleEngHeMatch = responseText.match(/(?:^|\n)\s*אנגלית\s*:\s*(.+?)(?:\n|$)/);
     const titleHebHeMatch = responseText.match(/(?:^|\n)\s*עברית\s*:\s*(.+?)(?:\n|$)/);
+    // Sometimes the webhook provides a single "Suggested Source" line
+    const suggestedSourceMatch = responseText.match(
+      /(?:^|\n)\s*(?:Suggested\s+Source|Source|Title)\s*[:：\-–—]?\s*(.+?)(?:\n|$)/i
+    );
 
     // Source range - improved to capture multi-line ranges completely
     const rangeEngMatch = responseText.match(/\*\*\s*Source Range\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=\n\s*\*\*|(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English|ציטוט|תמצית|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית)\b|$)/i)
-      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English|ציטוט|תמצית|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית)\b|$)/i);
+      || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?Source Range\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English|ציטוט|תמצית|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית)\b|$)/i)
+      // Support newer "Suggested Range" or "Range" labels
+      || responseText.match(/(?:^|\n)\s*(?:Suggested\s+Range|Range)\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English|ציטוט|תמצית|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית)\b|$)/i);
     
     // Hebrew source range - improved to capture complete multi-line descriptions
     const rangeHebMatch = responseText.match(/\*\*\s*(?:מקור הלימוד|טווח מקור|מראה מקום)\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?([\s\S]*?)(?=(?:\n\s*)?(?:^|\n)\s*(?:\*\*|[*•\-]\s*)?(?:ציטוט קצר|קטע קצר|תמצית|ציטוט|שאלה|הרהור|זמן משוער|ספאריה|קישור|עברית|אנגלית|Brief\s+Excerpt|Excerpt|Summary|Key\s+Quote|Short\s+Quote|Quote|Reflection Prompt|Reflection Questions?|Estimated Time|Sefaria|Working Link|Hebrew|English)\b|$)/i)
@@ -154,8 +160,9 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
           .replace(/^texts\//i, '')
           .replace(/^library\//i, '');
         const lastSeg = path.split('/').pop() || '';
-        const [bookPart, refPart] = lastSeg.split('.');
+        const [bookPart, ...refParts] = lastSeg.split('.');
         const book = bookPart.replace(/_/g, ' ').replace(/,/g, ', ').trim();
+        const refPart = refParts.join('.');
         if (!refPart) {
           return { book, range: book };
         }
@@ -166,8 +173,12 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       }
     };
 
-    const englishTitleRaw = titleEngMatch?.[1] || titleEngHeMatch?.[1];
-    const hebrewTitleRaw = titleHebLabelMatch?.[1] || titleHebHeMatch?.[1];
+    let englishTitleRaw = titleEngMatch?.[1] || titleEngHeMatch?.[1];
+    let hebrewTitleRaw = titleHebLabelMatch?.[1] || titleHebHeMatch?.[1];
+
+    if (!englishTitleRaw && !hebrewTitleRaw && suggestedSourceMatch?.[1]) {
+      englishTitleRaw = suggestedSourceMatch[1];
+    }
 
     let sourceRange = (preferredLang === 'he'
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
@@ -210,6 +221,11 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       const derived = deriveRangeFromLink(extractedLink);
       if (!finalRange) finalRange = derived.range;
       if (!baseTitle) baseTitle = derived.book || derived.range;
+    }
+
+    // If no explicit range but title looks like a range, use it
+    if (!finalRange && baseTitle && /\d/.test(baseTitle)) {
+      finalRange = baseTitle;
     }
 
     const title = baseTitle || finalRange || (preferredLang === 'he' ? 'מקור תורני' : 'Torah Source');
