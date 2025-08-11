@@ -168,6 +168,12 @@ function toast({ ...props }: Toast) {
   }
 }
 
+interface ToastOptions {
+  title?: string
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -181,9 +187,42 @@ function useToast() {
     }
   }, [state])
 
+  const success = (message: string, options?: ToastOptions) =>
+    toast({
+      title: options?.title ?? message,
+      description: options?.description,
+      action: options?.action,
+    })
+
+  const error = (message: string, options?: ToastOptions) =>
+    toast({
+      title: options?.title ?? message,
+      description: options?.description,
+      action: options?.action,
+      variant: "destructive",
+    })
+
+  const info = (message: string, options?: ToastOptions) =>
+    toast({
+      title: options?.title ?? message,
+      description: options?.description,
+      action: options?.action,
+    })
+
+  const warning = (message: string, options?: ToastOptions) =>
+    toast({
+      title: options?.title ?? message,
+      description: options?.description,
+      action: options?.action,
+    })
+
   return {
     ...state,
     toast,
+    success,
+    error,
+    info,
+    warning,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }

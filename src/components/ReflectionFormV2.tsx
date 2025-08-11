@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Language } from "./LanguageToggle";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
-import { useAppToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, X, Save, Loader2 } from "lucide-react";
 
 interface ReflectionFormProps {
@@ -50,7 +50,7 @@ export const ReflectionFormV2 = ({
   onSave 
 }: ReflectionFormProps) => {
   const { createReflection } = useSupabaseData();
-  const { success, error } = useAppToast();
+  const { success, error } = useToast();
   const [reflection, setReflection] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
