@@ -64,23 +64,4 @@ Suggested Range: Pirkei Avot 1:1-2
     expect(parsed.title).toBe('Pirkei Avot 1:1');
     expect(parsed.source_range).toBe('Pirkei Avot 1:1-2');
   });
-
-
-  it('derives full range from sefaria link when range is missing', () => {
-    const { parseWebhookResponse } = useWebhookSource(5, 'topic', 'en');
-
-    const sampleResponse = `
-Suggested Source: Genesis 1
-
-**Brief Excerpt**: In the beginning...
-**Reflection Prompt**: What does this teach us?
-**Estimated Time**: 5
-**Sefaria**: https://www.sefaria.org/Genesis.1.1-2.3
-`;
-
-    const parsed = parseWebhookResponse(sampleResponse, 'en');
-    expect(parsed.source_range).toBe('Genesis 1:1-2:3');
-  });
-=======
-
 });

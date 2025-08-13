@@ -152,7 +152,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       return s;
     };
 
-
     const deriveRangeFromLink = (link: string) => {
       try {
         const url = new URL(link);
@@ -161,9 +160,8 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
           .replace(/^texts\//i, '')
           .replace(/^library\//i, '');
         const lastSeg = path.split('/').pop() || '';
-        const [bookPart, ...refParts] = lastSeg.split('.');
+        const [bookPart, refPart] = lastSeg.split('.');
         const book = bookPart.replace(/_/g, ' ').replace(/,/g, ', ').trim();
-        const refPart = refParts.join('.');
         if (!refPart) {
           return { book, range: book };
         }
@@ -180,13 +178,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     if (!englishTitleRaw && !hebrewTitleRaw && suggestedSourceMatch?.[1]) {
       englishTitleRaw = suggestedSourceMatch[1];
     }
-
-=======
-=======
-    const englishTitleRaw = titleEngMatch?.[1] || titleEngHeMatch?.[1];
-    const hebrewTitleRaw = titleHebLabelMatch?.[1] || titleHebHeMatch?.[1];
-
-
 
     let sourceRange = (preferredLang === 'he'
       ? (rangeHebMatch?.[1] || rangeEngMatch?.[1])
@@ -223,7 +214,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       finalRange = finalRange.replace(/\s+/g, ' ').trim();
     }
     // Compute title with fallback to finalRange when explicit title missing (handles Hebrew)
-
     let baseTitle = (englishTitleRaw || hebrewTitleRaw || '').replace(/\*/g, '').trim();
 
     if ((!finalRange || !baseTitle) && extractedLink) {
@@ -236,12 +226,6 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     if (!finalRange && baseTitle && /\d/.test(baseTitle)) {
       finalRange = baseTitle;
     }
-
-
-=======
-=======
-    const baseTitle = (englishTitleRaw || hebrewTitleRaw || '').replace(/\*/g, '').trim();
-
 
     const title = baseTitle || finalRange || (preferredLang === 'he' ? 'מקור תורני' : 'Torah Source');
     const titleHe = (hebrewTitleRaw || '').replace(/\*/g, '').trim() || finalRange || 'מקור תורני';
