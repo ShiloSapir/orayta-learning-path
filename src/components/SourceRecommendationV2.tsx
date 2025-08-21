@@ -25,7 +25,7 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
-import { selectCommentaries, filterCommentariesByTopic } from "@/utils/commentarySelector";
+import { normalizeSefariaUrl, isValidSefariaUrl } from "@/utils/sefariaLinkValidator";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -249,6 +249,24 @@ export const SourceRecommendationV2 = ({
     }
   };
 
+  const formatSourceRange = (range: string, language: Language): string => {
+    // Check if range contains "to", "-", or similar range indicators
+    const hasRange = /\s+to\s+|\s*-\s*|\s+עד\s+/.test(range);
+    
+    if (hasRange) {
+      // Extract start and end parts
+      const parts = range.split(/\s+to\s+|\s*-\s*|\s+עד\s+/i);
+      if (parts.length === 2) {
+        const [start, end] = parts.map(p => p.trim());
+        return language === 'he' 
+          ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+          : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+      }
+    }
+    
+    return range; // Return as-is if no range detected
+  };
+
   if (showLoading) {
     return (
       <SourceLoadingState
@@ -353,20 +371,10 @@ export const SourceRecommendationV2 = ({
     return [];
   };
 
+  // Only use commentaries from webhook - no fallbacks
   const fromField = normalizeCommentaries(webhookSource.commentaries);
   const fromExcerpt = extractFromExcerpt(webhookSource.excerpt);
-  const baseCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).length > 0
-    ? fromField.length > 0 ? fromField : fromExcerpt
-    : selectCommentaries({
-        topicSelected,
-        sourceTitle: webhookSource.title,
-        sourceRange: webhookSource.source_range,
-        excerpt: webhookSource.excerpt || ''
-      });
-  const displayedCommentaries = filterCommentariesByTopic(
-    topicSelected,
-    baseCommentaries
-  ).slice(0, 2);
+  const displayedCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).slice(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
@@ -394,10 +402,12 @@ export const SourceRecommendationV2 = ({
                         <div className="flex items-center gap-2 mb-1">
                           <BookOpen className="h-4 w-4 text-primary" />
                           <span className="text-sm font-medium text-primary">
-                            {language === 'he' ? 'מקור הלימוד' : 'Study Source'}
+                            {language === 'he' ? 'מקור הלימוד' : 'Torah Source'}
                           </span>
                         </div>
-                        <p className="mobile-text-sm font-medium whitespace-pre-line">{webhookSource.source_range}</p>
+                        <p className="mobile-text-sm font-medium whitespace-pre-line">
+                          {formatSourceRange(webhookSource.source_range, language)}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -453,7 +463,17 @@ export const SourceRecommendationV2 = ({
                     variant="outline"
                     size="sm"
                     className="w-full touch-button"
-                    onClick={() => window.open(webhookSource.sefaria_link, '_blank', 'noopener,noreferrer')}
+                    onClick={() => {
+                      try {
+                        const normalizedUrl = isValidSefariaUrl(webhookSource.sefaria_link) 
+                          ? normalizeSefariaUrl(webhookSource.sefaria_link)
+                          : webhookSource.sefaria_link;
+                        window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
+                      } catch (error) {
+                        console.error('Error opening Sefaria link:', error);
+                        window.open(webhookSource.sefaria_link, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
                   >
                     <ExternalLink className="h-4 w-4 mr-2 inline" />
                     <span className="mobile-text-sm">{content[language].sefariaLink}</span>
