@@ -7,8 +7,7 @@ import {
   Scale, 
   Scroll, 
   Users, 
-  Heart, 
-  Shuffle,
+  Heart,
   TrendingUp
 } from "lucide-react";
 
@@ -51,11 +50,6 @@ const content = {
         title: "Spiritual Growth",
         subtitle: "Inner Development",
         subcategories: ["Mussar", "Chassidut", "Jewish Thought"]
-      },
-      surprise: {
-        title: "Surprise Me",
-        subtitle: "Random Divine Selection",
-        subcategories: []
       }
     },
     quote: "\"Turn it and turn it again, for everything is in it.\" — Pirkei Avot 5:22"
@@ -90,11 +84,6 @@ const content = {
         title: "צמיחה רוחנית",
         subtitle: "פיתוח פנימי",
         subcategories: ["מוסר", "חסידות", "מחשבת ישראל"]
-      },
-      surprise: {
-        title: "הפתע אותי",
-        subtitle: "בחירה אלוהית אקראית",
-        subcategories: []
       }
     },
     quote: "\"הפוך בה והפוך בה, דכולא בה\" — פרקי אבות ה׳:כב"
@@ -106,8 +95,7 @@ const topicIcons = {
   rambam: Book,
   tanakh: Scroll,
   talmud: Users,
-  spiritual: Heart,
-  surprise: Shuffle
+  spiritual: Heart
 };
 
 export const TopicSelection = ({ 
