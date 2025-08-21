@@ -188,6 +188,8 @@ Downloaded from Orayata Learning App
         <a
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex items-center gap-2')}
           href={getEmailUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <Mail className="h-4 w-4" />
           Email
