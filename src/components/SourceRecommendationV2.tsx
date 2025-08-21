@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,6 +27,7 @@ import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
 import { filterCommentariesByTopic } from "@/utils/commentarySelector";
+import { cn } from "@/lib/utils";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -436,16 +437,14 @@ export const SourceRecommendationV2 = ({
                 )}
                 
                 {webhookSource.sefaria_link && isValidSefariaUrl(webhookSource.sefaria_link) && (
-                  <Button asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full touch-button"
+                  <a
+                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full touch-button inline-flex items-center justify-center')}
+                    href={normalizeSefariaUrl(webhookSource.sefaria_link)}
+                    target="_blank" rel="noopener noreferrer"
                   >
-                    <a href={normalizeSefariaUrl(webhookSource.sefaria_link)} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-2 inline" />
-                      <span className="mobile-text-sm">{content[language].sefariaLink}</span>
-                    </a>
-                  </Button>
+                    <ExternalLink className="h-4 w-4 mr-2 inline" />
+                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                  </a>
                 )}
               </div>
             </div>
@@ -494,15 +493,14 @@ export const SourceRecommendationV2 = ({
                   <span className="mobile-text-sm">{content[language].learnedButton}</span>
                 </Button>
                 
-                <Button asChild
-                  variant="outline"
-                  className="touch-button sm:col-span-2 lg:col-span-1"
+                <a
+                  className={cn(buttonVariants({ variant: 'outline' }), 'touch-button sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center')}
+                  href={getCalendarUrl()}
+                  target="_blank" rel="noopener noreferrer"
                 >
-                  <a href={getCalendarUrl()} target="_blank" rel="noopener noreferrer">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="mobile-text-sm">{content[language].calendarButton}</span>
-                  </a>
-                </Button>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                </a>
               </div>
 
               <Button

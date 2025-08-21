@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { 
   Share2, 
   Copy, 
@@ -184,39 +185,32 @@ Downloaded from Orayata Learning App
           {t.copyLink}
         </Button>
 
-        <Button asChild
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
+        <a
+          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex items-center gap-2')}
+          href={getEmailUrl()}
         >
-          <a href={getEmailUrl()}>
-            <Mail className="h-4 w-4" />
-            Email
-          </a>
-        </Button>
+          <Mail className="h-4 w-4" />
+          Email
+        </a>
 
-        <Button asChild
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
+        <a
+          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex items-center gap-2')}
+          href={getWhatsAppUrl()}
+          target="_blank" rel="noopener noreferrer"
         >
-          <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
-          </a>
-        </Button>
+          <MessageCircle className="h-4 w-4" />
+          WhatsApp
+        </a>
 
         {isValidSefariaUrl(source.sefariaLink) && (
-          <Button asChild
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
+          <a
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex items-center gap-2')}
+            href={normalizeSefariaUrl(source.sefariaLink)}
+            target="_blank" rel="noopener noreferrer"
           >
-            <a href={normalizeSefariaUrl(source.sefariaLink)} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4" />
-              Sefaria
-            </a>
-          </Button>
+            <ExternalLink className="h-4 w-4" />
+            Sefaria
+          </a>
         )}
       </div>
 
