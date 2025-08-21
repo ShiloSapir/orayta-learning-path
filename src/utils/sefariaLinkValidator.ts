@@ -11,14 +11,24 @@ export function isValidSefariaUrl(url: string): boolean {
 }
 
 /**
- * Normalizes Sefaria URLs to use the canonical .org domain
+ * Normalizes Sefaria URLs to use the canonical .org domain and fix common Rambam formatting issues
  */
 export function normalizeSefariaUrl(url: string): string {
   if (!isValidSefariaUrl(url)) {
     throw new Error('Invalid Sefaria URL');
   }
   
-  return url.replace('sefaria.org.il', 'sefaria.org');
+  let normalized = url.replace('sefaria.org.il', 'sefaria.org');
+  
+  // Fix common Rambam URL formatting issues
+  // Convert "Mishneh.Torah,.Hilchot" pattern to "Mishneh_Torah,_Hilchot"
+  if (normalized.includes('Mishneh')) {
+    normalized = normalized.replace(/Mishneh\.Torah\./g, 'Mishneh_Torah,_');
+    normalized = normalized.replace(/Mishneh\.Torah%2C\./g, 'Mishneh_Torah%2C_');
+    normalized = normalized.replace(/Mishneh\.Torah,\./g, 'Mishneh_Torah,_');
+  }
+  
+  return normalized;
 }
 
 /**
@@ -61,7 +71,28 @@ export function buildSefariaUrl(textRef: string, options: {
   with?: string[];
 } = {}): string {
   const baseUrl = 'https://www.sefaria.org';
-  const encodedRef = encodeURIComponent(textRef.replace(/\s+/g, '.'));
+  
+  // Handle Rambam/Mishneh Torah references specially
+  // Format: "Mishneh Torah, Hilchot X" should become "Mishneh_Torah%2C_Hilchot_X"
+  let processedRef = textRef;
+  
+  // Replace spaces with underscores for book names, but keep dots for chapter:verse references
+  if (textRef.includes('Mishneh Torah')) {
+    // Split on the last dot to separate book from chapter/verse
+    const lastDotIndex = textRef.lastIndexOf('.');
+    if (lastDotIndex > 0) {
+      const bookPart = textRef.substring(0, lastDotIndex);
+      const chapterPart = textRef.substring(lastDotIndex);
+      processedRef = bookPart.replace(/\s+/g, '_') + chapterPart;
+    } else {
+      processedRef = textRef.replace(/\s+/g, '_');
+    }
+  } else {
+    // For other texts, replace spaces with dots (existing behavior)
+    processedRef = textRef.replace(/\s+/g, '.');
+  }
+  
+  const encodedRef = encodeURIComponent(processedRef);
   
   const params = new URLSearchParams();
   if (options.language) params.set('lang', options.language);

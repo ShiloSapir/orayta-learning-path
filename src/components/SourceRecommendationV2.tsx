@@ -96,7 +96,44 @@ export const formatSourceRange = (
     try {
       const url = new URL(source.sefaria_link);
       const last = decodeURIComponent(url.pathname.replace(/\/$/, '').split('/').pop() || '');
-      // Match: Book.22.1-19 or Book.6.4-7.1 or Book.6-7
+      
+      // Handle Rambam/Mishneh Torah references specially
+      if (last.includes('Mishneh_Torah') || last.includes('Mishneh%20Torah')) {
+        // Pattern: Mishneh_Torah%2C_Hilchot_X.1.1-5 or Mishneh_Torah,_Hilchot_X.1.1-5
+        const rambamMatch = last.match(/^(Mishneh[_%]Torah[%2C,_]+[^.]+)\.(\d+)(?:\.(\d+))?(?:-(\d+)(?:\.(\d+))?)?$/);
+        if (rambamMatch) {
+          const book = rambamMatch[1]
+            .replace(/_/g, ' ')
+            .replace(/%2C/g, ',')
+            .replace(/,\s*/, ', ')
+            .trim();
+          const sChap = rambamMatch[2];
+          const sVerse = rambamMatch[3];
+          const eChap = rambamMatch[4];
+          const eVerse = rambamMatch[5];
+          
+          const start = sVerse ? `${book} ${sChap}:${sVerse}` : `${book} ${sChap}`;
+          let end = '';
+          
+          if (eChap && eVerse) {
+            end = `${book} ${eChap}:${eVerse}`;
+          } else if (eChap && sVerse) {
+            end = `${book} ${sChap}:${eChap}`;
+          } else if (eChap) {
+            end = `${book} ${eChap}`;
+          }
+          
+          if (end) {
+            return language === 'he'
+              ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+              : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+          } else {
+            return start;
+          }
+        }
+      }
+      
+      // Match: Book.22.1-19 or Book.6.4-7.1 or Book.6-7 (for other texts)
       const m = last.match(/^([^\.]+)\.(\d+)(?:\.(\d+))?(?:-(\d+)(?:\.(\d+))?)?$/);
       if (m) {
         const book = m[1].replace(/_/g, ' ').trim();

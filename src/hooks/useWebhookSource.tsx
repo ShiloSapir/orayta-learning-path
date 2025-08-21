@@ -183,6 +183,23 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
           .replace(/^texts\//i, '')
           .replace(/^library\//i, '');
         const lastSeg = path.split('/').pop() || '';
+        
+        // Handle Rambam/Mishneh Torah links specially
+        if (lastSeg.includes('Mishneh_Torah') || lastSeg.includes('Mishneh%20Torah')) {
+          const rambamMatch = lastSeg.match(/^(Mishneh[_%]Torah[%2C,_]+[^.]+)(?:\.(.+))?$/);
+          if (rambamMatch) {
+            const book = rambamMatch[1]
+              .replace(/_/g, ' ')
+              .replace(/%2C/g, ',')
+              .replace(/,\s*/, ', ')
+              .trim();
+            const ref = rambamMatch[2] || '';
+            const range = ref ? `${book} ${ref.replace(/\./g, ':')}` : book;
+            return { book, range };
+          }
+        }
+        
+        // Handle other texts (original logic)
         const [bookPart, refPart] = lastSeg.split('.');
         const book = bookPart.replace(/_/g, ' ').replace(/,/g, ', ').trim();
         if (!refPart) {
