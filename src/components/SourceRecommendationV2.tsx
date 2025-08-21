@@ -79,6 +79,35 @@ const content = {
   }
 };
 
+export const formatSourceRange = (
+  source: WebhookSource,
+  language: Language
+): string => {
+  // Use explicit start_ref and end_ref if available
+  if (source.start_ref && source.end_ref) {
+    return language === "he"
+      ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
+      : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
+  }
+
+  const range = source.source_range;
+  // Detect separators like "to", dashes, commas, or Hebrew "עד"
+  const separatorRegex = /\s+to\s+|\s+עד\s+|\s*[-–—,]\s*/i;
+  const hasRange = separatorRegex.test(range);
+
+  if (hasRange) {
+    const parts = range.split(separatorRegex);
+    if (parts.length >= 2) {
+      const [start, end] = parts.map((p) => p.trim());
+      return language === "he"
+        ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+        : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+    }
+  }
+
+  return range; // Return as-is if no range detected
+};
+
 export const SourceRecommendationV2 = ({ 
   language, 
   timeSelected, 
@@ -248,33 +277,6 @@ export const SourceRecommendationV2 = ({
       onReflection(currentSessionId);
     }
   };
-
-  const formatSourceRange = (source: WebhookSource, language: Language): string => {
-    // Use explicit start_ref and end_ref if available
-    if (source.start_ref && source.end_ref) {
-      return language === 'he'
-        ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
-        : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
-    }
-    
-    // Check if source_range contains "to", "-", or similar range indicators
-    const range = source.source_range;
-    const hasRange = /\s+to\s+|\s*-\s*|\s+עד\s+/.test(range);
-    
-    if (hasRange) {
-      // Extract start and end parts
-      const parts = range.split(/\s+to\s+|\s*-\s*|\s+עד\s+/i);
-      if (parts.length === 2) {
-        const [start, end] = parts.map(p => p.trim());
-        return language === 'he' 
-          ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
-          : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
-      }
-    }
-    
-    return range; // Return as-is if no range detected
-  };
-
   if (showLoading) {
     return (
       <SourceLoadingState
