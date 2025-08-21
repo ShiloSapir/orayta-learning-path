@@ -391,19 +391,22 @@ export const SourceRecommendationV2 = ({
                 <div className="mobile-flex-col items-start">
                   <div className="flex-1 space-y-3">
                     <h2 className="mobile-text-base font-semibold sm:text-xl">{title}</h2>
-                    {(webhookSource.source_range || (webhookSource.start_ref && webhookSource.end_ref)) && (
-                      <div className="bg-primary/10 rounded-lg p-3 border-l-4 border-primary">
-                        <div className="flex items-center gap-2 mb-1">
-                          <BookOpen className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium text-primary">
-                            {language === 'he' ? 'מקור הלימוד' : 'Torah Source'}
-                          </span>
-                        </div>
-                        <p className="mobile-text-sm font-medium whitespace-pre-line">
-                          {formatSourceRange(webhookSource, language)}
-                        </p>
+                    <div className="bg-primary/10 rounded-lg p-3 border-l-4 border-primary">
+                      <div className="flex items-center gap-2 mb-1">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium text-primary">
+                          {language === 'he' ? 'מקור הלימוד' : 'Torah Source'}
+                        </span>
                       </div>
-                    )}
+                      <p className="mobile-text-sm font-medium whitespace-pre-line">
+                        {webhookSource.start_ref && webhookSource.end_ref
+                          ? `${content[language].fromTo} ${webhookSource.start_ref} ${content[language].to} ${webhookSource.end_ref}`
+                          : webhookSource.source_range
+                          ? formatSourceRange(webhookSource, language)
+                          : title
+                        }
+                      </p>
+                    </div>
                   </div>
                   
                   {/* Save Toggle Button - Mobile Optimized */}
@@ -439,18 +442,6 @@ export const SourceRecommendationV2 = ({
                   </MotionWrapper>
                 )}
                 
-                {displayedCommentaries.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="mobile-text-sm font-semibold">{content[language].commentariesLabel}</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {displayedCommentaries.map((commentary, index) => (
-                        <span key={index} className="mobile-text-xs bg-primary/10 text-primary px-3 py-1 rounded-full">
-                          {commentary}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 
                 {webhookSource.sefaria_link && isValidSefariaUrl(webhookSource.sefaria_link) && (
                   <Button
@@ -471,6 +462,24 @@ export const SourceRecommendationV2 = ({
               </div>
             </div>
           </MotionWrapper>
+
+          {/* Suggested Commentaries Section */}
+          {displayedCommentaries.length > 0 && (
+            <MotionWrapper type="fadeUp" delay={0.4}>
+              <div className="content-card">
+                <h3 className="mobile-text-base font-semibold mb-3 sm:text-lg">{content[language].commentariesLabel}</h3>
+                <div className="space-y-3">
+                  {displayedCommentaries.map((commentary, index) => (
+                    <div key={index} className="bg-secondary/20 rounded-lg p-3 border-l-4 border-secondary">
+                      <span className="mobile-text-sm font-medium text-secondary-foreground">
+                        {commentary}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </MotionWrapper>
+          )}
 
           {reflectionPrompt && (
             <MotionWrapper type="fadeUp" delay={0.4}>
