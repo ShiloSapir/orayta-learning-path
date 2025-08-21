@@ -178,9 +178,7 @@ export const TopicSelection = ({
                   `}
                 >
                   {/* Header with icon - Mobile Optimized */}
-                  <div className="flex items-start justify-between mb-3">
-                    <Icon className={`h-8 w-8 sm:h-10 sm:w-10 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
-                  </div>
+                  <Icon className={`h-8 w-8 sm:h-10 sm:w-10 mb-3 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`} />
                   
                   <h3 className="font-bold text-lg sm:text-xl mb-2">{topic.title}</h3>
                   <p className={`text-sm sm:text-base mb-3 ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
