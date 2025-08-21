@@ -99,21 +99,29 @@ export function SocialSharing({ language, source }: SocialSharingProps) {
     }
   };
 
-  const handleEmailShare = () => {
+  const getEmailUrl = () => {
     const subject = t.emailSubject.replace('{title}', source.title);
+    const validLink = isValidSefariaUrl(source.sefariaLink) 
+      ? normalizeSefariaUrl(source.sefariaLink) 
+      : window.location.href;
     const body = t.emailBody
       .replace('{text}', source.text)
       .replace('{reflection}', source.reflection || '')
-      .replace('{link}', source.sefariaLink);
+      .replace('{link}', validLink);
     
     const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailto);
+    console.debug('Share mailto:', mailto);
+    return mailto;
   };
 
-  const handleWhatsAppShare = () => {
-    const text = createShareText() + '\n\n' + source.sefariaLink;
+  const getWhatsAppUrl = () => {
+    const validLink = isValidSefariaUrl(source.sefariaLink) 
+      ? normalizeSefariaUrl(source.sefariaLink) 
+      : window.location.href;
+    const text = createShareText() + '\n\n' + validLink;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(whatsappUrl, '_blank');
+    console.debug('WhatsApp URL:', whatsappUrl);
+    return whatsappUrl;
   };
 
   const handleDownload = () => {
@@ -176,40 +184,40 @@ Downloaded from Orayata Learning App
           {t.copyLink}
         </Button>
 
-        <Button
+        <Button asChild
           variant="outline"
           size="sm"
-          onClick={handleEmailShare}
           className="flex items-center gap-2"
         >
-          <Mail className="h-4 w-4" />
-          Email
+          <a href={getEmailUrl()}>
+            <Mail className="h-4 w-4" />
+            Email
+          </a>
         </Button>
 
-        <Button
+        <Button asChild
           variant="outline"
           size="sm"
-          onClick={handleWhatsAppShare}
           className="flex items-center gap-2"
         >
-          <MessageCircle className="h-4 w-4" />
-          WhatsApp
+          <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
+          </a>
         </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const url = isValidSefariaUrl(source.sefariaLink) 
-              ? normalizeSefariaUrl(source.sefariaLink)
-              : source.sefariaLink;
-            window.open(url, '_blank');
-          }}
-          className="flex items-center gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Sefaria
-        </Button>
+        {isValidSefariaUrl(source.sefariaLink) && (
+          <Button asChild
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <a href={normalizeSefariaUrl(source.sefariaLink)} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4" />
+              Sefaria
+            </a>
+          </Button>
+        )}
       </div>
 
       {isExpanded && (

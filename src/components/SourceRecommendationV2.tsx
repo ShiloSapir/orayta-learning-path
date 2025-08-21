@@ -20,6 +20,7 @@ import {
   BookmarkPlus,
   BookmarkCheck
 } from "lucide-react";
+import { isValidSefariaUrl, normalizeSefariaUrl } from "@/utils/sefariaLinkValidator";
 import { supabase } from "@/integrations/supabase/client";
 import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
@@ -230,17 +231,16 @@ export const SourceRecommendationV2 = ({
     success(content[language].learnedButton);
   };
 
-  const handleCalendar = () => {
-    if (!webhookSource) return;
+  const getCalendarUrl = () => {
+    if (!webhookSource) return '';
     
     const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
     const startDate = new Date();
     const endDate = new Date(startDate.getTime() + timeSelected * 60000);
     
     const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Study: ${title}`)}`;
-    
-    window.open(calendarUrl, '_blank');
-    success(content[language].calendarButton);
+    console.debug('Calendar URL:', calendarUrl);
+    return calendarUrl;
   };
 
   const handleReflection = () => {
@@ -421,15 +421,16 @@ export const SourceRecommendationV2 = ({
                   </div>
                 )}
                 
-                {webhookSource.sefaria_link && (
-                  <Button
+                {webhookSource.sefaria_link && isValidSefariaUrl(webhookSource.sefaria_link) && (
+                  <Button asChild
                     variant="outline"
                     size="sm"
                     className="w-full touch-button"
-                    onClick={() => window.open(webhookSource.sefaria_link, '_blank', 'noopener,noreferrer')}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2 inline" />
-                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                    <a href={normalizeSefariaUrl(webhookSource.sefaria_link)} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2 inline" />
+                      <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                    </a>
                   </Button>
                 )}
               </div>
@@ -479,13 +480,14 @@ export const SourceRecommendationV2 = ({
                   <span className="mobile-text-sm">{content[language].learnedButton}</span>
                 </Button>
                 
-                <Button
-                  onClick={handleCalendar}
+                <Button asChild
                   variant="outline"
                   className="touch-button sm:col-span-2 lg:col-span-1"
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                  <a href={getCalendarUrl()} target="_blank" rel="noopener noreferrer">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                  </a>
                 </Button>
               </div>
 
