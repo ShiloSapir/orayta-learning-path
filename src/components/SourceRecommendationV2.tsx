@@ -84,29 +84,65 @@ export const formatSourceRange = (
   source: WebhookSource,
   language: Language
 ): string => {
-  // Use explicit start_ref and end_ref if available
+  // Prefer explicit start/end from webhook
   if (source.start_ref && source.end_ref) {
-    return language === "he"
+    return language === 'he'
       ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
       : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
   }
 
-  const range = source.source_range;
-  // Detect separators like "to", dashes, commas, or Hebrew "עד"
-  const separatorRegex = /\s+to\s+|\s+עד\s+|\s*[-–—,]\s*/i;
-  const hasRange = separatorRegex.test(range);
-
-  if (hasRange) {
-    const parts = range.split(separatorRegex);
-    if (parts.length >= 2) {
-      const [start, end] = parts.map((p) => p.trim());
-      return language === "he"
-        ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
-        : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
-    }
+  // Try to derive from sefaria_link if present
+  if (source.sefaria_link) {
+    try {
+      const url = new URL(source.sefaria_link);
+      const last = decodeURIComponent(url.pathname.replace(/\/$/, '').split('/').pop() || '');
+      // Match: Book.22.1-19 or Book.6.4-7.1 or Book.6-7
+      const m = last.match(/^([^\.]+)\.(\d+)(?:\.(\d+))?(?:-(\d+)(?:\.(\d+))?)?$/);
+      if (m) {
+        const book = m[1].replace(/_/g, ' ').trim();
+        const sChap = m[2];
+        const sVerse = m[3];
+        const ePart1 = m[4];
+        const ePart2 = m[5];
+        const start = sVerse ? `${book} ${sChap}:${sVerse}` : `${book} ${sChap}`;
+        let end = '';
+        if (ePart1 && ePart2) {
+          end = `${book} ${ePart1}:${ePart2}`; // crosses chapter
+        } else if (ePart1 && sVerse) {
+          end = `${book} ${sChap}:${ePart1}`; // same chapter, verse range
+        } else if (ePart1) {
+          end = `${book} ${ePart1}`; // chapter range
+        }
+        if (end) {
+          return language === 'he'
+            ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+            : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+        }
+      }
+    } catch {}
   }
 
-  return range; // Return as-is if no range detected
+  const range = source.source_range?.trim();
+  if (range) {
+    // Detect separators like "to", dashes, commas, or Hebrew "עד"
+    const separatorRegex = /\s+to\s+|\s+עד\s+|\s*[-–—,]\s*/i;
+    const hasRange = separatorRegex.test(range);
+    if (hasRange) {
+      const parts = range.split(separatorRegex);
+      if (parts.length >= 2) {
+        const [start, end] = parts.map((p) => p.trim()).filter(Boolean);
+        if (start && end) {
+          return language === 'he'
+            ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+            : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+        }
+      }
+    }
+    // If it's a single chapter like "Deuteronomy 6", return it as-is
+    return range;
+  }
+
+  return '';
 };
 
 export const SourceRecommendationV2 = ({ 
