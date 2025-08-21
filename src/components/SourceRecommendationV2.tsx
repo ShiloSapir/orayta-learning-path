@@ -25,7 +25,7 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
-import { normalizeSefariaUrl, isValidSefariaUrl } from "@/utils/sefariaLinkValidator";
+import { filterCommentariesByTopic } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -249,8 +249,16 @@ export const SourceRecommendationV2 = ({
     }
   };
 
-  const formatSourceRange = (range: string, language: Language): string => {
-    // Check if range contains "to", "-", or similar range indicators
+  const formatSourceRange = (source: WebhookSource, language: Language): string => {
+    // Use explicit start_ref and end_ref if available
+    if (source.start_ref && source.end_ref) {
+      return language === 'he'
+        ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
+        : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
+    }
+    
+    // Check if source_range contains "to", "-", or similar range indicators
+    const range = source.source_range;
     const hasRange = /\s+to\s+|\s*-\s*|\s+עד\s+/.test(range);
     
     if (hasRange) {
@@ -324,57 +332,12 @@ export const SourceRecommendationV2 = ({
   const title = sanitizeTitle(language === 'he' ? webhookSource.title_he : webhookSource.title);
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
-  const normalizeCommentaries = (input: unknown): string[] => {
-    if (!input) return [];
-    if (Array.isArray(input)) {
-      return input
-        .map((c) => {
-          if (typeof c === 'string') return c;
-          if (c && typeof c === 'object') {
-            return (c.title || c.name || '').toString();
-          }
-          return '';
-        })
-        .map((c) => c.replace(/[*_`~]/g, '').trim())
-        .filter((c) => c && c.length > 2);
-    }
-    if (typeof input === 'string') {
-      return input
-        .split(/\n|,|\d+\./g)
-        .map((c) => c.replace(/[*_`~]/g, '').trim())
-        .filter((c) => c && c.length > 2);
-    }
-    return [];
-  };
-
-  const extractFromExcerpt = (raw?: string): string[] => {
-    if (!raw) return [];
-    // Prefer bolded items like **Kessef Mishneh**
-    const boldMatches = Array.from(raw.matchAll(/\*\*([^*]+)\*\*/g))
-      .map((m) => m[1])
-      .filter((s) => !/recommended\s+commentaries/i.test(s))
-      .map((s) => s.split(':')[0].trim());
-    if (boldMatches.length >= 2) return boldMatches;
-
-    // Fallback: parse lines after the "Recommended Commentaries" header
-    const sectionMatch = raw.match(/recommended\s+commentaries[\s\S]*$/i);
-    if (sectionMatch) {
-      const items = sectionMatch[0]
-        .split(/\n|\r|\d+\.|•|- /g)
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((s) => s.replace(/\*\*|__|[*_`~]/g, ''))
-        .map((s) => s.split(':')[0].trim())
-        .filter((s) => s && s.length > 2 && s.length < 60);
-      if (items.length >= 2) return items;
-    }
-    return [];
-  };
 
   // Only use commentaries from webhook - no fallbacks
-  const fromField = normalizeCommentaries(webhookSource.commentaries);
-  const fromExcerpt = extractFromExcerpt(webhookSource.excerpt);
-  const displayedCommentaries = (fromField.length > 0 ? fromField : fromExcerpt).slice(0, 2);
+  const displayedCommentaries = filterCommentariesByTopic(
+    topicSelected,
+    webhookSource.commentaries || []
+  ).slice(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
@@ -406,7 +369,7 @@ export const SourceRecommendationV2 = ({
                           </span>
                         </div>
                         <p className="mobile-text-sm font-medium whitespace-pre-line">
-                          {formatSourceRange(webhookSource.source_range, language)}
+                          {formatSourceRange(webhookSource, language)}
                         </p>
                       </div>
                     )}
@@ -463,17 +426,7 @@ export const SourceRecommendationV2 = ({
                     variant="outline"
                     size="sm"
                     className="w-full touch-button"
-                    onClick={() => {
-                      try {
-                        const normalizedUrl = isValidSefariaUrl(webhookSource.sefaria_link) 
-                          ? normalizeSefariaUrl(webhookSource.sefaria_link)
-                          : webhookSource.sefaria_link;
-                        window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
-                      } catch (error) {
-                        console.error('Error opening Sefaria link:', error);
-                        window.open(webhookSource.sefaria_link, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
+                    onClick={() => window.open(webhookSource.sefaria_link, '_blank', 'noopener,noreferrer')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2 inline" />
                     <span className="mobile-text-sm">{content[language].sefariaLink}</span>

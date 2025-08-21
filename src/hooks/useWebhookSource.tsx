@@ -1,11 +1,13 @@
 /* eslint-disable no-useless-escape */
 import { useState, useEffect, useCallback } from 'react';
-import { selectCommentaries, shouldProvideCommentaries } from '@/utils/commentarySelector';
+import { normalizeSefariaUrl, isValidSefariaUrl } from '@/utils/sefariaLinkValidator';
 
 export interface WebhookSource {
   title: string;
   title_he: string;
   source_range: string;
+  start_ref?: string;
+  end_ref?: string;
   excerpt: string;
   excerpt_he?: string;
   commentaries: string[];
@@ -75,25 +77,46 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const timeHebMatch = responseText.match(/\*\*\s*זמן משוער\s*\*\*\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i)
       || responseText.match(/(?:^|\n)\s*(?:[*•\-]\s*)?זמן משוער\s*[:：\-–—]?\s*(?:\r?\n\s*)?(\d+)/i);
     
-    // Look for Sefaria links - handle multiple formats (support Hebrew "Working Link")
-    const markdownLinkMatch = responseText.match(/\[.*?\]\((https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^)]+)\)/);
-    const plainLinkMatch = responseText.match(/(https:\/\/(?:www\.)?sefaria(?:library)?\.org\/[^\s\)]+)/);
-    const workingLinkMatch = responseText.match(/\*\*(?:Working Link[^:]*|קישור(?: עובד)?):\*\*\s*(?:\[.*?\]\()?(https:\/\/[^\s\)]+)/);
+    // Look for Sefaria links - expanded patterns for robustness
+    const sefariaPatterns = [
+      // Markdown links
+      /\[.*?\]\((https:\/\/(?:www\.)?sefaria\.org(?:\.il)?\/[^)]+)\)/i,
+      // Working Link patterns (English)
+      /\*\*\s*(?:Working Link|Sefaria Link|Link|Sefaria)\s*[^:]*:\*\*\s*(?:\[.*?\]\()?(https:\/\/[^\s\)]+)/i,
+      // Hebrew patterns
+      /\*\*\s*(?:ספאריה|קישור(?:\s+עובד)?|קישור(?:\s+ספאריה)?)\s*[^:]*:\*\*\s*(?:\[.*?\]\()?(https:\/\/[^\s\)]+)/i,
+      // Plain patterns
+      /(?:^|\n)\s*(?:Sefaria|ספאריה|Link|קישור)\s*[:：\-–—]?\s*(https:\/\/[^\s\)]+)/i,
+      // Bare URLs
+      /(https:\/\/(?:www\.)?sefaria\.org(?:\.il)?\/[^\s\)]+)/i
+    ];
     
-    let extractedLink = markdownLinkMatch?.[1] || workingLinkMatch?.[1] || plainLinkMatch?.[1] || '';
+    let extractedLink = '';
+    for (const pattern of sefariaPatterns) {
+      const match = responseText.match(pattern);
+      if (match?.[1]) {
+        extractedLink = match[1];
+        break;
+      }
+    }
     
-    // Clean and fix the link
+    // Clean and validate the link
     if (extractedLink) {
       extractedLink = extractedLink
         .replace(/\)$/, '') // Remove trailing parenthesis
         .replace(/sefarialibrary\.org/, 'sefaria.org') // Fix domain
         .replace(/%2C/g, ',') // Fix URL encoding
-        .replace(/texts\//, '') // Remove 'texts/' path if present
-        .replace(/MishnahPirkeiAvot/, 'Mishnah_Peah') // Fix path issues
         .trim();
         
-      // Ensure proper Sefaria URL format
-      if (!extractedLink.includes('sefaria.org')) {
+      // Normalize and validate
+      try {
+        if (isValidSefariaUrl(extractedLink)) {
+          extractedLink = normalizeSefariaUrl(extractedLink);
+        } else {
+          extractedLink = '';
+        }
+      } catch (error) {
+        console.debug('Sefaria link validation failed:', error);
         extractedLink = '';
       }
     }
@@ -270,32 +293,27 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
       }
     }
 
-    // Use webhook-provided recommended commentaries (take up to two), with smart fallback
-    let finalCommentaries = commentaries.slice(0, 2);
-    if (finalCommentaries.length === 0) {
-      const config = { topicSelected, sourceTitle: title, sourceRange: finalRange, excerpt };
-      if (shouldProvideCommentaries(config)) {
-        finalCommentaries = selectCommentaries(config).slice(0, 2);
-      }
-    }
+    // Use only webhook-provided commentaries (no fallbacks)
+    const finalCommentaries = commentaries.slice(0, 2);
 
     const timeStr = preferredLang === 'he' ? (timeHebMatch?.[1] || timeEngMatch?.[1]) : (timeEngMatch?.[1] || timeHebMatch?.[1]);
 
-    // Diagnostics for Hebrew parsing
-    if (preferredLang === 'he' && (excerpt.length === 0 || reflection.length === 0 || finalCommentaries.length === 0)) {
-      const snippet = responseText.slice(0, 600);
-      console.debug('Hebrew webhook parse diagnostics', {
-        hasExcerpt: excerpt.length > 0,
-        hasReflection: reflection.length > 0,
-        commentaryCount: finalCommentaries.length,
-        snippet
-      });
-    }
+    // Debug logging for parsing verification
+    console.debug('Webhook source parsing results:', {
+      sefaria_link: extractedLink,
+      start_ref: fromPref,
+      end_ref: toPref,
+      commentaries_count: finalCommentaries.length,
+      commentaries: finalCommentaries,
+      language: preferredLang
+    });
 
     return {
       title,
       title_he: titleHe,
       source_range: finalRange,
+      start_ref: fromPref,
+      end_ref: toPref,
       excerpt,
       commentaries: finalCommentaries,
       reflection_prompt: reflection,
