@@ -27,7 +27,7 @@ import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
 
-import { filterCommentariesByTopic, selectCommentaries } from "@/utils/commentarySelector";
+
 
 interface SourceRecommendationProps {
   language: Language;
@@ -375,20 +375,10 @@ export const SourceRecommendationV2 = ({
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
 
-  // Prefer commentaries from webhook; otherwise derive them from source metadata
-  const rawCommentaries =
-    webhookSource.commentaries && webhookSource.commentaries.length > 0
-      ? webhookSource.commentaries
-      : selectCommentaries({
-          topicSelected,
-          sourceTitle: `${webhookSource.title} ${webhookSource.title_he || ''}`,
-          sourceRange:
-            webhookSource.source_range ||
-            `${webhookSource.start_ref || ''} ${webhookSource.end_ref || ''}`,
-          excerpt: webhookSource.excerpt || ''
-        });
-  const filteredCommentaries = filterCommentariesByTopic(topicSelected, rawCommentaries);
-  const displayedCommentaries = filteredCommentaries.slice(0, 2);
+  // Use commentaries only from webhook output
+  const displayedCommentaries = webhookSource.commentaries && webhookSource.commentaries.length > 0
+    ? webhookSource.commentaries.slice(0, 2)
+    : [];
   
   console.debug('📍 Range formatting:', {
     start_ref: webhookSource.start_ref,
@@ -399,11 +389,8 @@ export const SourceRecommendationV2 = ({
   
   console.debug('📚 Commentary display:', {
     from_webhook: webhookSource.commentaries,
-    after_selection: rawCommentaries,
-    after_topic_filter: filteredCommentaries,
     final_displayed: displayedCommentaries,
-    topic_selected: topicSelected,
-    is_spiritual_topic: topicSelected?.toLowerCase().includes('spiritual')
+    topic_selected: topicSelected
   });
 
   return (
