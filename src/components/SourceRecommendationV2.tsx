@@ -454,19 +454,18 @@ export const SourceRecommendationV2 = ({
                 
                 {webhookSource.sefaria_link && isValidSefariaUrl(webhookSource.sefaria_link) && (
                   <Button
-                    asChild
                     variant="outline"
                     size="sm"
+                    onClick={() => {
+                      console.log('📚 Sefaria button clicked (main)');
+                      const sefariaUrl = normalizeSefariaUrl(webhookSource.sefaria_link);
+                      console.log('📚 Opening main Sefaria with URL:', sefariaUrl);
+                      window.open(sefariaUrl, '_blank', 'noopener,noreferrer');
+                    }}
                     className="w-full touch-button inline-flex items-center justify-center"
                   >
-                    <a
-                      href={normalizeSefariaUrl(webhookSource.sefaria_link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2 inline" />
-                      <span className="mobile-text-sm">{content[language].sefariaLink}</span>
-                    </a>
+                    <ExternalLink className="h-4 w-4 mr-2 inline" />
+                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
                   </Button>
                 )}
               </div>
@@ -517,18 +516,19 @@ export const SourceRecommendationV2 = ({
                 </Button>
                 
                 <Button
-                  asChild
                   variant="outline"
+                  onClick={() => {
+                    console.log('📅 Calendar button clicked');
+                    const calendarUrl = getCalendarUrl();
+                    console.log('📅 Opening calendar with URL:', calendarUrl);
+                    if (calendarUrl) {
+                      window.open(calendarUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
                   className="touch-button sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center"
                 >
-                  <a
-                    href={getCalendarUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="mobile-text-sm">{content[language].calendarButton}</span>
-                  </a>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
                 </Button>
               </div>
 

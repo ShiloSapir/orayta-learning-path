@@ -188,30 +188,50 @@ Downloaded from Orayata Learning App
           {t.copyLink}
         </Button>
 
-        <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
-          <a href={getEmailUrl()} target="_blank" rel="noopener noreferrer">
-            <Mail className="h-4 w-4" />
-            {t.shareEmail}
-          </a>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            console.log('📧 Email button clicked');
+            const emailUrl = getEmailUrl();
+            console.log('📧 Opening email with URL:', emailUrl);
+            window.location.href = emailUrl;
+          }}
+          className="flex items-center gap-2"
+        >
+          <Mail className="h-4 w-4" />
+          {t.shareEmail}
         </Button>
 
-        <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
-          <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
-          </a>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            console.log('📱 WhatsApp button clicked');
+            const whatsappUrl = getWhatsAppUrl();
+            console.log('📱 Opening WhatsApp with URL:', whatsappUrl);
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+          }}
+          className="flex items-center gap-2"
+        >
+          <MessageCircle className="h-4 w-4" />
+          WhatsApp
         </Button>
 
         {isValidSefariaUrl(source.sefariaLink) && (
-          <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
-            <a
-              href={normalizeSefariaUrl(source.sefariaLink)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Sefaria
-            </a>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              console.log('📚 Sefaria button clicked');
+              const sefariaUrl = normalizeSefariaUrl(source.sefariaLink);
+              console.log('📚 Opening Sefaria with URL:', sefariaUrl);
+              window.open(sefariaUrl, '_blank', 'noopener,noreferrer');
+            }}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Sefaria
           </Button>
         )}
       </div>
