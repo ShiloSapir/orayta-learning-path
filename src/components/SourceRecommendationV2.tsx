@@ -504,10 +504,10 @@ export const SourceRecommendationV2 = ({
             <MotionWrapper type="fadeUp" delay={0.4}>
               <div className="content-card">
                 <h3 className="mobile-text-base font-semibold mb-3 sm:text-lg">{content[language].commentariesLabel}</h3>
-                <div className="space-y-3">
+                 <div className="space-y-3">
                   {displayedCommentaries.map((commentary, index) => (
-                    <div key={index} className="bg-secondary/20 rounded-lg p-3 border-l-4 border-secondary">
-                      <span className="mobile-text-sm font-medium text-secondary-foreground">
+                    <div key={index} className="bg-accent/10 rounded-lg p-3 border-l-4 border-accent">
+                      <span className="mobile-text-sm font-medium text-foreground">
                         {commentary}
                       </span>
                     </div>
