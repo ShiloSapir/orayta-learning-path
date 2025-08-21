@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Language } from "./LanguageToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,8 +26,11 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
+
 import { filterCommentariesByTopic, selectCommentaries } from "@/utils/commentarySelector";
 import { cn } from "@/lib/utils";
+=======
+import { filterCommentariesByTopic } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
   language: Language;
@@ -78,6 +81,35 @@ const content = {
     noSources: "אין מקורות זמינים לנושא זה. אנא נסה נושא אחר.",
     errorLoading: "שגיאה בטעינת המקור. אנא נסה שוב."
   }
+};
+
+export const formatSourceRange = (
+  source: WebhookSource,
+  language: Language
+): string => {
+  // Use explicit start_ref and end_ref if available
+  if (source.start_ref && source.end_ref) {
+    return language === "he"
+      ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
+      : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
+  }
+
+  const range = source.source_range;
+  // Detect separators like "to", dashes, commas, or Hebrew "עד"
+  const separatorRegex = /\s+to\s+|\s+עד\s+|\s*[-–—,]\s*/i;
+  const hasRange = separatorRegex.test(range);
+
+  if (hasRange) {
+    const parts = range.split(separatorRegex);
+    if (parts.length >= 2) {
+      const [start, end] = parts.map((p) => p.trim());
+      return language === "he"
+        ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
+        : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
+    }
+  }
+
+  return range; // Return as-is if no range detected
 };
 
 export const SourceRecommendationV2 = ({ 
@@ -249,33 +281,6 @@ export const SourceRecommendationV2 = ({
       onReflection(currentSessionId);
     }
   };
-
-  const formatSourceRange = (source: WebhookSource, language: Language): string => {
-    // Use explicit start_ref and end_ref if available
-    if (source.start_ref && source.end_ref) {
-      return language === 'he'
-        ? `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`
-        : `${content[language].fromTo} ${source.start_ref} ${content[language].to} ${source.end_ref}`;
-    }
-    
-    // Check if source_range contains "to", "-", or similar range indicators
-    const range = source.source_range;
-    const hasRange = /\s+to\s+|\s*-\s*|\s+עד\s+/.test(range);
-    
-    if (hasRange) {
-      // Extract start and end parts
-      const parts = range.split(/\s+to\s+|\s*-\s*|\s+עד\s+/i);
-      if (parts.length === 2) {
-        const [start, end] = parts.map(p => p.trim());
-        return language === 'he' 
-          ? `${content[language].fromTo} ${start} ${content[language].to} ${end}`
-          : `${content[language].fromTo} ${start} ${content[language].to} ${end}`;
-      }
-    }
-    
-    return range; // Return as-is if no range detected
-  };
-
   if (showLoading) {
     return (
       <SourceLoadingState
@@ -448,14 +453,21 @@ export const SourceRecommendationV2 = ({
                 )}
                 
                 {webhookSource.sefaria_link && isValidSefariaUrl(webhookSource.sefaria_link) && (
-                  <a
-                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full touch-button inline-flex items-center justify-center')}
-                    href={normalizeSefariaUrl(webhookSource.sefaria_link)}
-                    target="_blank" rel="noopener noreferrer"
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full touch-button inline-flex items-center justify-center"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2 inline" />
-                    <span className="mobile-text-sm">{content[language].sefariaLink}</span>
-                  </a>
+                    <a
+                      href={normalizeSefariaUrl(webhookSource.sefaria_link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2 inline" />
+                      <span className="mobile-text-sm">{content[language].sefariaLink}</span>
+                    </a>
+                  </Button>
                 )}
               </div>
             </div>
@@ -504,14 +516,20 @@ export const SourceRecommendationV2 = ({
                   <span className="mobile-text-sm">{content[language].learnedButton}</span>
                 </Button>
                 
-                <a
-                  className={cn(buttonVariants({ variant: 'outline' }), 'touch-button sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center')}
-                  href={getCalendarUrl()}
-                  target="_blank" rel="noopener noreferrer"
+                <Button
+                  asChild
+                  variant="outline"
+                  className="touch-button sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center"
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span className="mobile-text-sm">{content[language].calendarButton}</span>
-                </a>
+                  <a
+                    href={getCalendarUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="mobile-text-sm">{content[language].calendarButton}</span>
+                  </a>
+                </Button>
               </div>
 
               <Button
