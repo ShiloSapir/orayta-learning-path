@@ -299,12 +299,14 @@ export const useWebhookSource = (timeSelected: number, topicSelected: string, la
     const timeStr = preferredLang === 'he' ? (timeHebMatch?.[1] || timeEngMatch?.[1]) : (timeEngMatch?.[1] || timeHebMatch?.[1]);
 
     // Debug logging for parsing verification
-    console.debug('Webhook source parsing results:', {
+    console.debug('🔍 Webhook source parsing results:', {
       sefaria_link: extractedLink,
       start_ref: fromPref,
       end_ref: toPref,
+      source_range: finalRange,
       commentaries_count: finalCommentaries.length,
       commentaries: finalCommentaries,
+      raw_commentaries_text: commentariesText.substring(0, 100) + '...',
       language: preferredLang
     });
 

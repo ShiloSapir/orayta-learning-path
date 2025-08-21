@@ -334,10 +334,24 @@ export const SourceRecommendationV2 = ({
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
 
   // Only use commentaries from webhook - no fallbacks
-  const displayedCommentaries = filterCommentariesByTopic(
-    topicSelected,
-    webhookSource.commentaries || []
-  ).slice(0, 2);
+  const rawCommentaries = webhookSource.commentaries || [];
+  const filteredCommentaries = filterCommentariesByTopic(topicSelected, rawCommentaries);
+  const displayedCommentaries = filteredCommentaries.slice(0, 2);
+  
+  console.debug('📍 Range formatting:', {
+    start_ref: webhookSource.start_ref,
+    end_ref: webhookSource.end_ref,
+    source_range: webhookSource.source_range,
+    formatted: formatSourceRange(webhookSource, language)
+  });
+  
+  console.debug('📚 Commentary display:', {
+    raw_from_webhook: rawCommentaries,
+    after_topic_filter: filteredCommentaries,
+    final_displayed: displayedCommentaries,
+    topic_selected: topicSelected,
+    is_spiritual_topic: topicSelected?.toLowerCase().includes('spiritual')
+  });
 
   return (
     <div className="min-h-screen bg-gradient-parchment mobile-container">
