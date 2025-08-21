@@ -26,6 +26,10 @@ import { MotionWrapper } from "@/components/MotionWrapper";
 import { ScaleOnTap } from "@/components/ui/motion";
 import { useBlessingToast } from "@/components/ui/blessing-toast";
 import { ScrollIcon } from "@/components/ui/torah-icons";
+
+import { filterCommentariesByTopic, selectCommentaries } from "@/utils/commentarySelector";
+import { cn } from "@/lib/utils";
+=======
 import { filterCommentariesByTopic } from "@/utils/commentarySelector";
 
 interface SourceRecommendationProps {
@@ -335,8 +339,18 @@ export const SourceRecommendationV2 = ({
   const excerpt = sanitizeText(webhookSource.excerpt);
   const reflectionPrompt = sanitizeText(webhookSource.reflection_prompt);
 
-  // Only use commentaries from webhook - no fallbacks
-  const rawCommentaries = webhookSource.commentaries || [];
+  // Prefer commentaries from webhook; otherwise derive them from source metadata
+  const rawCommentaries =
+    webhookSource.commentaries && webhookSource.commentaries.length > 0
+      ? webhookSource.commentaries
+      : selectCommentaries({
+          topicSelected,
+          sourceTitle: `${webhookSource.title} ${webhookSource.title_he || ''}`,
+          sourceRange:
+            webhookSource.source_range ||
+            `${webhookSource.start_ref || ''} ${webhookSource.end_ref || ''}`,
+          excerpt: webhookSource.excerpt || ''
+        });
   const filteredCommentaries = filterCommentariesByTopic(topicSelected, rawCommentaries);
   const displayedCommentaries = filteredCommentaries.slice(0, 2);
   
@@ -348,7 +362,8 @@ export const SourceRecommendationV2 = ({
   });
   
   console.debug('📚 Commentary display:', {
-    raw_from_webhook: rawCommentaries,
+    from_webhook: webhookSource.commentaries,
+    after_selection: rawCommentaries,
     after_topic_filter: filteredCommentaries,
     final_displayed: displayedCommentaries,
     topic_selected: topicSelected,
