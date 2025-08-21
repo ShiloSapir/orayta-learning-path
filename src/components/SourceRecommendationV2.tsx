@@ -374,7 +374,7 @@ export const SourceRecommendationV2 = ({
                 <div className="mobile-flex-col items-start">
                   <div className="flex-1 space-y-3">
                     <h2 className="mobile-text-base font-semibold sm:text-xl">{title}</h2>
-                    {webhookSource.source_range && (
+                    {(webhookSource.source_range || (webhookSource.start_ref && webhookSource.end_ref)) && (
                       <div className="bg-primary/10 rounded-lg p-3 border-l-4 border-primary">
                         <div className="flex items-center gap-2 mb-1">
                           <BookOpen className="h-4 w-4 text-primary" />
