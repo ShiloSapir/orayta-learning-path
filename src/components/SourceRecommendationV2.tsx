@@ -262,14 +262,17 @@ export const SourceRecommendationV2 = ({
   };
 
   const getCalendarUrl = () => {
-    if (!webhookSource) return '';
+    if (!webhookSource) {
+      console.log('📅 No webhook source for calendar');
+      return '';
+    }
     
     const title = language === 'he' ? webhookSource.title_he : webhookSource.title;
     const startDate = new Date();
     const endDate = new Date(startDate.getTime() + timeSelected * 60000);
     
     const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Study: ${title}`)}`;
-    console.debug('Calendar URL:', calendarUrl);
+    console.log('📅 Calendar URL generated:', calendarUrl);
     return calendarUrl;
   };
 

@@ -88,14 +88,17 @@ export function SocialSharing({ language, source }: SocialSharingProps) {
   }, [customMessage, source, t]);
 
   const handleCopyLink = async () => {
+    console.log('🔗 Copy link clicked');
     try {
       const hasValidSefaria = isValidSefariaUrl(source.sefariaLink);
       const linkToCopy = hasValidSefaria
         ? normalizeSefariaUrl(source.sefariaLink)
         : (typeof window !== 'undefined' ? window.location.href : source.sefariaLink);
+      console.log('🔗 Link to copy:', linkToCopy);
       await navigator.clipboard.writeText(linkToCopy);
       toast.success(t.linkCopied);
     } catch (err) {
+      console.error('🔗 Copy failed:', err);
       toast.error(isHebrew ? 'ההעתקה נכשלה' : 'Failed to copy to clipboard');
     }
   };
@@ -104,24 +107,24 @@ export function SocialSharing({ language, source }: SocialSharingProps) {
     const subject = t.emailSubject.replace('{title}', source.title);
     const validLink = isValidSefariaUrl(source.sefariaLink) 
       ? normalizeSefariaUrl(source.sefariaLink) 
-      : window.location.href;
+      : (typeof window !== 'undefined' ? window.location.href : source.sefariaLink);
     const body = t.emailBody
       .replace('{text}', source.text)
       .replace('{reflection}', source.reflection || '')
       .replace('{link}', validLink);
     
     const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    console.debug('Share mailto:', mailto);
+    console.log('📧 Email URL generated:', mailto);
     return mailto;
   };
 
   const getWhatsAppUrl = () => {
     const validLink = isValidSefariaUrl(source.sefariaLink) 
       ? normalizeSefariaUrl(source.sefariaLink) 
-      : window.location.href;
+      : (typeof window !== 'undefined' ? window.location.href : source.sefariaLink);
     const text = createShareText() + '\n\n' + validLink;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    console.debug('WhatsApp URL:', whatsappUrl);
+    console.log('📱 WhatsApp URL generated:', whatsappUrl);
     return whatsappUrl;
   };
 
